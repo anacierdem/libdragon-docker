@@ -12,12 +12,20 @@ os:
   - linux
 
 install:
-  - npm install
+  - npm ci
+  - git submodule update --init
 
 script:
+  # Download base image only
   - npm run download
+  # Build and install libdragon & mikmod - test docker script & build
+  - npm run buildDragon
+  # Test NPM scripts to check if they are also working propoerly
   - npm run make
   - npm run make install
+  - npm run make tools
+  - npm run make tools-install
+  # Test if examples are building properly
   - npm run make examples
 
 deploy:
@@ -26,5 +34,5 @@ deploy:
   script: npm config set '//registry.npmjs.org/:_authToken' "${NPM_TOKEN}" && echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin && npm publish
   on:
     branch: master
-    repo: anacierdem/libdragon
+    repo: anacierdem/libdragon-docker
     tags: true

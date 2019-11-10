@@ -1,5 +1,10 @@
 # Change Log
 
+## [2.0.0] -
+### Changed
+
+- Separate the docker deployment process from library code.
+
 ## [1.3.15] - 2019-01-11
 ### Changed
 

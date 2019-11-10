@@ -4,14 +4,18 @@ const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
-const { version } = require('./package.json'); // Always use self version for docker image
+const { version, libdragon } = require('./package.json'); // Always use self version for docker image
+
+const BASE_VERSION = 'toolchain';
+const DOCKER_HUB_NAME = 'anacierdem/libdragon';
+const UPDATE_LATEST = false;
 
 // Default options
 const options = {
   PROJECT_NAME: process.env.npm_package_name || 'libdragon', // Use active package name when available
   BYTE_SWAP: false,
   MOUNT_PATH: process.cwd(),
-  VERSION: version.split('.'), // libdragon version
+  VERSION: version.split('.').map((v) => parseInt(v)), // libdragon version
   IS_CI: process.env.CI === 'true'
 }
 
@@ -51,13 +55,13 @@ async function startToolchain() {
     + ' -e LIBDRAGON_VERSION_MINOR=' + options.VERSION[1]
     + ' -e LIBDRAGON_VERSION_REVISION=' + options.VERSION[2];
 
-  // Use only base version on CI to test make && make install only
+  // Always start freshly built version
   await runCommand('docker run --name=' + options.PROJECT_NAME
     + (options.BYTE_SWAP ? ' -e N64_BYTE_SWAP=true' : '')
     + ' -e IS_DOCKER=true'
-    + (options.IS_CI ? '' : versionEnv)
+    + versionEnv
     + ' -d --mount type=bind,source="' + options.MOUNT_PATH + '",target=/' + options.PROJECT_NAME
-    + ' -w="/' + options.PROJECT_NAME + '" anacierdem/libdragon:' + (options.IS_CI ? 'base' : version) + ' tail -f /dev/null');
+    + ' -w="/' + options.PROJECT_NAME + '" ' + DOCKER_HUB_NAME + ':' + version + ' tail -f /dev/null');
 }
 
 async function make(param) {
@@ -75,11 +79,11 @@ async function download() {
   if (process.env.IS_DOCKER === 'true') {
     return;
   }
-  await runCommand('docker pull anacierdem/libdragon:base');
+  await runCommand('docker pull ' + DOCKER_HUB_NAME + ':' + BASE_VERSION);
 
   // Use only base version on CI to test make && make install only
   if (!options.IS_CI) {
-    await runCommand('docker pull anacierdem/libdragon:' + version);
+    await runCommand('docker pull ' + DOCKER_HUB_NAME + ':' + version);
   }
 
   await startToolchain();
@@ -90,10 +94,22 @@ async function stop() {
   if (process.env.IS_DOCKER === 'true') {
     return;
   }
-  const list = await runCommand('docker ps -a -q -f name=' + options.PROJECT_NAME);
+  const list = await runCommand('docker ps -a -q -f name=^/' + options.PROJECT_NAME + '$');
   if (list) {
     await runCommand('docker rm -f ' + options.PROJECT_NAME);
   }
+}
+
+async function buildDragon() {
+  await runCommand('docker build'
+    + ' --build-arg DOCKER_HUB_NAME=' + DOCKER_HUB_NAME
+    + ' --build-arg BASE_VERSION=' + BASE_VERSION
+    + ' --build-arg LIBDRAGON_VERSION_MAJOR=' + options.VERSION[0]
+    + ' --build-arg LIBDRAGON_VERSION_MINOR=' + options.VERSION[1]
+    + ' --build-arg LIBDRAGON_VERSION_REVISION=' + options.VERSION[2]
+    + ' -t ' + DOCKER_HUB_NAME + ':' + version + ' -f ./dragon.Dockerfile ./');
+  // Start freshly built image
+  await startToolchain();
 }
 
 const availableActions = {
@@ -104,11 +120,16 @@ const availableActions = {
     if (process.env.IS_DOCKER === 'true') {
       return;
     }
+
+    // Build toolchain
     await runCommand('docker build'
       + ' --build-arg LIBDRAGON_VERSION_MAJOR=' + options.VERSION[0]
       + ' --build-arg LIBDRAGON_VERSION_MINOR=' + options.VERSION[1]
       + ' --build-arg LIBDRAGON_VERSION_REVISION=' + options.VERSION[2]
-      + ' -t anacierdem/libdragon:' + version + ' ./');
+      + ' -t ' + DOCKER_HUB_NAME + ':' + BASE_VERSION + ' ./');
+
+    // Build and install libdragon
+    await buildDragon();
     await startToolchain();
   },
   install: async function install() {
@@ -163,6 +184,7 @@ const availableActions = {
   },
   make: make,
   stop: stop,
+  buildDragon: buildDragon,
   // This requires docker login
   update: async function update() {
     // Do not try to run docker if already in container
@@ -170,20 +192,25 @@ const availableActions = {
       return;
     }
     await stop();
-    await runCommand('docker build'
-      + ' --build-arg LIBDRAGON_VERSION_MAJOR=' + options.VERSION[0]
-      + ' --build-arg LIBDRAGON_VERSION_MINOR=' + options.VERSION[1]
-      + ' --build-arg LIBDRAGON_VERSION_REVISION=' + options.VERSION[2]
-      + ' -t anacierdem/libdragon:' + version + ' -f ./update.Dockerfile ./');
-    await runCommand('docker tag anacierdem/libdragon:' + version + ' anacierdem/libdragon:latest');
-    await runCommand('docker push anacierdem/libdragon:' + version);
-    await runCommand('docker push anacierdem/libdragon:latest');
+    // We assume buildDragon was run.
+    await runCommand('docker push ' + DOCKER_HUB_NAME + ':' + version);
+
+    if (UPDATE_LATEST) {
+      await runCommand('docker tag ' + DOCKER_HUB_NAME + ':' + version + ' ' + DOCKER_HUB_NAME + ':latest');
+      await runCommand('docker push ' + DOCKER_HUB_NAME + ':latest');
+    }
+
     await startToolchain();
   },
 }
 
 process.argv.forEach(function (val, index) {
   if (index < 1) {
+    return;
+  }
+
+  if (val.indexOf('--mount-path=') === 0) {
+    options.MOUNT_PATH = path.join(process.cwd(), val.split('--mount-path=')[1]);
     return;
   }
 
