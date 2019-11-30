@@ -1,0 +1,3 @@
+[submodule "libdragon-source"]
+	path = libdragon-source
+	url = https://github.com/DragonMinded/libdragon.git
