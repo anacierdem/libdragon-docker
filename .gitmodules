@@ -1,4 +1,0 @@
-[submodule "libdragon-source"]
-	path = libdragon-source
-	url = https://github.com/anacierdem/libdragon
-	branch = without-deployment
