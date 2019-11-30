@@ -1,9 +1,13 @@
 # Change Log
 
-## [2.0.0] -
+## [2.0.0] - 
 ### Changed
 
 - Separate the docker deployment process from library code.
+- Upgraded `binutils` to 2.33.1.
+- Improved ucode example and fixed byte alignment.
+- Removed confusing assemply macros from `ucode.S`.
+- Built a new base docker hub image tagged `toolchain`.
 
 ## [1.3.15] - 2019-01-11
 ### Changed

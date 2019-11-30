@@ -4,7 +4,7 @@ const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
-const { version, libdragon } = require('./package.json'); // Always use self version for docker image
+const { version } = require('./package.json'); // Always use self version for docker image
 
 const BASE_VERSION = 'toolchain';
 const DOCKER_HUB_NAME = 'anacierdem/libdragon';

@@ -9,13 +9,13 @@ ENV N64_INST=/usr/local
 
 WORKDIR /libdragon
 
-# 46dbd48e145649ac248e9a75c923c57d063dff1f is the SHA at the point of separation (v1.3.15)
+# 5cc5336366a5a7c2aec5bbfe68e6e548129a035e is the SHA before releasing version 2.0.0
 RUN apt-get update && \
     apt-get install -yq wget bzip2 gcc g++ make file libmpfr-dev libmpc-dev libpng-dev zlib1g-dev texinfo git gcc-multilib && \
     apt-get clean && \
     git clone https://github.com/DragonMinded/libdragon.git/ ./libdragon-code && \
     cd ./libdragon-code && \
-    git checkout 46dbd48e145649ac248e9a75c923c57d063dff1f && \
+    git checkout 5cc5336366a5a7c2aec5bbfe68e6e548129a035e && \
     cp -r ./tools /tmp/tools && \
     cd .. && \
     cd /tmp/tools && \
