@@ -1,5 +1,10 @@
 # Change Log
 
+## [2.0.1] - 2019-30-11
+### Changed
+
+- Updated repository URL
+
 ## [2.0.0] - 2019-30-11
 ### Changed
 

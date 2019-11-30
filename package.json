@@ -1,6 +1,6 @@
 {
   "name": "libdragon",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "This is a docker wrapper for libdragon",
   "main": "index.js",
   "engines": {
@@ -23,14 +23,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/anacierdem/libdragon.git"
+    "url": "git+https://github.com/anacierdem/libdragon-docker.git"
   },
   "author": "Ali Naci Erdem",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/anacierdem/libdragon/issues"
+    "url": "https://github.com/anacierdem/libdragon-docker/issues"
   },
-  "homepage": "https://github.com/anacierdem/libdragon#readme",
+  "homepage": "https://github.com/anacierdem/libdragon-docker#readme",
   "dependencies": {
     "lodash": "^4.17.15"
   }
