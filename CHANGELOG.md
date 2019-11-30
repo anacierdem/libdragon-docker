@@ -1,6 +1,6 @@
 # Change Log
 
-## [2.0.0] - 
+## [2.0.0] - 2019-30-11
 ### Changed
 
 - Separate the docker deployment process from library code.
@@ -8,6 +8,7 @@
 - Improved ucode example and fixed byte alignment.
 - Removed confusing assemply macros from `ucode.S`.
 - Built a new base docker hub image tagged `toolchain`.
+- Running `download` command no longer starts the container.
 
 ## [1.3.15] - 2019-01-11
 ### Changed

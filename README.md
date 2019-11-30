@@ -22,12 +22,15 @@ to download the toolchain image from docker repository. If you instead prefer to
 
 This will build and start the container and may take a while as it will initialize the docker container and build the toolchain from scratch.
 
+Then start the docker container using;
+
+    npm start
+
 Then you will be able to work on the files simultaneously with the container and any built binaries will be available in `libdragon-source` as it is mounted on the container.
 You will need to share your working drive from docker UI for it to be able to access your workspace for Windows hosts.
 
-You can also start / stop the docker container using;
+You can also stop the container via;
 
-    npm start
     npm stop
 
 To build the examples do;
