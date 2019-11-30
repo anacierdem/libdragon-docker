@@ -8,7 +8,7 @@ const { version } = require('./package.json'); // Always use self version for do
 
 const BASE_VERSION = 'toolchain';
 const DOCKER_HUB_NAME = 'anacierdem/libdragon';
-const UPDATE_LATEST = false;
+const UPDATE_LATEST = true;
 
 // Default options
 const options = {
@@ -85,8 +85,6 @@ async function download() {
   if (!options.IS_CI) {
     await runCommand('docker pull ' + DOCKER_HUB_NAME + ':' + version);
   }
-
-  await startToolchain();
 }
 
 async function stop() {

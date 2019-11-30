@@ -1,7 +1,7 @@
 {
   "name": "libdragon",
-  "version": "2.0.0-beta",
-  "description": "This is a wrapper for libdragon",
+  "version": "2.0.0",
+  "description": "This is a docker wrapper for libdragon",
   "main": "index.js",
   "engines": {
     "node": ">=7.6"
@@ -18,7 +18,7 @@
     "make": "node index.js make",
     "download": "node index.js --mount-path=./libdragon-source download",
     "init": "node index.js --mount-path=./libdragon-source init",
-    "buildDragon": "node index.js --mount-path=./libdragon-source  buildDragon",
+    "buildDragon": "node index.js --mount-path=./libdragon-source buildDragon",
     "prepublishOnly": "node index.js --mount-path=./libdragon-source update"
   },
   "repository": {
