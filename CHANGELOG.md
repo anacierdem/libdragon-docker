@@ -1,5 +1,10 @@
 # Change Log
 
+## [2.0.x] -
+### Changed
+
+- Updated readme.
+
 ## [2.0.2] - 2019-30-11
 ### Changed
 

@@ -149,7 +149,7 @@ const availableActions = {
       }));
 
     await Promise.all(
-      deps.map(({ name, paths }) => {
+      deps.map(({ paths }) => {
         if (paths.length > 1) {
           return Promise.reject('Using same dependency with different versions is not supported!');
         }

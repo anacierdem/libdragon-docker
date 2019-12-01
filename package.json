@@ -19,7 +19,8 @@
     "download": "node index.js --mount-path=./libdragon-source download",
     "init": "node index.js --mount-path=./libdragon-source init",
     "buildDragon": "node index.js --mount-path=./libdragon-source buildDragon",
-    "prepublishOnly": "node index.js --mount-path=./libdragon-source update"
+    "prepublishOnly": "node index.js --mount-path=./libdragon-source update",
+    "prepare": "node index.js --mount-path=./libdragon-source install"
   },
   "repository": {
     "type": "git",
