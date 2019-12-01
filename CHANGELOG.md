@@ -1,9 +1,14 @@
 # Change Log
 
+## [2.0.2] - 2019-30-11
+### Changed
+
+- Running `install` command now starts the container.
+
 ## [2.0.1] - 2019-30-11
 ### Changed
 
-- Updated repository URL
+- Updated repository URL.
 
 ## [2.0.0] - 2019-30-11
 ### Changed
@@ -11,7 +16,7 @@
 - Separate the docker deployment process from library code.
 - Upgraded `binutils` to 2.33.1.
 - Improved ucode example and fixed byte alignment.
-- Removed confusing assemply macros from `ucode.S`.
+- Removed confusing assemply macros from `ucode.S`. This changed vector and scalar register names.
 - Built a new base docker hub image tagged `toolchain`.
 - Running `download` command no longer starts the container.
 

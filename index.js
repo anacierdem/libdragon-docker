@@ -134,6 +134,7 @@ const availableActions = {
     // Override CI checks and start actual version on install
     options.IS_CI = false;
     await download();
+    await startToolchain();
 
     const { dependencies } = require(path.join(process.cwd() + '/package.json'));
 
