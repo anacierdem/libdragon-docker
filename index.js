@@ -81,9 +81,8 @@ async function startToolchain() {
       '" ' +
       DOCKER_HUB_NAME +
       ':' +
-      options.USE_BASE_VERSION
-      ? BASE_VERSION
-      : version + ' tail -f /dev/null'
+      (options.USE_BASE_VERSION ? BASE_VERSION : version) +
+      ' tail -f /dev/null'
   );
 }
 
