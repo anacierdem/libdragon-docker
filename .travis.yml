@@ -4,7 +4,7 @@ services:
   - docker
 
 node_js:
-  - "node"
+  - 'node'
 
 sudo: false
 
@@ -12,12 +12,11 @@ os:
   - linux
 
 install:
+  # Downloads base image only on CI - and test if install command is working properly
   - npm ci
   - git submodule update --init
 
 script:
-  # Download base image only
-  - npm run download
   # Build and install libdragon & mikmod - test docker script & build
   - npm run buildDragon
   # Test NPM scripts to check if they are also working propoerly

@@ -6,7 +6,7 @@
 
 - Updated readme.
 - Install dragon on `npm i`.
-- Override CI checks if not building self.
+- Use base version if building self in CI for start and download commands.
 
 ## [2.0.2] - 2019-30-11
 

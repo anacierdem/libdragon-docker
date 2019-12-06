@@ -19,6 +19,11 @@ const options = {
   IS_CI: process.env.CI === 'true',
 };
 
+// Use base version if building self in CI, actual version o/w
+// When self building, the new version does not exist yet
+options.USE_BASE_VERSION =
+  options.PROJECT_NAME === 'libdragon' ? options.IS_CI : false;
+
 function runCommand(cmd) {
   return new Promise((resolve, reject) => {
     const command = exec(cmd, {}, (err, stdout) => {
@@ -61,7 +66,6 @@ async function startToolchain() {
     ' -e LIBDRAGON_VERSION_REVISION=' +
     options.VERSION[2];
 
-  // Always start freshly built version
   await runCommand(
     'docker run --name=' +
       options.PROJECT_NAME +
@@ -77,8 +81,9 @@ async function startToolchain() {
       '" ' +
       DOCKER_HUB_NAME +
       ':' +
-      version +
-      ' tail -f /dev/null'
+      options.USE_BASE_VERSION
+      ? BASE_VERSION
+      : version + ' tail -f /dev/null'
   );
 }
 
@@ -99,10 +104,8 @@ async function download() {
   }
   await runCommand('docker pull ' + DOCKER_HUB_NAME + ':' + BASE_VERSION);
 
-  console.log('options.IS_CI', options.IS_CI);
   // Use only base version on CI to test make && make install only
-  if (!options.IS_CI) {
-    console.log('pull', DOCKER_HUB_NAME + ':' + version);
+  if (!options.USE_BASE_VERSION) {
     await runCommand('docker pull ' + DOCKER_HUB_NAME + ':' + version);
   }
 }
@@ -173,13 +176,6 @@ const availableActions = {
     await startToolchain();
   },
   install: async function install() {
-    // Override CI checks if not building self and start actual version on install
-    // When self building, the new version does not exist yet
-    console.log('options.PROJECT_NAME', options.PROJECT_NAME);
-    if (options.PROJECT_NAME !== 'libdragon') {
-      options.IS_CI = false;
-    }
-
     await download();
     await startToolchain();
 
