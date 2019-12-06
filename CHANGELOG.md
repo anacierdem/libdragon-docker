@@ -1,5 +1,11 @@
 # Change Log
 
+## [2.0.4] - 2019-07-12
+
+### Changed
+
+- Added support information.
+
 ## [2.0.3] - 2019-06-12
 
 ### Changed
