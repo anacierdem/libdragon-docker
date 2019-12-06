@@ -1,12 +1,12 @@
 # Change Log
 
-## [2.0.3] - 2019-06-12
+## [2.1.0] - 2019-06-12
 
 ### Changed
 
 - Updated readme.
-- Install dragon on `npm i`.
-- Use base version if building self in CI for start and download commands.
+- Use base version for start and download commands if self-building in CI.
+- Remove unnecessary toolchain start on `update` command.
 
 ## [2.0.2] - 2019-30-11
 

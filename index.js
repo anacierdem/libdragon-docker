@@ -103,7 +103,7 @@ async function download() {
   }
   await runCommand('docker pull ' + DOCKER_HUB_NAME + ':' + BASE_VERSION);
 
-  // Use only base version on CI to test make && make install only
+  // Use only base version on CI
   if (!options.USE_BASE_VERSION) {
     await runCommand('docker pull ' + DOCKER_HUB_NAME + ':' + version);
   }
@@ -172,7 +172,6 @@ const availableActions = {
 
     // Build and install libdragon
     await buildDragon();
-    await startToolchain();
   },
   install: async function install() {
     await download();
@@ -281,8 +280,6 @@ const availableActions = {
       );
       await runCommand('docker push ' + DOCKER_HUB_NAME + ':latest');
     }
-
-    await startToolchain();
   },
 };
 
