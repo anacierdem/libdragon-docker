@@ -15,9 +15,14 @@ const options = {
   PROJECT_NAME: process.env.npm_package_name || 'libdragon', // Use active package name when available
   BYTE_SWAP: false,
   MOUNT_PATH: process.cwd(),
-  VERSION: version.split('.').map((v) => parseInt(v)), // libdragon version
-  IS_CI: process.env.CI === 'true'
-}
+  VERSION: version.split('.').map(v => parseInt(v)), // libdragon version
+  IS_CI: process.env.CI === 'true',
+};
+
+// Use base version if building self in CI, actual version o/w
+// When self building, the new version does not exist yet
+options.SELF_BUILD =
+  options.PROJECT_NAME === 'libdragon' ? options.IS_CI : false;
 
 function runCommand(cmd) {
   return new Promise((resolve, reject) => {
@@ -29,39 +34,56 @@ function runCommand(cmd) {
       }
     });
 
-    command.stdout.on('data', function (data) {
+    command.stdout.on('data', function(data) {
       console.log(data.toString());
     });
 
-    command.stderr.on('data', function (data) {
+    command.stderr.on('data', function(data) {
       console.error(data.toString());
     });
-  })
+  });
 }
 
-async function startToolchain() {
+async function startToolchain(forceLatest = false) {
   // Do not try to run docker if already in container
   if (process.env.IS_DOCKER === 'true') {
     return;
   }
 
-  const containerID = await runCommand('docker container ls -qa -f name=^/' + options.PROJECT_NAME + '$');
+  const containerID = await runCommand(
+    'docker container ls -qa -f name=^/' + options.PROJECT_NAME + '$'
+  );
 
   if (containerID) {
     await runCommand('docker container rm -f ' + containerID);
   }
 
-  const versionEnv = ' -e LIBDRAGON_VERSION_MAJOR=' + options.VERSION[0]
-    + ' -e LIBDRAGON_VERSION_MINOR=' + options.VERSION[1]
-    + ' -e LIBDRAGON_VERSION_REVISION=' + options.VERSION[2];
+  const versionEnv =
+    ' -e LIBDRAGON_VERSION_MAJOR=' +
+    options.VERSION[0] +
+    ' -e LIBDRAGON_VERSION_MINOR=' +
+    options.VERSION[1] +
+    ' -e LIBDRAGON_VERSION_REVISION=' +
+    options.VERSION[2];
 
-  // Always start freshly built version
-  await runCommand('docker run --name=' + options.PROJECT_NAME
-    + (options.BYTE_SWAP ? ' -e N64_BYTE_SWAP=true' : '')
-    + ' -e IS_DOCKER=true'
-    + versionEnv
-    + ' -d --mount type=bind,source="' + options.MOUNT_PATH + '",target=/' + options.PROJECT_NAME
-    + ' -w="/' + options.PROJECT_NAME + '" ' + DOCKER_HUB_NAME + ':' + version + ' tail -f /dev/null');
+  await runCommand(
+    'docker run --name=' +
+      options.PROJECT_NAME +
+      (options.BYTE_SWAP ? ' -e N64_BYTE_SWAP=true' : '') +
+      ' -e IS_DOCKER=true' +
+      versionEnv +
+      ' -d --mount type=bind,source="' +
+      options.MOUNT_PATH +
+      '",target=/' +
+      options.PROJECT_NAME +
+      ' -w="/' +
+      options.PROJECT_NAME +
+      '" ' +
+      DOCKER_HUB_NAME +
+      ':' +
+      (!forceLatest && options.SELF_BUILD ? BASE_VERSION : version) +
+      ' tail -f /dev/null'
+  );
 }
 
 async function make(param) {
@@ -81,8 +103,8 @@ async function download() {
   }
   await runCommand('docker pull ' + DOCKER_HUB_NAME + ':' + BASE_VERSION);
 
-  // Use only base version on CI to test make && make install only
-  if (!options.IS_CI) {
+  // Use only base version on CI
+  if (!options.SELF_BUILD) {
     await runCommand('docker pull ' + DOCKER_HUB_NAME + ':' + version);
   }
 }
@@ -92,22 +114,35 @@ async function stop() {
   if (process.env.IS_DOCKER === 'true') {
     return;
   }
-  const list = await runCommand('docker ps -a -q -f name=^/' + options.PROJECT_NAME + '$');
+  const list = await runCommand(
+    'docker ps -a -q -f name=^/' + options.PROJECT_NAME + '$'
+  );
   if (list) {
     await runCommand('docker rm -f ' + options.PROJECT_NAME);
   }
 }
 
 async function buildDragon() {
-  await runCommand('docker build'
-    + ' --build-arg DOCKER_HUB_NAME=' + DOCKER_HUB_NAME
-    + ' --build-arg BASE_VERSION=' + BASE_VERSION
-    + ' --build-arg LIBDRAGON_VERSION_MAJOR=' + options.VERSION[0]
-    + ' --build-arg LIBDRAGON_VERSION_MINOR=' + options.VERSION[1]
-    + ' --build-arg LIBDRAGON_VERSION_REVISION=' + options.VERSION[2]
-    + ' -t ' + DOCKER_HUB_NAME + ':' + version + ' -f ./dragon.Dockerfile ./');
+  await runCommand(
+    'docker build' +
+      ' --build-arg DOCKER_HUB_NAME=' +
+      DOCKER_HUB_NAME +
+      ' --build-arg BASE_VERSION=' +
+      BASE_VERSION +
+      ' --build-arg LIBDRAGON_VERSION_MAJOR=' +
+      options.VERSION[0] +
+      ' --build-arg LIBDRAGON_VERSION_MINOR=' +
+      options.VERSION[1] +
+      ' --build-arg LIBDRAGON_VERSION_REVISION=' +
+      options.VERSION[2] +
+      ' -t ' +
+      DOCKER_HUB_NAME +
+      ':' +
+      version +
+      ' -f ./dragon.Dockerfile ./'
+  );
   // Start freshly built image
-  await startToolchain();
+  await startToolchain(true);
 }
 
 const availableActions = {
@@ -120,41 +155,55 @@ const availableActions = {
     }
 
     // Build toolchain
-    await runCommand('docker build'
-      + ' --build-arg LIBDRAGON_VERSION_MAJOR=' + options.VERSION[0]
-      + ' --build-arg LIBDRAGON_VERSION_MINOR=' + options.VERSION[1]
-      + ' --build-arg LIBDRAGON_VERSION_REVISION=' + options.VERSION[2]
-      + ' -t ' + DOCKER_HUB_NAME + ':' + BASE_VERSION + ' ./');
+    await runCommand(
+      'docker build' +
+        ' --build-arg LIBDRAGON_VERSION_MAJOR=' +
+        options.VERSION[0] +
+        ' --build-arg LIBDRAGON_VERSION_MINOR=' +
+        options.VERSION[1] +
+        ' --build-arg LIBDRAGON_VERSION_REVISION=' +
+        options.VERSION[2] +
+        ' -t ' +
+        DOCKER_HUB_NAME +
+        ':' +
+        BASE_VERSION +
+        ' ./'
+    );
 
     // Build and install libdragon
     await buildDragon();
-    await startToolchain();
   },
   install: async function install() {
-    // Override CI checks and start actual version on install
-    options.IS_CI = false;
     await download();
     await startToolchain();
 
-    const { dependencies } = require(path.join(process.cwd() + '/package.json'));
+    const { dependencies } = require(path.join(
+      process.cwd() + '/package.json'
+    ));
 
-    const deps = await Promise.all(Object.keys(dependencies)
-      .filter(dep => dep !== 'libdragon')
-      .map(async dep => {
-        const npmPath = await runCommand('npm ls ' + dep + ' --parseable=true');
-        return {
-          name: dep,
-          paths: _.uniq(npmPath.split('\n').filter(f => f))
-        }
-      }));
+    const deps = await Promise.all(
+      Object.keys(dependencies)
+        .filter(dep => dep !== 'libdragon')
+        .map(async dep => {
+          const npmPath = await runCommand(
+            'npm ls ' + dep + ' --parseable=true'
+          );
+          return {
+            name: dep,
+            paths: _.uniq(npmPath.split('\n').filter(f => f)),
+          };
+        })
+    );
 
     await Promise.all(
-      deps.map(({ name, paths }) => {
+      deps.map(({ paths }) => {
         if (paths.length > 1) {
-          return Promise.reject('Using same dependency with different versions is not supported!');
+          return Promise.reject(
+            'Using same dependency with different versions is not supported!'
+          );
         }
         return new Promise((resolve, reject) => {
-          fs.access(path.join(paths[0], 'Makefile'), fs.F_OK, async (e) => {
+          fs.access(path.join(paths[0], 'Makefile'), fs.F_OK, async e => {
             if (e) {
               // File does not exist - skip
               resolve();
@@ -162,18 +211,43 @@ const availableActions = {
             }
 
             try {
-              const relativePath = path.relative(options.MOUNT_PATH, paths[0]).replace(new RegExp('\\' + path.sep), path.posix.sep);
-              const containerPath = path.posix.join('/', options.PROJECT_NAME, relativePath, '/');
+              const relativePath = path
+                .relative(options.MOUNT_PATH, paths[0])
+                .replace(new RegExp('\\' + path.sep), path.posix.sep);
+              const containerPath = path.posix.join(
+                '/',
+                options.PROJECT_NAME,
+                relativePath,
+                '/'
+              );
               const makePath = path.posix.join(containerPath, 'Makefile');
 
               // Do not try to run docker if already in container
               if (process.env.IS_DOCKER === 'true') {
-                await runCommand('[ -f ' + makePath + ' ] &&  make -C ' + containerPath + ' && make -C ' + containerPath + ' install');
+                await runCommand(
+                  '[ -f ' +
+                    makePath +
+                    ' ] &&  make -C ' +
+                    containerPath +
+                    ' && make -C ' +
+                    containerPath +
+                    ' install'
+                );
               } else {
-                await runCommand('docker exec ' + options.PROJECT_NAME + ' /bin/bash -c "[ -f ' + makePath + ' ] &&  make -C ' + containerPath + ' && make -C ' + containerPath + ' install"');
+                await runCommand(
+                  'docker exec ' +
+                    options.PROJECT_NAME +
+                    ' /bin/bash -c "[ -f ' +
+                    makePath +
+                    ' ] &&  make -C ' +
+                    containerPath +
+                    ' && make -C ' +
+                    containerPath +
+                    ' install"'
+                );
               }
               resolve();
-            } catch(e) {
+            } catch (e) {
               reject(e);
             }
           });
@@ -195,21 +269,30 @@ const availableActions = {
     await runCommand('docker push ' + DOCKER_HUB_NAME + ':' + version);
 
     if (UPDATE_LATEST) {
-      await runCommand('docker tag ' + DOCKER_HUB_NAME + ':' + version + ' ' + DOCKER_HUB_NAME + ':latest');
+      await runCommand(
+        'docker tag ' +
+          DOCKER_HUB_NAME +
+          ':' +
+          version +
+          ' ' +
+          DOCKER_HUB_NAME +
+          ':latest'
+      );
       await runCommand('docker push ' + DOCKER_HUB_NAME + ':latest');
     }
-
-    await startToolchain();
   },
-}
+};
 
-process.argv.forEach(function (val, index) {
+process.argv.forEach(function(val, index) {
   if (index < 1) {
     return;
   }
 
   if (val.indexOf('--mount-path=') === 0) {
-    options.MOUNT_PATH = path.join(process.cwd(), val.split('--mount-path=')[1]);
+    options.MOUNT_PATH = path.join(
+      process.cwd(),
+      val.split('--mount-path=')[1]
+    );
     return;
   }
 
@@ -220,7 +303,7 @@ process.argv.forEach(function (val, index) {
 
   if (val === '--help') {
     console.log('Available actions:');
-    Object.keys(availableActions).forEach((val) => {
+    Object.keys(availableActions).forEach(val => {
       console.log(val);
     });
     process.exit(0);
@@ -232,10 +315,12 @@ process.argv.forEach(function (val, index) {
     const params = process.argv.slice(index + 1);
     const param = params.join(' ');
 
-    functionToRun(param).then((r) => {
-      process.exit(0);
-    }).catch((e) => {
-      process.exit(1);
-    });
+    functionToRun(param)
+      .then(r => {
+        process.exit(0);
+      })
+      .catch(e => {
+        process.exit(1);
+      });
   }
 });

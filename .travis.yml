@@ -4,7 +4,7 @@ services:
   - docker
 
 node_js:
-  - "node"
+  - 'node'
 
 sudo: false
 
@@ -25,7 +25,7 @@ script:
   - npm run make install
   - npm run make tools
   - npm run make tools-install
-  # Test if examples are building properly
+  # Test if examples are building properly through the container
   - npm run make examples
 
 deploy:
