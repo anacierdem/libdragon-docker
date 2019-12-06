@@ -99,8 +99,10 @@ async function download() {
   }
   await runCommand('docker pull ' + DOCKER_HUB_NAME + ':' + BASE_VERSION);
 
+  console.log('options.IS_CI', options.IS_CI);
   // Use only base version on CI to test make && make install only
   if (!options.IS_CI) {
+    console.log('pull', DOCKER_HUB_NAME + ':' + version);
     await runCommand('docker pull ' + DOCKER_HUB_NAME + ':' + version);
   }
 }
@@ -171,8 +173,13 @@ const availableActions = {
     await startToolchain();
   },
   install: async function install() {
-    // Override CI checks and start actual version on install
-    options.IS_CI = false;
+    // Override CI checks if not building self and start actual version on install
+    // When self building, the new version does not exist yet
+    console.log('options.PROJECT_NAME', options.PROJECT_NAME);
+    if (options.PROJECT_NAME !== 'libdragon') {
+      options.IS_CI = false;
+    }
+
     await download();
     await startToolchain();
 
