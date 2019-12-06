@@ -18,7 +18,7 @@ Then navigate to the folder containing your project and start the container whic
 Now you will be able to work on the files simultaneously with the docker container and any built binaries will be available in the current directory as it is mounted on the container.
 You will need to share your working drive from docker UI for it to be able to access your workspace for Windows hosts.
 
-The container's `make` command can be invoked on your current working directory via `libdragon make`.
+The container's `make` action can be invoked on your current working directory via `libdragon make`.
 
     libdragon make
 
@@ -28,12 +28,12 @@ Any additonal parameters are passed down to the actual make command. For example
 
 Keep in mind that `--` is necessary for actual arguments to make.
 
-The same docker container (with the default name of libdragon) will be used for all global `libdragon start`s. Successive commands will remove the old container and you will lose any changes in the container outside your working directory. So **BE CAREFUL** containers are temporary assets in this context.
+The same docker container (with the default name of libdragon) will be used for all global `libdragon start`s. Successive `start`/`stop` actions will remove the old container and you will lose any changes in the container outside your working directory. So **BE CAREFUL** containers are temporary assets in this context.
 See [Invoking libdragon](#Invoking-libdragon) for more details on available actions.
 
 ### ROM byte order
 
-To use the toolchain's host make command with byte swap enabled, include the `--byte-swap` flag;
+To use the toolchain's host `make` action with byte swap enabled, include the `--byte-swap` flag;
 
     libdragon --byte-swap make
 
@@ -65,7 +65,7 @@ Similarly to run the `clean` recipe, run;
 
     npm run make clean
 
-The toolchain `make` command will be only run at the root-level of libdragon's source, but additonal parameters are passed down to the actual make command. For example use `-C` flag to invoke make on a directory instead;
+The toolchain `make` action will be only run at the root-level of libdragon's source, but additonal parameters are passed down to the actual make command. For example use `-C` flag to invoke make on a directory instead;
 
     npm run make -- -C your/path
 
@@ -73,7 +73,7 @@ Also keep in mind that the same docker container (with the default name of `libd
 
 ### NPM scripts
 
-A list of all available NPM scripts provided with this repository. Also see [Invoking libdragon](#Invoking-libdragon) section for more details on using libdragon commands.
+A list of all available NPM scripts provided with this repository. Also see [Invoking libdragon](#Invoking-libdragon) section for more details on using libdragon actions.
 
 **download:** `npm run download` downloads the pre-built docker image for the current version from docker hub.
 
@@ -133,7 +133,7 @@ Available options for the `libdragon` command (`index.js`) are explained below. 
 
 There is an optional flag `--mount-path=<relative path>` that can be used to provide a mount path other than the project root. This is for example used in NPM scripts.
 
-**download:** Pulls the docker image with the version in `package.json`. Only pulls the base image on CI.
+**download:** Pulls the docker image with the version in `package.json`. Only pulls the base image on self-build.
 
 **start:** Starts/re-starts the container named as the NPM project name and the version in `package.json`. Provide `--byte-swap` flag to start a container that will output `.v64` images. Accepts `--mount-path`.
 
@@ -143,7 +143,7 @@ There is an optional flag `--mount-path=<relative path>` that can be used to pro
 
 **init:** Builds the toolchain image from scratch and then builds libdragon on top of it.
 
-**install:** Does `download` and `start` actions followed by a dependency analysis step which will try to run `make && make install` in all NPM dependencies, effectively installing them in the active container. Accepts `--mount-path`.
+**install:** Does `download` and `start` actions followed by a dependency analysis step which will try to run `make && make install` in all NPM dependencies, effectively installing them in the active container. Accepts `--mount-path`. Do not use when building self.
 
 **update: _(CI only)_** Starts uploading the docker image. Requires docker login.
 
