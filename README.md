@@ -43,7 +43,6 @@ If you need more control over the toolchain container bash into it with;
 
     docker exec -i -t libdragon /bin/bash
 
-
 ## Using this repository
 
 After cloning this repository on a machine with node.js (>= 7.6) & docker, in this repository's root you can simply do;
@@ -88,10 +87,9 @@ A list of all available NPM scripts provided with this repository. Also see [Inv
 
 **prepare:** Invokes `install` on libdragon (see [Invoking libdragon](#Invoking-libdragon)), which will do all the magic on an `npm i`.
 
-**buildDragon: *(CI only)*** Builds a new image using `dragon.Dockerfile`. This is used to build an incremental image for a new release.
+**buildDragon: _(CI only)_** Builds a new image using `dragon.Dockerfile`. This is used to build an incremental image for a new release.
 
-**prepublishOnly: *(CI only)*** Pushes the newly built image to docker hub. Requires docker login.
-
+**prepublishOnly: _(CI only)_** Pushes the newly built image to docker hub. Requires docker login.
 
 ## As an NPM dependency
 
@@ -104,7 +102,6 @@ You can install libdragon as an NPM dependency by `npm install libdragon --save`
     }
 
 See [here](https://github.com/anacierdem/ed64-example) for a full example and see [Invoking libdragon](#Invoking-libdragon) section for more details on libdragon commands.
-
 
 ## Developing a dependency
 
@@ -130,7 +127,6 @@ will download the docker image, run it with the name `libdragonDependentProject`
 
 This is an experimental dependency management.
 
-
 ## Invoking libdragon
 
 Available options for the `libdragon` command (`index.js`) are explained below. It is in the form `libdragon <flags> action parameters`.
@@ -147,8 +143,8 @@ There is an optional flag `--mount-path=<relative path>` that can be used to pro
 
 **init:** Builds the toolchain image from scratch and then builds libdragon on top of it.
 
-**install:** Does `download` and `start` actions followed by a dependency analysis step which will try to run `make && make install` in all NPM dependencies, effectively installing them in the active container.
+**install:** Does `download` and `start` actions followed by a dependency analysis step which will try to run `make && make install` in all NPM dependencies, effectively installing them in the active container. Accepts `--mount-path`.
 
-**update: *(CI only)*** Starts uploading the docker image. Requires docker login.
+**update: _(CI only)_** Starts uploading the docker image. Requires docker login.
 
-**buildDragon: *(CI only)*** Builds a new image based on toolchain using `dragon.Dockerfile` and starts it.
+**buildDragon: _(CI only)_** Builds a new image based on toolchain using `dragon.Dockerfile` and starts it.
