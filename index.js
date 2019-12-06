@@ -21,7 +21,7 @@ const options = {
 
 // Use base version if building self in CI, actual version o/w
 // When self building, the new version does not exist yet
-options.USE_BASE_VERSION =
+options.SELF_BUILD =
   options.PROJECT_NAME === 'libdragon' ? options.IS_CI : false;
 
 function runCommand(cmd) {
@@ -44,7 +44,7 @@ function runCommand(cmd) {
   });
 }
 
-async function startToolchain() {
+async function startToolchain(forceLatest = false) {
   // Do not try to run docker if already in container
   if (process.env.IS_DOCKER === 'true') {
     return;
@@ -81,7 +81,7 @@ async function startToolchain() {
       '" ' +
       DOCKER_HUB_NAME +
       ':' +
-      (options.USE_BASE_VERSION ? BASE_VERSION : version) +
+      (!forceLatest && options.SELF_BUILD ? BASE_VERSION : version) +
       ' tail -f /dev/null'
   );
 }
@@ -104,7 +104,7 @@ async function download() {
   await runCommand('docker pull ' + DOCKER_HUB_NAME + ':' + BASE_VERSION);
 
   // Use only base version on CI
-  if (!options.USE_BASE_VERSION) {
+  if (!options.SELF_BUILD) {
     await runCommand('docker pull ' + DOCKER_HUB_NAME + ':' + version);
   }
 }
@@ -142,7 +142,7 @@ async function buildDragon() {
       ' -f ./dragon.Dockerfile ./'
   );
   // Start freshly built image
-  await startToolchain();
+  await startToolchain(true);
 }
 
 const availableActions = {

@@ -7,6 +7,7 @@
 - Updated readme.
 - Use base version for start and download commands if self-building in CI.
 - Remove unnecessary toolchain start on `update` command.
+- Start correct version on `buildDragon`.
 
 ## [2.0.2] - 2019-30-11
 
