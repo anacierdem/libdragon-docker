@@ -152,3 +152,9 @@ There is an optional flag `--mount-path=<relative path>` that can be used to pro
 **update: _(CI only)_** Starts uploading the docker image. Requires docker login.
 
 **buildDragon: _(CI only)_** Builds a new image based on toolchain using `dragon.Dockerfile` and starts it.
+
+## Support
+
+If this tool helped you, consider supporting its development at;
+
+<a href="https://patreon.com/anacierdem"><img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.herokuapp.com%2Fanacierdem&style=for-the-badge" /> </a>
