@@ -1,5 +1,12 @@
 # Change Log
 
+## [2.0.4] - 2019-07-12
+
+### Changed
+
+- Updated readme.
+- Removed version injection as the versions have diverged with libdragon.
+
 ## [2.0.3] - 2019-06-12
 
 ### Changed

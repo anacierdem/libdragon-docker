@@ -18,7 +18,7 @@ Then navigate to the folder containing your project and start the container whic
 Now you will be able to work on the files simultaneously with the docker container and any built binaries will be available in the current directory as it is mounted on the container.
 You will need to share your working drive from docker UI for it to be able to access your workspace for Windows hosts.
 
-The container's `make` action can be invoked on your current working directory via `libdragon make`.
+The container's `make` action can be invoked on your current working directory via;
 
     libdragon make
 
@@ -28,7 +28,7 @@ Any additonal parameters are passed down to the actual make command. For example
 
 Keep in mind that `--` is necessary for actual arguments to make.
 
-The same docker container (with the default name of libdragon) will be used for all global `libdragon start`s. Successive `start`/`stop` actions will remove the old container and you will lose any changes in the container outside your working directory. So **BE CAREFUL** containers are temporary assets in this context.
+The same docker container (with the default name of `libdragon`) will be used for all global `libdragon start`s. Successive `start`/`stop` actions will remove the old container and you will lose any changes in the container outside your working directory. So **BE CAREFUL** containers are temporary assets in this context.
 See [Invoking libdragon](#Invoking-libdragon) for more details on available actions.
 
 ### ROM byte order
@@ -49,9 +49,15 @@ After cloning this repository on a machine with node.js (>= 7.6) & docker, in th
 
     npm install
 
-This will install all necessary dependencies (including the pre-built toolchain image from docker hub), and start the toolchain container. (This will also use the name `libdragon` and will remove the global instance if any)
+This will install all necessary NPM dependencies. Then run;
 
-Then sync the original libdragon repository (or clone this repo with `--recurse-submodules` in the first place).
+    npm run download
+
+to download the pre-built toolchain image from docker hub and start it;
+
+    npm run start
+
+Now it is time to sync the original libdragon repository. (or clone this repo with `--recurse-submodules` in the first place)
 
     git submodule update --init
 
@@ -69,7 +75,7 @@ The toolchain `make` action will be only run at the root-level of libdragon's so
 
     npm run make -- -C your/path
 
-Also keep in mind that the same docker container (with the default name of `libdragon`) will be used for all the git cloned libdragon instances, deleting your changes in the containers outside of the working folder.
+Keep in mind that a single docker container with the name of `libdragon` will be run for all the git cloned libdragon instances and the global installation's instance if any. Starting a new container will remove the old one, deleting your changes in it outside of your working folder.
 
 ### NPM scripts
 
@@ -84,8 +90,6 @@ A list of all available NPM scripts provided with this repository. Also see [Inv
 **make:** Runs `make` inside the container with given parameters.
 
 **init:** If you prefer to build the docker image on your computer, do `npm run init`. This will build and start the container and may take a while as it will initialize the docker container and build the toolchain from scratch.
-
-**prepare:** Invokes `install` on libdragon (see [Invoking libdragon](#Invoking-libdragon)), which will do all the magic on an `npm i`.
 
 **buildDragon: _(CI only)_** Builds a new image using `dragon.Dockerfile`. This is used to build an incremental image for a new release.
 
@@ -107,12 +111,12 @@ See [here](https://github.com/anacierdem/ed64-example) for a full example and se
 
 You can make an NPM package that a `libdragon` project can depend on. Just include a `Makefile` on the repository root with recipes for `all` and `install`. On the depending project, after installing libdragon and the dependency with `npm install [dep name]`, one can install libdragon dependencies on the current docker container using `package.json` scripts. See [Invoking libdragon](#Invoking-libdragon) section for more details on libdragon commands.
 
-For example this package.json;
+For example this `package.json` in the dependent project;
 
     {
         "name": "libdragonDependentProject",
         "version": "1.0.0",
-        "description": "",
+        "description": "...",
         "scripts": {
             "build": "libdragon make",
             "clean": "libdragon make clean",
@@ -143,7 +147,7 @@ There is an optional flag `--mount-path=<relative path>` that can be used to pro
 
 **init:** Builds the toolchain image from scratch and then builds libdragon on top of it.
 
-**install:** Does `download` and `start` actions followed by a dependency analysis step which will try to run `make && make install` in all NPM dependencies, effectively installing them in the active container. Accepts `--mount-path`. Do not use when building self.
+**install:** Does `download` and `start` actions followed by a dependency analysis step which will try to run `make && make install` in all NPM dependencies, effectively installing them in the active container. Accepts `--mount-path`. Do not use when building self. Very useful when using libdragon as an NPM dependency to set up everything on an `npm i` by putting it in the `prepare` script.
 
 **update: _(CI only)_** Starts uploading the docker image. Requires docker login.
 

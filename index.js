@@ -15,7 +15,6 @@ const options = {
   PROJECT_NAME: process.env.npm_package_name || 'libdragon', // Use active package name when available
   BYTE_SWAP: false,
   MOUNT_PATH: process.cwd(),
-  VERSION: version.split('.').map(v => parseInt(v)), // libdragon version
   IS_CI: process.env.CI === 'true',
 };
 
@@ -58,20 +57,11 @@ async function startToolchain(forceLatest = false) {
     await runCommand('docker container rm -f ' + containerID);
   }
 
-  const versionEnv =
-    ' -e LIBDRAGON_VERSION_MAJOR=' +
-    options.VERSION[0] +
-    ' -e LIBDRAGON_VERSION_MINOR=' +
-    options.VERSION[1] +
-    ' -e LIBDRAGON_VERSION_REVISION=' +
-    options.VERSION[2];
-
   await runCommand(
     'docker run --name=' +
       options.PROJECT_NAME +
       (options.BYTE_SWAP ? ' -e N64_BYTE_SWAP=true' : '') +
       ' -e IS_DOCKER=true' +
-      versionEnv +
       ' -d --mount type=bind,source="' +
       options.MOUNT_PATH +
       '",target=/' +
@@ -129,12 +119,6 @@ async function buildDragon() {
       DOCKER_HUB_NAME +
       ' --build-arg BASE_VERSION=' +
       BASE_VERSION +
-      ' --build-arg LIBDRAGON_VERSION_MAJOR=' +
-      options.VERSION[0] +
-      ' --build-arg LIBDRAGON_VERSION_MINOR=' +
-      options.VERSION[1] +
-      ' --build-arg LIBDRAGON_VERSION_REVISION=' +
-      options.VERSION[2] +
       ' -t ' +
       DOCKER_HUB_NAME +
       ':' +
@@ -156,18 +140,7 @@ const availableActions = {
 
     // Build toolchain
     await runCommand(
-      'docker build' +
-        ' --build-arg LIBDRAGON_VERSION_MAJOR=' +
-        options.VERSION[0] +
-        ' --build-arg LIBDRAGON_VERSION_MINOR=' +
-        options.VERSION[1] +
-        ' --build-arg LIBDRAGON_VERSION_REVISION=' +
-        options.VERSION[2] +
-        ' -t ' +
-        DOCKER_HUB_NAME +
-        ':' +
-        BASE_VERSION +
-        ' ./'
+      'docker build -t ' + DOCKER_HUB_NAME + ':' + BASE_VERSION + ' ./'
     );
 
     // Build and install libdragon
