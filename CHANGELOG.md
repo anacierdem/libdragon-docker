@@ -1,5 +1,17 @@
 # Change Log
 
+## [3.0.0] - 2019-11-02
+
+### Changed
+
+- Fixed vand opcode (https://github.com/DragonMinded/libdragon/pull/86)
+- Reimplement mtc2/mfc2 with the extended syntax allowed by RSP (https://github.com/DragonMinded/libdragon/pull/89)
+- Improve error message when using MIPS opcodes not available on RSP (https://github.com/DragonMinded/libdragon/pull/90)
+
+### Added
+
+- Transfer Pak support (https://github.com/DragonMinded/libdragon/pull/88)
+
 ## [2.0.5] - 2019-07-12
 
 ### Changed
