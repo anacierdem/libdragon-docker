@@ -1,5 +1,15 @@
 # Change Log
 
+## [3.1.0] - 2019-25-03
+
+### Added
+
+- Add function to detect expansion pak (https://github.com/DragonMinded/libdragon/pull/91)
+
+### Changed
+
+- No need a tag for a travis deploy anymore.
+
 ## [3.0.0] - 2019-11-02
 
 ### Changed

@@ -35,4 +35,3 @@ deploy:
   on:
     branch: master
     repo: anacierdem/libdragon-docker
-    tags: true
