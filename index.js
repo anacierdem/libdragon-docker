@@ -33,11 +33,11 @@ function runCommand(cmd) {
       }
     });
 
-    command.stdout.on('data', function(data) {
+    command.stdout.on('data', function (data) {
       console.log(data.toString());
     });
 
-    command.stderr.on('data', function(data) {
+    command.stderr.on('data', function (data) {
       console.error(data.toString());
     });
   });
@@ -148,22 +148,29 @@ const availableActions = {
   },
   install: async function install() {
     await download();
-    await startToolchain();
+    await startToolchain(true);
 
     const { dependencies } = require(path.join(
       process.cwd() + '/package.json'
     ));
 
+    const { devDependencies } = require(path.join(
+      process.cwd() + '/package.json'
+    ));
+
     const deps = await Promise.all(
-      Object.keys(dependencies)
-        .filter(dep => dep !== 'libdragon')
-        .map(async dep => {
+      Object.keys({
+        ...dependencies,
+        ...devDependencies,
+      })
+        .filter((dep) => dep !== 'libdragon')
+        .map(async (dep) => {
           const npmPath = await runCommand(
             'npm ls ' + dep + ' --parseable=true'
           );
           return {
             name: dep,
-            paths: _.uniq(npmPath.split('\n').filter(f => f)),
+            paths: _.uniq(npmPath.split('\n').filter((f) => f)),
           };
         })
     );
@@ -176,7 +183,7 @@ const availableActions = {
           );
         }
         return new Promise((resolve, reject) => {
-          fs.access(path.join(paths[0], 'Makefile'), fs.F_OK, async e => {
+          fs.access(path.join(paths[0], 'Makefile'), fs.F_OK, async (e) => {
             if (e) {
               // File does not exist - skip
               resolve();
@@ -256,7 +263,7 @@ const availableActions = {
   },
 };
 
-process.argv.forEach(function(val, index) {
+process.argv.forEach(function (val, index) {
   if (index < 1) {
     return;
   }
@@ -276,7 +283,7 @@ process.argv.forEach(function(val, index) {
 
   if (val === '--help') {
     console.log('Available actions:');
-    Object.keys(availableActions).forEach(val => {
+    Object.keys(availableActions).forEach((val) => {
       console.log(val);
     });
     process.exit(0);
@@ -289,10 +296,10 @@ process.argv.forEach(function(val, index) {
     const param = params.join(' ');
 
     functionToRun(param)
-      .then(r => {
+      .then((r) => {
         process.exit(0);
       })
-      .catch(e => {
+      .catch((e) => {
         process.exit(1);
       });
   }

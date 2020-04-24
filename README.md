@@ -43,7 +43,7 @@ If you need more control over the toolchain container bash into it with;
 
     docker exec -i -t libdragon /bin/bash
 
-## Using this repository
+## Working on this repository
 
 After cloning this repository on a machine with node.js (>= 7.6) & docker, in this repository's root you can simply do;
 
@@ -51,11 +51,9 @@ After cloning this repository on a machine with node.js (>= 7.6) & docker, in th
 
 This will install all necessary NPM dependencies. Then run;
 
-    npm run download
+    npm run dragonInstall
 
-to download the pre-built toolchain image from docker hub and start it;
-
-    npm run start
+to download the pre-built toolchain image from docker hub and start it. This will also install test bench dependencies into the container.
 
 Now it is time to sync the original libdragon repository. (or clone this repo with `--recurse-submodules` in the first place)
 
@@ -71,11 +69,15 @@ Similarly to run the `clean` recipe, run;
 
     npm run make clean
 
-The toolchain `make` action will be only run at the root-level of libdragon's source, but additonal parameters are passed down to the actual make command. For example use `-C` flag to invoke make on a directory instead;
+The `make` script will be only run at the root-level of this repository, but additonal parameters are passed down to the actual make command. For example use `-C` flag to invoke make on a directory instead;
 
     npm run make -- -C your/path
 
 Keep in mind that a single docker container with the name of `libdragon` will be run for all the git cloned libdragon instances and the global installation's instance if any. Starting a new container will remove the old one, deleting your changes in it outside of your working folder.
+
+### Local test bench
+
+This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can just hit F5 on vscode to run the test code in `src` folder to develop libdragon itself quicker.
 
 ### NPM scripts
 
@@ -87,9 +89,13 @@ A list of all available NPM scripts provided with this repository. Also see [Inv
 
 **stop:** Stop the container via `npm stop`.
 
-**make:** Runs `make` inside the container with given parameters.
+**make:** Runs `make` inside the container on libdragon-source with given parameters.
 
 **init:** If you prefer to build the docker image on your computer, do `npm run init`. This will build and start the container and may take a while as it will initialize the docker container and build the toolchain from scratch.
+
+**dragonInstall:** Invokes the `install` libdragon action for this repository, preparing the container for the local test bench. Using the `prepare` script to do this on `npm i` is not feasable on the main repository as it make things complicated on CI, where there is no build docker version yet on first install.
+
+**build:** Use this to run the local test bench. It will build and install libdragon into the default container followed by `make` inside the container for the `src` folder. The src folder will always build to keep it in sync with libdragon. This can be used to test libdragon changes.
 
 **buildDragon: _(CI only)_** Builds a new image using `dragon.Dockerfile`. This is used to build an incremental image for a new release.
 
@@ -135,7 +141,7 @@ This is an experimental dependency management.
 
 Available options for the `libdragon` command (`index.js`) are explained below. It is in the form `libdragon <flags> action parameters`.
 
-There is an optional flag `--mount-path=<relative path>` that can be used to provide a mount path other than the project root. This is for example used in NPM scripts.
+There is an optional flag `--mount-path=<relative path>` that can be used to provide a mount path other than the project root.
 
 **download:** Pulls the docker image with the version in `package.json`. Only pulls the base image on self-build.
 
@@ -147,7 +153,7 @@ There is an optional flag `--mount-path=<relative path>` that can be used to pro
 
 **init:** Builds the toolchain image from scratch and then builds libdragon on top of it.
 
-**install:** Does `download` and `start` actions followed by a dependency analysis step which will try to run `make && make install` in all NPM dependencies, effectively installing them in the active container. Accepts `--mount-path`. Do not use when building self. Very useful when using libdragon as an NPM dependency to set up everything on an `npm i` by putting it in the `prepare` script.
+**install:** Does `download` and `start` actions followed by a dependency analysis step which will try to run `make && make install` in all NPM dependencies, effectively installing them in the active container. Accepts `--mount-path`. Do not use when building self. Very useful when using libdragon as an NPM dependency to set up everything on an `npm i` by putting it in the `prepare` script. This is also used in this repository to prepare the build environment for the test bench.
 
 **update: _(CI only)_** Starts uploading the docker image. Requires docker login.
 

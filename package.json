@@ -1,6 +1,6 @@
 {
   "name": "libdragon",
-  "version": "3.2.0",
+  "version": "4.0.0",
   "description": "This is a docker wrapper for libdragon",
   "main": "index.js",
   "engines": {
@@ -13,13 +13,15 @@
     "libdragon": "./index.js"
   },
   "scripts": {
-    "start": "node index.js --mount-path=./libdragon-source start",
+    "start": "node index.js start",
     "stop": "node index.js stop",
     "make": "node index.js make",
-    "download": "node index.js --mount-path=./libdragon-source download",
-    "init": "node index.js --mount-path=./libdragon-source init",
-    "buildDragon": "node index.js --mount-path=./libdragon-source buildDragon",
-    "prepublishOnly": "node index.js --mount-path=./libdragon-source update"
+    "download": "node index.js download",
+    "init": "node index.js init",
+    "buildDragon": "node index.js buildDragon",
+    "dragonInstall": "node index.js install",
+    "prepublishOnly": "node index.js update",
+    "build": "run-s \"make -- -C ./libdragon-source\" \"make -- -C ./libdragon-source install\" \"make -- -C ./src -B\""
   },
   "repository": {
     "type": "git",
@@ -33,5 +35,9 @@
   "homepage": "https://github.com/anacierdem/libdragon-docker#readme",
   "dependencies": {
     "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "ed64": "^1.0.5",
+    "npm-run-all": "^4.1.5"
   }
 }

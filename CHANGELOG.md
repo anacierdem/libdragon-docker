@@ -1,5 +1,21 @@
 # Change Log
 
+## [4.0.0] - 2019-24-04
+
+### Added
+
+- Add ability to run a local test bench with ed64 support.
+- Add `dragonInstall` and `build` NPM scripts for managing the test bench.
+- Add vscode files for quick test bench execution.
+- `devDependencies` are now also searched for makefiles and installed in the container.
+
+### Changed
+
+- Container mount path for this repository (NPM scripts) is now the repository root instead of `.\libdragon-source`.
+  - make commands are now executed inside `.\libdragon-source`.
+  - This will not effect consumers unless they depend on container's `/libdragon` path for explicitly accessing source files or relative paths with make's `-C`. They are now relative to repository root.
+  - `--mount-path` is still supported although not used on this repository anymore. These changes do not effect a local/global installation.
+
 ## [3.2.0] - 2020-24-04
 
 ### Changed

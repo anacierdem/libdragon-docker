@@ -9,8 +9,8 @@ WORKDIR /libdragon
 RUN apt-get update && \
     apt-get install -yq wget bzip2 gcc g++ make file libmpfr-dev libmpc-dev libpng-dev zlib1g-dev texinfo git gcc-multilib && \
     apt-get clean && \
-    git clone https://github.com/DragonMinded/libdragon.git/ ./libdragon-code && \
-    cd ./libdragon-code && \
+    git clone https://github.com/DragonMinded/libdragon.git/ ./libdragon-source && \
+    cd ./libdragon-source && \
     git checkout 5cc5336366a5a7c2aec5bbfe68e6e548129a035e && \
     cp -r ./tools /tmp/tools && \
     cd .. && \
