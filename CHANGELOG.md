@@ -1,5 +1,11 @@
 # Change Log
 
+## [3.2.0] - 2020-24-04
+
+### Changed
+
+- MIT license
+
 ## [3.1.0] - 2019-25-03
 
 ### Added

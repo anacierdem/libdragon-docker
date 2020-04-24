@@ -1,6 +1,6 @@
 {
   "name": "libdragon",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "This is a docker wrapper for libdragon",
   "main": "index.js",
   "engines": {
@@ -26,7 +26,7 @@
     "url": "git+https://github.com/anacierdem/libdragon-docker.git"
   },
   "author": "Ali Naci Erdem",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/anacierdem/libdragon-docker/issues"
   },
