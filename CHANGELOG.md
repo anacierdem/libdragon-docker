@@ -1,5 +1,11 @@
 # Change Log
 
+## [4.0.1] - 2019-25-04
+
+### Fixed
+
+- Add missing vscode files.
+
 ## [4.0.0] - 2019-24-04
 
 ### Added

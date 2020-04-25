@@ -77,7 +77,7 @@ Keep in mind that a single docker container with the name of `libdragon` will be
 
 ### Local test bench
 
-This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can just hit F5 on vscode to run the test code in `src` folder to develop libdragon itself quicker.
+This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can just hit F5 on vscode to run the test code in `src` folder to develop libdragon itself quicker. There is a caveat though: If you want the problem matcher to work properly, you should name this repository folder `libdragon` exactly.
 
 ### NPM scripts
 

@@ -8,7 +8,6 @@
 
 int main(void)
 {
-    long int count = 0;
     resolution_t res = RESOLUTION_320x240;
     bitdepth_t bit = DEPTH_32_BPP;
 
