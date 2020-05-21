@@ -1,5 +1,23 @@
 # Change Log
 
+## [4.1.0] - 2019-21-05
+
+### Fixed
+
+- RSP macros now supports negative offsets. (https://github.com/DragonMinded/libdragon/pull/99)
+- Exception handler properly works and sets cause register to `cr` on `reg_block_t`. (https://github.com/DragonMinded/libdragon/pull/95)
+- Padding on data sections were causing boot issues. They are properly padded. (https://github.com/DragonMinded/libdragon/pull/98)
+- n64tool: Broken ROM issue is fixed when doing byte-swapping or zero-padding. (https://github.com/DragonMinded/libdragon/pull/97)
+- GCC 10 support with default `-fno-common`. (https://github.com/DragonMinded/libdragon/pull/96)
+
+### Added
+
+- Exception cause map is now implemented and it is accessible via `info` on `exception_t`. (https://github.com/DragonMinded/libdragon/pull/95)
+
+### Changed
+
+- n64tool: Less IO operations for faster ROM build times. (https://github.com/DragonMinded/libdragon/pull/97)
+
 ## [4.0.1] - 2019-25-04
 
 ### Fixed
