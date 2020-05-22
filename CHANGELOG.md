@@ -1,5 +1,14 @@
 # Change Log
 
+## [4.1.1] -2020-05-10
+
+### Changed
+
+- Updated readme on how to use this repository. Fixes #14.
+- Update dependencies.
+- Fix examples' n64tool argument order. (https://github.com/DragonMinded/libdragon/pull/103)
+- Change ucodetest Makefile mode from 775 to 644. (https://github.com/DragonMinded/libdragon/pull/104)
+
 ## [4.1.0] - 2019-21-05
 
 ### Fixed

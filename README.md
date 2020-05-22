@@ -59,25 +59,25 @@ Now it is time to sync the original libdragon repository. (or clone this repo wi
 
     git submodule update --init
 
-Now you will be able to work on the files simultaneously with the docker container and any built binaries will be available in `libdragon-source` as it is mounted on the container.
-
-After the build environment is ready, to build the examples do;
-
-    npm run make examples
-
-Similarly to run the `clean` recipe, run;
-
-    npm run make clean
+Now you will be able to work on the files simultaneously with the docker container and any built binaries will be available in your workspace as it is mounted on the container.
 
 The `make` script will be only run at the root-level of this repository, but additonal parameters are passed down to the actual make command. For example use `-C` flag to invoke make on a directory instead;
 
     npm run make -- -C your/path
 
+For example, to build the original libdragon examples do;
+
+    npm run make -- -C ./libdragon-source examples
+
+Similarly to run the `clean` recipe, run;
+
+    npm run make -- -C ./libdragon-source clean
+
 Keep in mind that a single docker container with the name of `libdragon` will be run for all the git cloned libdragon instances and the global installation's instance if any. Starting a new container will remove the old one, deleting your changes in it outside of your working folder.
 
 ### Local test bench
 
-This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can just hit F5 on vscode to run the test code in `src` folder to develop libdragon itself quicker. There is a caveat though: If you want the problem matcher to work properly, you should name this repository folder `libdragon` exactly.
+This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can just hit F5 on vscode to run the test code in `src` folder to develop libdragon itself quicker. This will always re-compile and install libdragon itself to make sure tou are testing with the latest code. There is a caveat though: If you want the problem matcher to work properly, you should name this repository folder `libdragon` exactly.
 
 ### NPM scripts
 

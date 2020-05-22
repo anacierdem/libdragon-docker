@@ -1,6 +1,6 @@
 {
   "name": "libdragon",
-  "version": "4.1.0",
+  "version": "4.1.1",
   "description": "This is a docker wrapper for libdragon",
   "main": "index.js",
   "engines": {
@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/anacierdem/libdragon-docker#readme",
   "dependencies": {
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.20"
   },
   "devDependencies": {
     "ed64": "^1.0.5",
