@@ -1,11 +1,28 @@
 # Change Log
 
+## [4.1.2] -2020-15-12
+
+### Changed
+
+- Updated readme on how to use this repository.
+- Update dependencies.
+- Update ed64 to `1.2.0`.
+
+### Fixed
+
+- n64tool: fix bug in detection of unaligned image sizes (https://github.com/DragonMinded/libdragon/pull/109)
+- tools/build: Set default number of jobs to number of processors (https://github.com/DragonMinded/libdragon/pull/111)
+- Build script fixes (https://github.com/DragonMinded/libdragon/pull/112)
+
 ## [4.1.1] -2020-05-10
 
 ### Changed
 
 - Updated readme on how to use this repository. Fixes #14.
 - Update dependencies.
+
+### Fixed
+
 - Fix examples' n64tool argument order. (https://github.com/DragonMinded/libdragon/pull/103)
 - Change ucodetest Makefile mode from 775 to 644. (https://github.com/DragonMinded/libdragon/pull/104)
 

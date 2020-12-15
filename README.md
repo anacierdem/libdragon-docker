@@ -55,7 +55,7 @@ This will install all necessary NPM dependencies. Then run;
 
 to download the pre-built toolchain image from docker hub and start it. This will also install test bench dependencies into the container.
 
-Now it is time to sync the original libdragon repository. (or clone this repo with `--recurse-submodules` in the first place)
+Now it is time to get the original libdragon repository. (or clone this repo with `--recurse-submodules` in the first place)
 
     git submodule update --init
 
@@ -74,6 +74,12 @@ Similarly to run the `clean` recipe, run;
     npm run make -- -C ./libdragon-source clean
 
 Keep in mind that a single docker container with the name of `libdragon` will be run for all the git cloned libdragon instances and the global installation's instance if any. Starting a new container will remove the old one, deleting your changes in it outside of your working folder.
+
+After some while, the libdragon submodule may become out of sync. To update the submodule;
+
+    cd libdragon-source
+    git checkout master
+    git pull
 
 ### Local test bench
 
