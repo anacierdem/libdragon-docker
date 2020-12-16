@@ -1,6 +1,6 @@
 {
   "name": "libdragon",
-  "version": "4.1.2",
+  "version": "4.1.3",
   "description": "This is a docker wrapper for libdragon",
   "main": "index.js",
   "engines": {

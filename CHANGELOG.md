@@ -1,5 +1,11 @@
 # Change Log
 
+## [4.1.3] -2020-16-12
+
+### Changed
+
+- Removed broken patreon shield. This is only a readme change.
+
 ## [4.1.2] -2020-15-12
 
 ### Changed
