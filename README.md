@@ -78,7 +78,7 @@ Keep in mind that a single docker container with the name of `libdragon` will be
 After some while, the libdragon submodule may become out of sync. To update the submodule;
 
     cd libdragon-source
-    git checkout master
+    git checkout trunk
     git pull
 
 ### Local test bench
