@@ -34,11 +34,11 @@ function runCommand(cmd) {
     });
 
     command.stdout.on('data', function (data) {
-      console.log(data.toString());
+      process.stdout.write(data.toString());
     });
 
     command.stderr.on('data', function (data) {
-      console.error(data.toString());
+      process.stderr.write(data.toString());
     });
   });
 }
