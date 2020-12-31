@@ -1,12 +1,22 @@
 # Change Log
 
-## [4.1.3] -2020-16-12
+## [4.1.4] - 2020-31-12
+
+### Changed
+
+- Update readme for submodule update procedure (https://github.com/anacierdem/libdragon-docker/pull/17)
+
+### Fixed
+
+- Prevent newlines in the output (https://github.com/anacierdem/libdragon-docker/pull/19)
+
+## [4.1.3] - 2020-16-12
 
 ### Changed
 
 - Removed broken patreon shield. This is only a readme change.
 
-## [4.1.2] -2020-15-12
+## [4.1.2] - 2020-15-12
 
 ### Changed
 
@@ -20,7 +30,7 @@
 - tools/build: Set default number of jobs to number of processors (https://github.com/DragonMinded/libdragon/pull/111)
 - Build script fixes (https://github.com/DragonMinded/libdragon/pull/112)
 
-## [4.1.1] -2020-05-10
+## [4.1.1] - 2020-05-10
 
 ### Changed
 
