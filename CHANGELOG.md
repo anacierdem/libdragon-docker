@@ -1,5 +1,25 @@
 # Change Log
 
+## [5.0.0] - 2021-16-01
+
+### Changed
+
+- dfs: fix performance of dfs_seek to be constant-time (https://github.com/DragonMinded/libdragon/pull/115)
+  - This changes the file system layout
+
+### Fixed
+
+- n64sys: fix dma cache ops (https://github.com/DragonMinded/libdragon/pull/116)
+- Added a new root makefile to batch multiple operations. Fixes #10
+- Added local search paths to improve test bench compile time. Fixes #18
+
+### Added
+
+- Exposed the TV_TYPE at 0x80000300 as a n64sys function (https://github.com/DragonMinded/libdragon/pull/113)
+- Initial libdragon testsuite (https://github.com/DragonMinded/libdragon/pull/117)
+- Launch configurations for the new test suite and existing examples
+- Launch configuration to clean everything
+
 ## [4.1.4] - 2020-31-12
 
 ### Changed

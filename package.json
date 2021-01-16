@@ -1,6 +1,6 @@
 {
   "name": "libdragon",
-  "version": "4.1.4",
+  "version": "5.0.0",
   "description": "This is a docker wrapper for libdragon",
   "main": "index.js",
   "engines": {
@@ -21,7 +21,7 @@
     "buildDragon": "node index.js buildDragon",
     "dragonInstall": "node index.js install",
     "prepublishOnly": "node index.js update",
-    "build": "run-s \"make -- -C ./libdragon-source\" \"make -- -C ./libdragon-source install\" \"make -- -C ./src -B\""
+    "build": "npm run make bench"
   },
   "repository": {
     "type": "git",
@@ -37,7 +37,6 @@
     "lodash": "^4.17.20"
   },
   "devDependencies": {
-    "ed64": "^1.2.0",
-    "npm-run-all": "^4.1.5"
+    "ed64": "^1.2.0"
   }
 }

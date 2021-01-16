@@ -5,8 +5,8 @@ MKDFSPATH = $(ROOTDIR)/bin/mkdfs
 HEADERPATH = $(ROOTDIR)/mips64-elf/lib
 N64TOOL = $(ROOTDIR)/bin/n64tool
 HEADERNAME = header
-LINK_FLAGS = -L$(ROOTDIR)/mips64-elf/lib -led64 -ldragon -lc -lm -ldragonsys -Tn64.ld
-CFLAGS = -std=gnu99 -march=vr4300 -mtune=vr4300 -O2 -Wall -I$(ROOTDIR)/mips64-elf/include -I$(CURDIR)
+LINK_FLAGS = -L$(CURDIR)/../libdragon-source -L$(ROOTDIR)/mips64-elf/lib -led64 -ldragon -lc -lm -ldragonsys -Tn64.ld
+CFLAGS = -std=gnu99 -march=vr4300 -mtune=vr4300 -O2 -Wall -I$(CURDIR)/../libdragon-source/include -I$(ROOTDIR)/mips64-elf/include
 ASFLAGS = -mtune=vr4300 -march=vr4300
 CC = $(GCCN64PREFIX)gcc
 AS = $(GCCN64PREFIX)as
@@ -25,6 +25,8 @@ else
 ROM_EXTENSION = .z64
 endif
 
+all: $(PROG_NAME)$(ROM_EXTENSION)
+
 $(PROG_NAME)$(ROM_EXTENSION): $(PROG_NAME).elf
 	$(OBJCOPY) $(PROG_NAME).elf $(PROG_NAME).bin -O binary
 	rm -f $(PROG_NAME)$(ROM_EXTENSION)
@@ -39,8 +41,6 @@ $(PROG_NAME).elf: $(PROG_NAME).o
 	$(LD) -o $@ $^ $(LINK_FLAGS)
 
 .PHONY: clean all
-
-all: $(PROG_NAME)$(ROM_EXTENSION)
 
 clean:
 	rm -rf $(BUILD_PATH)/*
