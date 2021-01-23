@@ -37,6 +37,10 @@ $(PROG_NAME).o: $(SOURCE_PATH)/main.c
 	mkdir -p $(BUILD_PATH)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
+$(PROG_NAME).elf: ../libdragon-source/libdragon.a
+$(PROG_NAME).elf: ../libdragon-source/libdragonsys.a
+$(PROG_NAME).elf: ../libdragon-source/n64.ld
+
 $(PROG_NAME).elf: $(PROG_NAME).o
 	$(LD) -o $@ $^ $(LINK_FLAGS)
 
