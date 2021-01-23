@@ -1,5 +1,31 @@
 # Change Log
 
+## [6.0.0] - 2021-23-01
+
+### Changed
+
+- Update base Dockerfile to use the latest toolchain setup and make it deduce processor count for the toolchain build
+- `make` action does not first restart the container anymore. This will result in minor performance gains when running make
+- `libdragon` command does not always exit with code 1 anymore, it instead echoes the underlying error code if known
+- Updated toolchain dockerfile to strip symbols from executables and remove locales and built a new base image. Closes #8
+- Move code into modules
+- Do not put unnecessary files into the NPM package
+- Renamed `dragonInstall` npm script to `prepareDragon`
+- Readme improvements
+
+### Fixed
+
+- Start using child_process spawn to prevent buffer issues. Fixes #2
+- Colors are now properly displayed when using the wrapper. Fixes #21
+
+### Added
+
+- Readme update instructions. Closes #20
+- Readme root makefile instructions
+- A red message to show the error if any, including subprocess exit codes
+- An additional `installDependencies` libdragon action and NPM script. It does what we used to do after `download` and `start` when running `install`
+- `-fdiagnostics-color` for the local test bench to enable color output
+
 ## [5.0.0] - 2021-16-01
 
 ### Changed

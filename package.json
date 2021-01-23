@@ -1,13 +1,10 @@
 {
   "name": "libdragon",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "description": "This is a docker wrapper for libdragon",
   "main": "index.js",
   "engines": {
     "node": ">=7.6"
-  },
-  "directories": {
-    "example": "examples"
   },
   "bin": {
     "libdragon": "./index.js"
@@ -19,14 +16,18 @@
     "download": "node index.js download",
     "init": "node index.js init",
     "buildDragon": "node index.js buildDragon",
-    "dragonInstall": "node index.js install",
+    "prepareDragon": "node index.js install",
+    "installDependencies": "node index.js installDependencies",
     "prepublishOnly": "node index.js update",
-    "build": "npm run make bench"
+    "build": "node index.js make bench"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/anacierdem/libdragon-docker.git"
   },
+  "files": [
+    "modules/**/*"
+  ],
   "author": "Ali Naci Erdem",
   "license": "MIT",
   "bugs": {
@@ -34,6 +35,7 @@
   },
   "homepage": "https://github.com/anacierdem/libdragon-docker#readme",
   "dependencies": {
+    "chalk": "^4.1.0",
     "lodash": "^4.17.20"
   },
   "devDependencies": {

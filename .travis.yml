@@ -27,8 +27,9 @@ script:
   - npm run make -- -C ./libdragon-source tools-install
   # Test if examples are building properly through the container
   - npm run make examples
-  # install dependencies
-  - npm run dragonInstall
+  # install dependencies via both scripts to make sure they don't error out
+  - npm run prepareDragon
+  - npm run installDependencies
   # Test if test bench is building properly through the container
   - npm run build
   # Test if test suite is building properly through the container
