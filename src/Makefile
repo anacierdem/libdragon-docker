@@ -42,7 +42,7 @@ $(PROG_NAME).elf: ../libdragon-source/libdragonsys.a
 $(PROG_NAME).elf: ../libdragon-source/n64.ld
 
 $(PROG_NAME).elf: $(PROG_NAME).o
-	$(LD) -o $@ $^ $(LINK_FLAGS)
+	$(LD) -o $@ $< $(LINK_FLAGS)
 
 .PHONY: clean all
 

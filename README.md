@@ -86,8 +86,8 @@ Similarly to run the `clean` recipe, run;
 There is also a root makefile making deeper makefiles easier with these recipes;
 
     bench: build the test bench (see below)
-    examples: build libdragon examples
-    tests: build the test ROM
+    examples: re-build libdragon examples
+    tests: re-build the test ROM
     libdragon: build libdragon itself
     libdragon-install: install libdragon
     clean-bench: clean the test bench (see below)
@@ -107,7 +107,9 @@ After some while, the libdragon submodule may become out of sync. To update the 
 
 ### Local test bench
 
-This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can just hit F5 on vscode to run the test code in `src` folder to develop libdragon itself quicker if you have an everdrive v3. There is a caveat though: If you want the problem matcher to work properly, you should name this repository folder `libdragon` exactly.
+This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can just hit F5 on vscode (The `Run Test Bench` launch configuration) to run the test code in `src` folder to develop libdragon itself quicker if you have an everdrive v3. There is a caveat though: If you want the problem matcher to work properly, you should name this repository folder `libdragon` exactly.
+
+There are also additional vscode luanch configurations to build libdragon examples and tests based on the currently built and installed libdragon in the docker container. These will always rebuild so that they will use the latest if you make and install an alternative libdragon, which you can do with the `installDragon` vscode task. To run it open the command palette and choose `Run Task -> installDragon`. If you have made changes, do not forget to first run the `installDragon` task for your changes to be effective on the examples and tests. The test bench itself will already build libdragon only if necessary. In contrast to libdragon's internal examples/tests no extra step is needed, it will always produce a rom image using the latest libdragon code in the active repository via its make dependencies and relative includes. Similarly you can clean everything with the `clean` task.
 
 ### NPM scripts
 

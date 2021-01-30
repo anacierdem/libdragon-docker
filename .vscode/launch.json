@@ -161,7 +161,7 @@
       "name": "Run Video Resolution Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon-source/examples/vtest/vtest.z64",
+        "${workspaceFolder}/libdragon-source/examples/vtest/VidResTest.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildVTest",
@@ -181,13 +181,6 @@
       "preLaunchTask": "buildUCodeTest",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
-    },
-
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Clean All",
-      "preLaunchTask": "clean"
     }
   ]
 }

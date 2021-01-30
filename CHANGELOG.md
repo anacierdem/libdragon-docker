@@ -1,5 +1,25 @@
 # Change Log
 
+## [6.0.1] - 2021-07-02
+
+### Changed
+
+- Makefile: add -ffunction-sections and -fdata-sections to libdragon (https://github.com/DragonMinded/libdragon/pull/121)
+- Running vscode tasks now always rebuild libdragon examples and tests
+- Root makefile always rebuilds examples and tests
+- Update readme
+
+### Fixed
+
+- C++ test example works now (https://github.com/DragonMinded/libdragon/pull/118)
+- Delay functions work correctly now (https://github.com/DragonMinded/libdragon/pull/120)
+- Fix broken bench makefile
+- Fix incorrect rom name for resolution test vscode launch configuration
+
+### Added
+
+- `installDragon` vscode task to make and install libdragon to the container
+
 ## [6.0.0] - 2021-23-01
 
 ### Changed

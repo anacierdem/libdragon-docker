@@ -2,10 +2,10 @@ bench: libdragon
 	make -C ./src
 
 examples: libdragon-install
-	make -C ./libdragon-source/examples
+	make -BC ./libdragon-source/examples
 
 tests: libdragon-install
-	make -C ./libdragon-source/tests
+	make -BC ./libdragon-source/tests
 
 libdragon-install: libdragon
 	make -C ./libdragon-source install
