@@ -1,5 +1,17 @@
 # Change Log
 
+## [6.0.2] - 2021-04-03
+
+### Fixed
+
+- Fix icache ops (https://github.com/DragonMinded/libdragon/pull/122)
+- Rewrite timer.c to avoid messing up the COP0 hardware counter (https://github.com/DragonMinded/libdragon/pull/123)
+- Fix 16k EEPROM detection (https://github.com/DragonMinded/libdragon/pull/124)
+
+### Added
+
+- Support GCC nested functions (https://github.com/DragonMinded/libdragon/pull/122)
+
 ## [6.0.1] - 2021-07-02
 
 ### Changed
