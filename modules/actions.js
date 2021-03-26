@@ -6,7 +6,7 @@ const { options } = require('./options');
 const { runCommand, spawnProcess } = require('./helpers');
 const { version: selfVersion } = require('../package.json'); // Always use self version for docker image
 
-async function startToolchain(forceLatest = false) {
+async function startToolchain() {
   // Do not try to run docker if already in container
   if (process.env.IS_DOCKER === 'true') {
     return;
@@ -41,9 +41,7 @@ async function startToolchain(forceLatest = false) {
         ',target=/' +
         options.PROJECT_NAME, // Mount files
       '-w=/' + options.PROJECT_NAME, // Set working directory
-      DOCKER_HUB_NAME +
-        ':' +
-        (!forceLatest && options.SELF_BUILD ? BASE_VERSION : selfVersion),
+      DOCKER_HUB_NAME + ':' + (options.SELF_BUILD ? BASE_VERSION : selfVersion),
       'tail',
       '-f',
       '/dev/null',
@@ -119,7 +117,7 @@ async function buildDragon() {
     true
   );
   // Start freshly built image
-  await startToolchain(true);
+  await startToolchain();
 }
 
 async function installDependencies() {
@@ -212,7 +210,7 @@ async function installDependencies() {
 }
 
 module.exports = {
-  start: () => startToolchain(true),
+  start: startToolchain,
   download: download,
   init: async function initialize() {
     // Do not try to run docker if already in container
@@ -233,7 +231,7 @@ module.exports = {
   installDependencies: installDependencies,
   install: async function install() {
     await download();
-    await startToolchain(true);
+    await startToolchain();
     await installDependencies();
   },
   make: make,

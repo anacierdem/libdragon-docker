@@ -1,6 +1,6 @@
-const BASE_VERSION = 'toolchain';
+const BASE_VERSION = 'beta-toolchain';
 const DOCKER_HUB_NAME = 'anacierdem/libdragon';
-const UPDATE_LATEST = true;
+const UPDATE_LATEST = false;
 
 module.exports = {
   BASE_VERSION: BASE_VERSION,
