@@ -21,9 +21,7 @@ script:
   # Build and install libdragon & mikmod - test docker script & build
   - npm run buildDragon
   # Test NPM scripts to check if they are also working propoerly
-  - npm run make libdragon
   - npm run make libdragon-install
-  - npm run make -- -C ./libdragon-source tools
   - npm run make -- -C ./libdragon-source tools-install
   # Test if examples are building properly through the container
   - npm run make examples

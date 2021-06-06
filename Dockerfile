@@ -10,7 +10,7 @@ RUN apt-get update && \
     apt-get clean && \
     git clone https://github.com/DragonMinded/libdragon.git/ ./libdragon-source && \
     cd ./libdragon-source && \
-    git checkout 21075daf77d1f4c009b555fd9e46b7261005ebb7 && \
+    git checkout 1c522f2da5928bb5bb79ac76436c2186091fef75 && \
     cp -r ./tools /tmp/tools && \
     cd .. && \
     cd /tmp/tools && \
@@ -19,13 +19,14 @@ RUN apt-get update && \
     rm -rf /tmp/tools && \
     rm -rf * && \
     find /usr/local/bin -type f | xargs strip && \
-    strip /usr/local/libexec/gcc/mips64-elf/9.1.0/plugin/gengtype && \
-    strip /usr/local/libexec/gcc/mips64-elf/9.1.0/liblto_plugin.so.0.0.0 && \
-    strip /usr/local/libexec/gcc/mips64-elf/9.1.0/lto-wrapper && \
-    strip /usr/local/libexec/gcc/mips64-elf/9.1.0/collect2 && \
-    strip /usr/local/libexec/gcc/mips64-elf/9.1.0/cc1plus && \
-    strip /usr/local/libexec/gcc/mips64-elf/9.1.0/cc1 && \
-    strip /usr/local/libexec/gcc/mips64-elf/9.1.0/install-tools/fixincl && \
-    strip /usr/local/libexec/gcc/mips64-elf/9.1.0/lto1 && \
+    strip /usr/local/libexec/gcc/mips64-elf/10.2.0/plugin/gengtype && \
+    strip /usr/local/libexec/gcc/mips64-elf/10.2.0/liblto_plugin.so.0.0.0 && \
+    strip /usr/local/libexec/gcc/mips64-elf/10.2.0/liblto_plugin.so.0 && \
+    strip /usr/local/libexec/gcc/mips64-elf/10.2.0/lto-wrapper && \
+    strip /usr/local/libexec/gcc/mips64-elf/10.2.0/collect2 && \
+    strip /usr/local/libexec/gcc/mips64-elf/10.2.0/cc1plus && \
+    strip /usr/local/libexec/gcc/mips64-elf/10.2.0/cc1 && \
+    strip /usr/local/libexec/gcc/mips64-elf/10.2.0/install-tools/fixincl && \
+    strip /usr/local/libexec/gcc/mips64-elf/10.2.0/lto1 && \
     rm -rf /usr/local/share/locale/* && \
     apt autoremove -yq

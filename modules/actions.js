@@ -1,12 +1,18 @@
 const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
-const { BASE_VERSION, DOCKER_HUB_NAME, UPDATE_LATEST } = require('./constants');
+const {
+  BASE_IMAGE_VERSION,
+  DOCKER_HUB_NAME,
+  IS_CI,
+  IMAGE_VERSION,
+  SELF_BUILD,
+  PROJECT_NAME,
+} = require('./constants');
 const { options } = require('./options');
 const { runCommand, spawnProcess } = require('./helpers');
-const { version: selfVersion } = require('../package.json'); // Always use self version for docker image
 
-async function startToolchain(forceLatest = false) {
+async function startToolchain() {
   // Do not try to run docker if already in container
   if (process.env.IS_DOCKER === 'true') {
     return;
@@ -18,7 +24,7 @@ async function startToolchain(forceLatest = false) {
       'ls',
       '-qa',
       '-f',
-      'name=^/' + options.PROJECT_NAME + '$',
+      'name=^/' + PROJECT_NAME + '$',
     ])
   ).trim();
 
@@ -30,20 +36,15 @@ async function startToolchain(forceLatest = false) {
     'docker',
     [
       'run',
-      '--name=' + options.PROJECT_NAME,
+      '--name=' + PROJECT_NAME,
       ...(options.BYTE_SWAP ? ['-e', 'N64_BYTE_SWAP=true'] : []),
       '-e',
       'IS_DOCKER=true',
       '-d', // Detached
       '--mount',
-      'type=bind,source=' +
-        options.MOUNT_PATH +
-        ',target=/' +
-        options.PROJECT_NAME, // Mount files
-      '-w=/' + options.PROJECT_NAME, // Set working directory
-      DOCKER_HUB_NAME +
-        ':' +
-        (!forceLatest && options.SELF_BUILD ? BASE_VERSION : selfVersion),
+      'type=bind,source=' + options.MOUNT_PATH + ',target=/' + PROJECT_NAME, // Mount files
+      '-w=/' + PROJECT_NAME, // Set working directory
+      DOCKER_HUB_NAME + ':' + IMAGE_VERSION,
       'tail',
       '-f',
       '/dev/null',
@@ -58,11 +59,7 @@ async function make(params) {
     await spawnProcess('make', params, true);
     return;
   }
-  await spawnProcess(
-    'docker',
-    ['exec', options.PROJECT_NAME, 'make', ...params],
-    true
-  );
+  await spawnProcess('docker', ['exec', PROJECT_NAME, 'make', ...params], true);
 }
 
 async function download() {
@@ -72,15 +69,15 @@ async function download() {
   }
   await spawnProcess(
     'docker',
-    ['pull', DOCKER_HUB_NAME + ':' + BASE_VERSION],
+    ['pull', DOCKER_HUB_NAME + ':' + BASE_IMAGE_VERSION],
     true
   );
 
   // Use only base version on CI
-  if (!options.SELF_BUILD) {
+  if (!SELF_BUILD) {
     await spawnProcess(
       'docker',
-      ['pull', DOCKER_HUB_NAME + ':' + selfVersion],
+      ['pull', DOCKER_HUB_NAME + ':' + IMAGE_VERSION],
       true
     );
   }
@@ -94,10 +91,10 @@ async function stop() {
   const list = await spawnProcess('docker', [
     'ps',
     '-aq',
-    '-f name=^/' + options.PROJECT_NAME + '$',
+    '-f name=^/' + PROJECT_NAME + '$',
   ]);
   if (list) {
-    await spawnProcess('docker', ['rm', '-f', options.PROJECT_NAME], true);
+    await spawnProcess('docker', ['rm', '-f', PROJECT_NAME], true);
   }
 }
 
@@ -109,9 +106,9 @@ async function buildDragon() {
       '--build-arg',
       'DOCKER_HUB_NAME=' + DOCKER_HUB_NAME,
       '--build-arg',
-      'BASE_VERSION=' + BASE_VERSION,
+      'BASE_VERSION=' + BASE_IMAGE_VERSION,
       '-t',
-      DOCKER_HUB_NAME + ':' + selfVersion,
+      DOCKER_HUB_NAME + ':' + IMAGE_VERSION,
       '-f',
       './dragon.Dockerfile',
       './',
@@ -119,7 +116,7 @@ async function buildDragon() {
     true
   );
   // Start freshly built image
-  await startToolchain(true);
+  await startToolchain();
 }
 
 async function installDependencies() {
@@ -165,7 +162,7 @@ async function installDependencies() {
               .replace(new RegExp('\\' + path.sep), path.posix.sep);
             const containerPath = path.posix.join(
               '/',
-              options.PROJECT_NAME,
+              PROJECT_NAME,
               relativePath,
               '/'
             );
@@ -187,7 +184,7 @@ async function installDependencies() {
                 'docker',
                 [
                   'exec',
-                  options.PROJECT_NAME,
+                  PROJECT_NAME,
                   '/bin/bash',
                   '-c',
                   '[ -f ' +
@@ -212,7 +209,7 @@ async function installDependencies() {
 }
 
 module.exports = {
-  start: () => startToolchain(true),
+  start: startToolchain,
   download: download,
   init: async function initialize() {
     // Do not try to run docker if already in container
@@ -223,7 +220,7 @@ module.exports = {
     // Build toolchain
     await spawnProcess(
       'docker',
-      ['build', '-t', DOCKER_HUB_NAME + ':' + BASE_VERSION, './'],
+      ['build', '-t', DOCKER_HUB_NAME + ':' + BASE_IMAGE_VERSION, './'],
       true
     );
 
@@ -233,7 +230,7 @@ module.exports = {
   installDependencies: installDependencies,
   install: async function install() {
     await download();
-    await startToolchain(true);
+    await startToolchain();
     await installDependencies();
   },
   make: make,
@@ -249,16 +246,16 @@ module.exports = {
     // We assume buildDragon was run.
     await spawnProcess(
       'docker',
-      ['push', DOCKER_HUB_NAME + ':' + selfVersion],
+      ['push', DOCKER_HUB_NAME + ':' + IMAGE_VERSION],
       true
     );
 
-    if (UPDATE_LATEST) {
+    if (IS_CI) {
       await spawnProcess(
         'docker',
         [
           'tag',
-          DOCKER_HUB_NAME + ':' + selfVersion,
+          DOCKER_HUB_NAME + ':' + IMAGE_VERSION,
           DOCKER_HUB_NAME + ':latest',
         ],
         true

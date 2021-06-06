@@ -1,5 +1,24 @@
 # Change Log
 
+## [7.0.0] - 2021-06-06
+
+### Changed
+
+- Update GCC (10.2.0), binutils (2.36.1) and newlib (4.1.0) (https://github.com/DragonMinded/libdragon/pull/130)
+- Remove internal forceLatest parameter
+- Refactor internal constants
+- Update dependencies
+
+### Fixed
+
+- Free stdio file handles when closed (https://github.com/DragonMinded/libdragon/pull/128)
+
+### Added
+
+- Default exception handler (https://github.com/DragonMinded/libdragon/pull/126)
+- New debugging library (https://github.com/DragonMinded/libdragon/pull/130)
+  - Not final, may have bugs or it may change in the future
+
 ## [6.0.2] - 2021-04-03
 
 ### Fixed
