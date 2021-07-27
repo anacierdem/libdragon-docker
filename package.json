@@ -1,6 +1,6 @@
 {
   "name": "libdragon",
-  "version": "7.0.0",
+  "version": "8.0.0",
   "description": "This is a docker wrapper for libdragon",
   "main": "index.js",
   "engines": {
@@ -10,14 +10,9 @@
     "libdragon": "./index.js"
   },
   "scripts": {
+    "libdragon": "node index.js",
     "start": "node index.js start",
     "stop": "node index.js stop",
-    "make": "node index.js make",
-    "download": "node index.js download",
-    "init": "node index.js init",
-    "buildDragon": "node index.js buildDragon",
-    "prepareDragon": "node index.js install",
-    "installDependencies": "node index.js installDependencies",
     "prepublishOnly": "node index.js update",
     "build": "node index.js make bench"
   },
@@ -39,6 +34,6 @@
     "lodash": "^4.17.20"
   },
   "devDependencies": {
-    "ed64": "^1.2.0"
+    "ed64": "^1.2.5"
   }
 }

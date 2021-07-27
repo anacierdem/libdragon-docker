@@ -1,5 +1,42 @@
 # Change Log
 
+## [8.0.0] - 2021-28-07
+
+### Changed
+
+- Removed make, download, init, buildDragon, prepareDragon, and installDependencies NPM scripts
+  - Update the necessary vscode and travis configuration
+  - Update the readme to match - this also fixes #31
+- Improve fastpath of dfs_read (https://github.com/DragonMinded/libdragon/pull/133)
+- Refactor n64tool (https://github.com/DragonMinded/libdragon/pull/153, https://github.com/DragonMinded/libdragon/pull/155)
+  - It no longer support byte-swapping and only generates a z64 file.
+  - Change test bench Makefile to reflect latest changes
+
+### Fixed
+
+- Zero-initialize the token array to avoid -Werror=maybe-uninitialized (https://github.com/DragonMinded/libdragon/pull/134)
+- Initialize arguments to main libdragon entrypoint (https://github.com/DragonMinded/libdragon/pull/136)
+- SD support fixes and dragonfs fopen fix (https://github.com/DragonMinded/libdragon/pull/137)
+- lib/include paths in tests Makefile (https://github.com/DragonMinded/libdragon/pull/138)
+- Reenable test_timer_ticks for emulators (https://github.com/DragonMinded/libdragon/pull/140)
+- n64tool: return error in case the seek offset required backward seek (https://github.com/DragonMinded/libdragon/pull/144)
+- Add missing extern "C" in debug.h (https://github.com/DragonMinded/libdragon/pull/146)
+- Ensure C++ global constructors are not garbage collected by ld (https://github.com/DragonMinded/libdragon/pull/148)
+- Fix clipped RDP rectangle drawing (https://github.com/DragonMinded/libdragon/pull/147)
+- Enable byte swap flag for the make action and update documentation accordingly
+- Skip the second parameter to the libdragon command as well
+- Enable --byte-swap flag for the make action
+
+### Added
+
+- restart_timer and new_timer_stopped functions (https://github.com/DragonMinded/libdragon/pull/131)
+- dfs_rom_addr (https://github.com/DragonMinded/libdragon/pull/133)
+- Implement EEPROM Filesystem and test ROM (https://github.com/DragonMinded/libdragon/pull/125)
+- ed64romconfig binary (https://github.com/DragonMinded/libdragon/pull/153, https://github.com/DragonMinded/libdragon/pull/155)
+- Support for RTC status/read/write commands (https://github.com/DragonMinded/libdragon/pull/152)
+- Generic libdragon NPM script
+
+
 ## [7.0.0] - 2021-06-06
 
 ### Changed

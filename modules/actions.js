@@ -59,7 +59,17 @@ async function make(params) {
     await spawnProcess('make', params, true);
     return;
   }
-  await spawnProcess('docker', ['exec', PROJECT_NAME, 'make', ...params], true);
+  await spawnProcess(
+    'docker',
+    [
+      'exec',
+      ...(options.BYTE_SWAP ? ['-e', 'N64_BYTE_SWAP=true'] : []),
+      PROJECT_NAME,
+      'make',
+      ...params,
+    ],
+    true
+  );
 }
 
 async function download() {

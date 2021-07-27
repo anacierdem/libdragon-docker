@@ -9,7 +9,7 @@
       "request": "launch",
       "name": "Run Test Bench",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
-      "args": ["${workspaceFolder}/src/build/main.z64", "--keep-alive"],
+      "args": ["${workspaceFolder}/src/test_bench.z64", "--keep-alive"],
       "preLaunchTask": "build",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"

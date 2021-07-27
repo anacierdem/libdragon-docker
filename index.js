@@ -6,7 +6,7 @@ const { options } = require('./modules/options');
 const actions = require('./modules/actions');
 
 process.argv.forEach(function (val, index) {
-  if (index < 1) {
+  if (index < 2) {
     return;
   }
 

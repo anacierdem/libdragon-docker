@@ -24,9 +24,7 @@ The container's `make` action can be invoked on your current working directory v
 
 Any additonal parameters are passed down to the actual make command. For example you can use `-C` flag to invoke make on a directory instead.
 
-    libdragon make -- -C your/path
-
-Keep in mind that `--` is necessary for actual arguments to make.
+    libdragon make -C your/path
 
 The same docker container (with the default name of `libdragon`) will be used for all global `libdragon start`s. Successive `start`/`stop` actions will remove the old container and you will lose any changes in the container outside your working directory. So **BE CAREFUL** containers are temporary assets in this context.
 See [Invoking libdragon](#Invoking-libdragon) for more details on available actions.
@@ -47,6 +45,10 @@ To use the toolchain's host `make` action with byte swap enabled, include the `-
 
     libdragon --byte-swap make
 
+Or you can start the container with byte swap enabled in the first place;
+
+    libdragon --byte-swap start
+
 ### Bash
 
 If you need more control over the toolchain container bash into it with;
@@ -61,7 +63,7 @@ After cloning this repository on a machine with node.js (>= 7.6) & docker, in th
 
 This will install all necessary NPM dependencies. Then run;
 
-    npm run prepareDragon
+    npm run libdragon -- install
 
 to download the pre-built toolchain image from docker hub and start it. This will also install test bench dependencies into the container.
 
@@ -71,17 +73,19 @@ Now it is time to get the original libdragon repository. (or clone this repo wit
 
 Now you will be able to work on the files simultaneously with the docker container and any built binaries will be available in your workspace as it is mounted on the container.
 
-The `make` script will be only run at the root-level of this repository, but additonal parameters are passed down to the actual make command. For example use `-C` flag to invoke make on a directory instead;
+The `make` command will be only run at the root-level of this repository, but additonal parameters are passed down to the actual make. For example use `-C` flag to invoke make on a directory instead;
 
-    npm run make -- -C your/path
+    npm run libdragon -- make -C your/path
 
 As an example, to build the original libdragon examples do;
 
-    npm run make -- -C ./libdragon-source examples
+    npm run libdragon -- make -C ./libdragon-source examples
 
 Similarly to run the `clean` recipe, run;
 
-    npm run make -- -C ./libdragon-source clean
+    npm run libdragon -- make -C ./libdragon-source clean
+
+Keep in mind that `--` is necessary for actual arguments when using npm scripts.
 
 There is also a root makefile making deeper makefiles easier with these recipes;
 
@@ -95,7 +99,7 @@ There is also a root makefile making deeper makefiles easier with these recipes;
 
 So some of the above operations can be simplified to;
 
-    npm run make examples
+    npm run libdragon -- make examples
 
 Keep in mind that a single docker container with the name of `libdragon` will be run for all the git cloned libdragon instances and the global installation's instance if any. Starting a new container will remove the old one, deleting your changes in it outside of your working folder.
 
@@ -113,25 +117,15 @@ There are also additional vscode luanch configurations to build libdragon exampl
 
 ### NPM scripts
 
-A list of all available NPM scripts provided with this repository. Also see [Invoking libdragon](#Invoking-libdragon) section for more details on using libdragon actions.
+A list of all available NPM scripts provided with this repository. Keep in mind that `--` is necessary for actual arguments to the scripts.
 
-**download:** `npm run download` downloads the pre-built docker image for the current version from docker hub.
+**libdragon:** `npm run libdragon` invokes libdragon command with the provided parameters. The parameters should be added after a `--` to be effective when using this script. e.g; `npm run libdragon -- make`. Also see [Invoking libdragon](#Invoking-libdragon) section for more details on using libdragon actions.
 
-**start:** `npm start` will start the container with the name `libdragon`.
+**start:** `npm start` will start the container with the name `libdragon`. Flags will not work when using this script.
 
 **stop:** Stop the container via `npm stop`.
 
-**make:** Runs `make` inside the container on libdragon-source with given parameters. Will not work without starting the container first.
-
-**init:** If you prefer to build the docker image on your computer, do `npm run init`. This will build and start the container and may take a while as it will initialize the docker container and build the toolchain from scratch.
-
-**prepareDragon:** Invokes the `install` libdragon action for this repository, preparing the container for the local test bench. Using the `prepare` script to do this on `npm i` is not feasable on the main repository as it make things complicated on CI, where there is no build docker version yet on first install.
-
-**installDependencies:** Invokes the `installDependencies` libdragon action for this repository, installing the dependencies required to build the test bench. This is already included in the `prepareDragon` script.
-
 **build:** Use this to run the local test bench. It will build and install libdragon into the default container followed by `make` inside the container for the `src` folder. The src folder will always build to keep it in sync with libdragon. This can be used to test libdragon changes.
-
-**buildDragon: _(CI only)_** Builds a new image using `dragon.Dockerfile`. This is used to build an incremental image for a new release.
 
 **prepublishOnly: _(CI only)_** Pushes the newly built image to docker hub. Requires docker login.
 
@@ -179,11 +173,11 @@ There is an optional flag `--mount-path=<relative path>` that can be used to pro
 
 **download:** Pulls the docker image with the version in `package.json`. Only pulls the base image on self-build.
 
-**start:** Starts/re-starts the container with the installed libdragon version naming it to the active NPM project name. This will translate to `libdragon` for a global installation and the current NPM project name for a local installation. Provide `--byte-swap` flag to start a container that will output `.v64` images. Accepts `--mount-path`.
+**start:** Starts/re-starts the container with the installed libdragon version naming it to the active NPM project name. This will translate to `libdragon` for a global installation and the current NPM project name for a local installation. Provide `--byte-swap` flag to start a container that will output `.v64` images by default. Accepts `--mount-path`.
 
 **stop:** Stops the container.
 
-**make:** Runs `make` in mounted folder with additional parameters. Will not work without starting the container first. Please note that any path provided should be unix-compatible, so you should not use auto completion on non-unix systems.
+**make:** Runs `make` in mounted folder with additional parameters. Will not work without starting the container first. Please note that any path provided should be unix-compatible, so you should not use auto completion on non-unix systems. Accepts `--byte-swap`.
 
 **init:** Builds the toolchain image from scratch and then builds libdragon on top of it.
 

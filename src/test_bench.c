@@ -16,10 +16,11 @@ int main(void)
     display_close();
     display_init( res, bit, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE );
 
-    everdrive_init(false);
+    everdrive_init(true);
 
     while(1)
     {
         handle_everdrive();
+        printf("test");
     }
 }
