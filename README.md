@@ -39,6 +39,14 @@ To update your docker image to the latest available, you can first install the l
 
 You can change `latest` to whichever version you want to switch to.
 
+### Using a different libdragon chain
+
+    With your preferred libdragon on your working environment run;
+
+    libdragon make
+    libdragon make install
+    libdragon make tools-install
+
 ### ROM byte order
 
 To use the toolchain's host `make` action with byte swap enabled, include the `--byte-swap` flag;
@@ -134,7 +142,7 @@ A list of all available NPM scripts provided with this repository. Keep in mind 
 You can install libdragon as an NPM dependency by `npm install libdragon --save` in order to use docker in your other N64 projects. In this case, your project name will be used as the container name and this is shared among all NPM projects using that name. Your project's root is mounted on the docker image. A `libdragon` command similar to global intallation is provided that can be used in your NPM scripts as follows;
 
     "scripts": {
-        "init": "libdragon download",
+        "prepare": "libdragon install"
         "build": "libdragon make",
         "clean": "libdragon make clean"
     }

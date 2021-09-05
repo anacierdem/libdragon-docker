@@ -4,23 +4,23 @@
 #include <stdint.h>
 
 #include <libdragon.h>
-#include <libed64.h>
 
 int main(void)
 {
-    resolution_t res = RESOLUTION_320x240;
-    bitdepth_t bit = DEPTH_32_BPP;
-
     init_interrupts();
 
     display_close();
-    display_init( res, bit, 2, GAMMA_NONE, ANTIALIAS_RESAMPLE );
+    console_init();
+    timer_init();
 
-    everdrive_init(true);
+    debug_init_usblog();
 
     while(1)
     {
-        handle_everdrive();
-        printf("test");
+        printf("Test counter: %llu\n", timer_ticks() / (TICKS_PER_SECOND / 1000));
+
+        // Wait to limit data
+        unsigned long stop = 100 + get_ticks_ms();
+        while (stop > get_ticks_ms());
     }
 }

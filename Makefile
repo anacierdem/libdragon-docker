@@ -1,24 +1,24 @@
-bench: libdragon
-	make -C ./src
+bench: libdragon-install
+	$(MAKE) -C ./src
 
 examples: libdragon-install
-	make -BC ./libdragon-source/examples
+	$(MAKE) -BC ./libdragon-source/examples
 
 tests: libdragon-install
-	make -BC ./libdragon-source/tests
+	$(MAKE) -BC ./libdragon-source/tests
 
 libdragon-install: libdragon
-	make -C ./libdragon-source install
+	$(MAKE) -C ./libdragon-source install
 
 libdragon:
-	make -C ./libdragon-source
+	$(MAKE) -C ./libdragon-source
 
 clean: clean-bench
-	make -C ./libdragon-source clean
-	make -C ./libdragon-source/tests clean
-	make -C ./libdragon-source/tests clean
+	$(MAKE) -C ./libdragon-source clean
+	$(MAKE) -C ./libdragon-source/tests clean
+	$(MAKE) -C ./libdragon-source/tests clean
 
 clean-bench:
-	make -C ./src clean
+	$(MAKE) -C ./src clean
 
 .PHONY: bench examples tests libdragon-install libdragon clean clean-bench
