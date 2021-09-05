@@ -1,6 +1,6 @@
 # Change Log
 
-## [8.0.0] - 2021-28-07
+## [8.0.0] - 2021-07-28
 
 ### Changed
 
@@ -56,7 +56,7 @@
 - New debugging library (https://github.com/DragonMinded/libdragon/pull/130)
   - Not final, may have bugs or it may change in the future
 
-## [6.0.2] - 2021-04-03
+## [6.0.2] - 2021-03-04
 
 ### Fixed
 
@@ -68,7 +68,7 @@
 
 - Support GCC nested functions (https://github.com/DragonMinded/libdragon/pull/122)
 
-## [6.0.1] - 2021-07-02
+## [6.0.1] - 2021-02-07
 
 ### Changed
 
@@ -88,7 +88,7 @@
 
 - `installDragon` vscode task to make and install libdragon to the container
 
-## [6.0.0] - 2021-23-01
+## [6.0.0] - 2021-01-23
 
 ### Changed
 
@@ -114,7 +114,7 @@
 - An additional `installDependencies` libdragon action and NPM script. It does what we used to do after `download` and `start` when running `install`
 - `-fdiagnostics-color` for the local test bench to enable color output
 
-## [5.0.0] - 2021-16-01
+## [5.0.0] - 2021-01-16
 
 ### Changed
 
@@ -134,7 +134,7 @@
 - Launch configurations for the new test suite and existing examples
 - Launch configuration to clean everything
 
-## [4.1.4] - 2020-31-12
+## [4.1.4] - 2020-12-31
 
 ### Changed
 
@@ -144,13 +144,13 @@
 
 - Prevent newlines in the output (https://github.com/anacierdem/libdragon-docker/pull/19)
 
-## [4.1.3] - 2020-16-12
+## [4.1.3] - 2020-12-16
 
 ### Changed
 
 - Removed broken patreon shield. This is only a readme change.
 
-## [4.1.2] - 2020-15-12
+## [4.1.2] - 2020-12-15
 
 ### Changed
 
@@ -164,7 +164,7 @@
 - tools/build: Set default number of jobs to number of processors (https://github.com/DragonMinded/libdragon/pull/111)
 - Build script fixes (https://github.com/DragonMinded/libdragon/pull/112)
 
-## [4.1.1] - 2020-05-10
+## [4.1.1] - 2020-10-05
 
 ### Changed
 
@@ -176,7 +176,7 @@
 - Fix examples' n64tool argument order. (https://github.com/DragonMinded/libdragon/pull/103)
 - Change ucodetest Makefile mode from 775 to 644. (https://github.com/DragonMinded/libdragon/pull/104)
 
-## [4.1.0] - 2019-21-05
+## [4.1.0] - 2019-05-21
 
 ### Fixed
 
@@ -194,13 +194,13 @@
 
 - n64tool: Less IO operations for faster ROM build times. (https://github.com/DragonMinded/libdragon/pull/97)
 
-## [4.0.1] - 2019-25-04
+## [4.0.1] - 2019-04-25
 
 ### Fixed
 
 - Add missing vscode files.
 
-## [4.0.0] - 2019-24-04
+## [4.0.0] - 2019-04-24
 
 ### Added
 
@@ -216,13 +216,13 @@
   - This will not effect consumers unless they depend on container's `/libdragon` path for explicitly accessing source files or relative paths with make's `-C`. They are now relative to repository root.
   - `--mount-path` is still supported although not used on this repository anymore. These changes do not effect a local/global installation.
 
-## [3.2.0] - 2020-24-04
+## [3.2.0] - 2020-04-24
 
 ### Changed
 
 - MIT license
 
-## [3.1.0] - 2019-25-03
+## [3.1.0] - 2019-03-25
 
 ### Added
 
@@ -232,7 +232,7 @@
 
 - No need a tag for a travis deploy anymore.
 
-## [3.0.0] - 2019-11-02
+## [3.0.0] - 2019-02-11
 
 ### Changed
 
@@ -244,20 +244,20 @@
 
 - Transfer Pak support (https://github.com/DragonMinded/libdragon/pull/88)
 
-## [2.0.5] - 2019-07-12
+## [2.0.5] - 2019-12-07
 
 ### Changed
 
 - Added support information.
 
-## [2.0.4] - 2019-07-12
+## [2.0.4] - 2019-12-07
 
 ### Changed
 
 - Updated readme.
 - Removed version injection as the versions have diverged with libdragon.
 
-## [2.0.3] - 2019-06-12
+## [2.0.3] - 2019-12-06
 
 ### Changed
 
@@ -266,19 +266,19 @@
 - Remove unnecessary toolchain start on `update` action.
 - Start correct version on `buildDragon`.
 
-## [2.0.2] - 2019-30-11
+## [2.0.2] - 2019-11-30
 
 ### Changed
 
 - Running `install` command now starts the container.
 
-## [2.0.1] - 2019-30-11
+## [2.0.1] - 2019-11-30
 
 ### Changed
 
 - Updated repository URL.
 
-## [2.0.0] - 2019-30-11
+## [2.0.0] - 2019-11-30
 
 ### Changed
 
@@ -289,32 +289,32 @@
 - Built a new base docker hub image tagged `toolchain`.
 - Running `download` command no longer starts the container.
 
-## [1.3.15] - 2019-01-11
+## [1.3.15] - 2019-11-01
 
 ### Changed
 
 - `libdragon install` should skip CI checks.
 
-## [1.3.14] - 2019-31-10
+## [1.3.14] - 2019-10-31
 
 ### Changed
 
 - Skip make install if no Makefile is found.
 
-## [1.3.12] - 2019-29-10
+## [1.3.12] - 2019-10-29
 
 ### Changed
 
 - Reduce response time for NPM commands.
 - Remove unnecessary console statements and double logs.
 
-## [1.3.11] - 2019-29-10
+## [1.3.11] - 2019-10-29
 
 ### Fixed
 
 - Fix problem with wait ticks. They do not lock the system now.
 
-## [1.3.9] - 2019-27-10
+## [1.3.9] - 2019-10-27
 
 ### Added
 
