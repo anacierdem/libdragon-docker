@@ -1,5 +1,24 @@
 # Change Log
 
+## [9.0.0] - 2021-09-06
+
+### Changed
+
+- Updated libdragon. We will be changing the update mechanism to be based on a
+git pull, so listing them here will not be useful anymore, let's not bother now.
+- Start using the new build system.
+- Update node engine spec to be at least 14.
+- Added minimum docker version to readme.
+
+### Added
+
+- Github actions integration
+  - Start building a standalone Windows executable
+
+### Fixed
+
+- Fixed changelog dates to ISO8601
+
 ## [8.0.0] - 2021-07-28
 
 ### Changed
