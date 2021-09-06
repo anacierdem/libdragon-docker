@@ -10,7 +10,7 @@ const {
   PROJECT_NAME,
 } = require('./constants');
 const { options } = require('./options');
-const { runCommand, spawnProcess } = require('./helpers');
+const { runCommand, spawnProcess, toPosixPath } = require('./helpers');
 
 async function startToolchain() {
   // Do not try to run docker if already in container
@@ -130,11 +130,10 @@ async function buildDragon() {
 }
 
 async function installDependencies() {
-  const { dependencies } = require(path.join(process.cwd() + '/package.json'));
+  const npmRoot = await runCommand('npm root');
+  const packageJsonPath = path.join(npmRoot.trim(), '..', 'package.json');
 
-  const { devDependencies } = require(path.join(
-    process.cwd() + '/package.json'
-  ));
+  const { dependencies, devDependencies } = require(packageJsonPath);
 
   const deps = await Promise.all(
     Object.keys({
@@ -159,7 +158,7 @@ async function installDependencies() {
         );
       }
       return new Promise((resolve, reject) => {
-        fs.access(path.join(paths[0], 'Makefile'), fs.F_OK, async (e) => {
+        fs.access(path.resolve(paths[0], 'Makefile'), fs.F_OK, async (e) => {
           if (e) {
             // File does not exist - skip
             resolve();
@@ -167,15 +166,10 @@ async function installDependencies() {
           }
 
           try {
-            const relativePath = path
-              .relative(options.MOUNT_PATH, paths[0])
-              .replace(new RegExp('\\' + path.sep), path.posix.sep);
-            const containerPath = path.posix.join(
-              '/',
-              PROJECT_NAME,
-              relativePath,
-              '/'
+            const relativePath = toPosixPath(
+              path.relative(options.MOUNT_PATH, paths[0])
             );
+            const containerPath = path.posix.join('/libdragon', relativePath);
             const makePath = path.posix.join(containerPath, 'Makefile');
 
             // Do not try to run docker if already in container

@@ -1,3 +1,4 @@
+const path = require('path');
 const { exec, spawn } = require('child_process');
 
 // A simple Promise wrapper for child_process.exec
@@ -59,7 +60,12 @@ function spawnProcess(cmd, params = [], discardResult = false) {
   });
 }
 
+function toPosixPath(p) {
+  return p.replace(new RegExp('\\' + path.sep), path.posix.sep);
+}
+
 module.exports = {
   runCommand: runCommand,
   spawnProcess: spawnProcess,
+  toPosixPath: toPosixPath,
 };
