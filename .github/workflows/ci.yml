@@ -1,0 +1,30 @@
+name: Verify
+
+on: [push, pull_request]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Install
+        run: |
+          npm ci
+          git submodule update --init
+
+      - name: Test build
+
+        run: |
+          npm run libdragon -- download
+          npm run libdragon -- buildDragon
+          npm run libdragon -- make libdragon-install
+          npm run libdragon -- make -C ./libdragon-source tools-install
+          npm run libdragon -- make examples
+          npm run libdragon -- install
+          npm run build
+          npm run libdragon -- make tests
+
