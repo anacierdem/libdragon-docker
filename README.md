@@ -6,9 +6,14 @@ This is a wrapper for libdragon using a docker container to make managing the to
 
 ## Quick Install
 
-On a machine with node.js (>= 7.6) & docker, you can do a global install of the wrapper to get up and running quickly. For this, first install `libdragon` as a global NPM package and download the container;
+On a machine with node.js (>= 14) & docker (>= 18), you can do a global install of the wrapper to get up and running quickly. For this, first install `libdragon` as a global NPM package;
 
     npm install -g libdragon
+
+Or you can grap the pre-built executable from the releases and put it somewhere on your PATH if you are on Windows. Then you won't need node.js on you machine.
+
+Then download the container;
+
     libdragon download
 
 Then navigate to the folder containing your project and start the container which will mount your current working directory into the container;
@@ -65,7 +70,7 @@ If you need more control over the toolchain container bash into it with;
 
 ## Working on this repository
 
-After cloning this repository on a machine with node.js (>= 7.6) & docker, in this repository's root you can simply do;
+After cloning this repository on a machine with node.js (>= 14) & docker, in this repository's root you can simply do;
 
     npm install
 
