@@ -1,4 +1,4 @@
-name: Verify
+name: Build
 
 on: [push, pull_request]
 
@@ -17,7 +17,6 @@ jobs:
           git submodule update --init
 
       - name: Test build
-
         run: |
           npm run libdragon -- download
           npm run libdragon -- buildDragon
@@ -27,4 +26,7 @@ jobs:
           npm run libdragon -- install
           npm run build
           npm run libdragon -- make tests
+
+      - name: Test release
+        run: npm run pack
 

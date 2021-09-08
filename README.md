@@ -1,6 +1,6 @@
 # Docker Libdragon
 
-[![Deploy](https://github.com/anacierdem/libdragon-docker/actions/workflows/release.yml/badge.svg)](https://github.com/anacierdem/libdragon-docker/actions/workflows/release.yml)
+[![Build](https://github.com/anacierdem/libdragon-docker/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/anacierdem/libdragon-docker/actions/workflows/ci.yml?branch=master)
 
 This is a wrapper for libdragon using a docker container to make managing the toolchain easier. Node.js is used to interact with the docker container for multi-platform support. You can inspect `index.js` if you prefer not to use node, but it makes things easier in general when working with docker.
 

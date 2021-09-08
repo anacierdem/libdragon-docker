@@ -1,10 +1,12 @@
-name: Deploy
+name: NPM Publish
 
 on:
-  push
+  push:
+    branches:
+      - master
 
 jobs:
-  Release:
+  Deploy:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     steps:
@@ -15,35 +17,15 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '14'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install
         run: |
           npm ci
           git submodule update --init
 
-      - name: Package
-        run: npm run pack
-
-      - name: Release executable
-        uses: softprops/action-gh-release@v1
-        with:
-          files: libdragon.exe
-
-  Deploy:
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Install
-        run: |
-          npm ci
-          git submodule update --init
-
-      - name: Build
-        run: |
-          npm run libdragon buildDragon
+      - name: Build docker image
+        run: npm run libdragon buildDragon
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
