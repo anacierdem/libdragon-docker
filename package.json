@@ -13,9 +13,11 @@
     "libdragon": "node index.js",
     "start": "node index.js start",
     "stop": "node index.js stop",
-    "prepublishOnly": "node index.js update",
-    "build": "node index.js make bench",
-    "pack": "pkg ./"
+    "pack": "pkg ./",
+    "format": "prettier **/*.js --write",
+    "format-check": "prettier **/*.js --check",
+    "lint": "eslint --fix **/*.js",
+    "lint-check": "eslint **/*.js"
   },
   "repository": {
     "type": "git",
@@ -36,12 +38,11 @@
   },
   "devDependencies": {
     "ed64": "^1.2.5",
-    "pkg": "^5.3.1"
+    "eslint": "^7.32.0",
+    "pkg": "^5.3.1",
+    "prettier": "^2.4.0"
   },
   "pkg": {
-    "assets": [
-      "./package.json"
-    ],
     "targets": [
       "node14-win-x64"
     ]

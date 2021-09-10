@@ -11,8 +11,8 @@
     },
     {
       "label": "build",
-      "type": "npm",
-      "script": "build",
+      "type": "shell",
+      "command": "npm run libdragon -- make bench",
       "group": {
         "kind": "build",
         "isDefault": true
@@ -20,27 +20,6 @@
       "problemMatcher": {
         "owner": "c",
         "fileLocation": ["relative", "${workspaceFolder}/.."],
-        "pattern": {
-          "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
-          "file": 1,
-          "line": 2,
-          "column": 3,
-          "severity": 4,
-          "message": 5
-        }
-      }
-    },
-    {
-      "label": "installDragon",
-      "type": "shell",
-      "group": "build",
-      "command": "npm run libdragon -- make libdragon-install",
-      "problemMatcher": {
-        "owner": "c",
-        "fileLocation": [
-          "relative",
-          "${workspaceFolder}/libdragon-source/tests"
-        ],
         "pattern": {
           "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
           "file": 1,
