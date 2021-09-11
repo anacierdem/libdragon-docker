@@ -95,8 +95,21 @@ const initContainer = withProject(async (libdragonInfo) => {
       ...libdragonInfo,
       containerId: newId,
     });
-    throw new Error('We we unable to initialize libdragon. Done cleanup.');
+    throw new Error('We were unable to initialize libdragon. Done cleanup.');
   }
+
+  await spawnProcess('ls', ['-la', './']);
+
+  console.log(
+    'libdragonInfo.root',
+    libdragonInfo.root,
+    CACHED_CONTAINER_FILE,
+    path.resolve(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE),
+    fs.existsSync(
+      path.resolve(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE)
+    ),
+    fs.existsSync(path.resolve(libdragonInfo.root, '.git'))
+  );
 
   // We have created a new container, save the new info
   fs.writeFileSync(
