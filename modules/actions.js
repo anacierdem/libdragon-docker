@@ -20,6 +20,10 @@ const {
   runNPM,
   findNPMRoot,
   log,
+  dockerExec,
+  dockerRelativeWorkdirParams,
+  dockerByteSwapParams,
+  dockerHostUserParams,
 } = require('./helpers');
 
 const destroyContainer = async (libdragonInfo) => {
@@ -52,9 +56,7 @@ const initContainer = withProject(async (libdragonInfo) => {
     newId = (
       await spawnProcess('docker', [
         'run',
-        ...(libdragonInfo.options.BYTE_SWAP
-          ? ['-e', 'N64_BYTE_SWAP=true']
-          : []),
+        ...dockerByteSwapParams(libdragonInfo),
         '-d', // Detached
         '--mount',
         'type=bind,source=' + libdragonInfo.root + ',target=/libdragon', // Mount files
@@ -66,12 +68,22 @@ const initContainer = withProject(async (libdragonInfo) => {
       ])
     ).trim();
 
-    await spawnProcess('docker', ['exec', newId, 'git', 'init']);
+    const newInfo = {
+      ...libdragonInfo,
+      containerId: newId,
+      imageName,
+    };
+
+    await dockerExec(
+      newInfo,
+      // Use the host user when initializing git as we will need access from
+      // the script
+      [...dockerHostUserParams(newInfo)],
+      ['git', 'init']
+    );
 
     // Add the submodule
-    await spawnProcess('docker', [
-      'exec',
-      newId,
+    await dockerExec(newInfo, [
       'git',
       'submodule',
       'add',
@@ -84,11 +96,7 @@ const initContainer = withProject(async (libdragonInfo) => {
       LIBDRAGON_SUBMODULE,
     ]);
 
-    await installDependencies({
-      ...libdragonInfo,
-      containerId: newId,
-      imageName,
-    });
+    await installDependencies(newInfo);
   } catch {
     // Dispose the invalid container, clean and exit
     await destroyContainer({
@@ -97,8 +105,6 @@ const initContainer = withProject(async (libdragonInfo) => {
     });
     throw new Error('We were unable to initialize libdragon. Done cleanup.');
   }
-
-  await spawnProcess('ls', ['-la', './']);
 
   console.log(
     'libdragonInfo.root',
@@ -173,22 +179,16 @@ const make = withProject(async (libdragonInfo, params) => {
   const workdir = toPosixPath(path.relative(libdragonInfo.root, process.cwd()));
   log(`Running make at ${workdir} with [${params}]`, true);
 
-  const tryMake = (id) =>
-    id &&
-    spawnProcess(
-      'docker',
+  const tryMake = (libdragonInfo) =>
+    libdragonInfo.containerId &&
+    dockerExec(
+      libdragonInfo,
       [
-        'exec',
-        '--workdir',
-        '/libdragon/' + workdir,
-        ...(libdragonInfo.options.BYTE_SWAP
-          ? ['-e', 'N64_BYTE_SWAP=true']
-          : []),
-        id,
-        'make',
-        ...params,
+        ...dockerRelativeWorkdirParams(libdragonInfo),
+        ...dockerByteSwapParams(libdragonInfo),
       ],
-      true // TODO: hide this first error
+      ['make', ...params],
+      true
     );
 
   let started = false;
@@ -196,7 +196,10 @@ const make = withProject(async (libdragonInfo, params) => {
     if (!started) {
       const newId = await start(libdragonInfo);
       started = true;
-      await tryMake(newId);
+      await tryMake({
+        ...libdragonInfo,
+        containerId: newId,
+      });
       return newId;
     }
   };
@@ -208,9 +211,9 @@ const make = withProject(async (libdragonInfo, params) => {
   }
 
   try {
-    await tryMake(libdragonInfo.containerId);
+    await tryMake(libdragonInfo);
   } catch (e) {
-    if (!e.out.toString().startsWith('Error: No such container:')) {
+    if (!e.out || !e.out.toString().startsWith('Error: No such container:')) {
       throw e;
     }
     await startOnceAndMake();
@@ -220,15 +223,15 @@ const make = withProject(async (libdragonInfo, params) => {
 const installDependencies = withProject(async (libdragonInfo) => {
   log('Vendoring libdragon...');
 
-  await spawnProcess('docker', [
-    'exec',
-    '--workdir',
-    '/libdragon/' + LIBDRAGON_SUBMODULE,
-    ...(libdragonInfo.options.BYTE_SWAP ? ['-e', 'N64_BYTE_SWAP=true'] : []),
-    libdragonInfo.containerId,
-    '/bin/bash',
-    './build.sh',
-  ]);
+  await dockerExec(
+    libdragonInfo,
+    [
+      '--workdir',
+      '/libdragon/' + LIBDRAGON_SUBMODULE,
+      ...dockerByteSwapParams(libdragonInfo),
+    ],
+    ['/bin/bash', './build.sh']
+  );
 
   // Install other NPM dependencies if this is an NPM project
   const npmRoot = await findNPMRoot();
@@ -278,9 +281,7 @@ const installDependencies = withProject(async (libdragonInfo) => {
               const containerPath = path.posix.join('/libdragon', relativePath);
               const makePath = path.posix.join(containerPath, 'Makefile');
 
-              await spawnProcess('docker', [
-                'exec',
-                libdragonInfo.containerId,
+              await dockerExec(libdragonInfo, [
                 '/bin/bash',
                 '-c',
                 '[ -f ' +
@@ -291,6 +292,7 @@ const installDependencies = withProject(async (libdragonInfo) => {
                   containerPath +
                   ' install',
               ]);
+
               resolve();
             } catch (e) {
               reject(e);
@@ -318,9 +320,8 @@ const update = withProject(async (libdragonInfo) => {
 
   // Update submodule
   log('Updating submodule...');
-  await spawnProcess('docker', [
-    'exec',
-    libdragonInfo.containerId,
+
+  await dockerExec(libdragonInfo, [
     'git',
     'submodule',
     'update',

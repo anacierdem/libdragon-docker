@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const chalk = require('chalk');
 const { spawn } = require('child_process');
 
@@ -67,6 +68,22 @@ function spawnProcess(cmd, params = [], showOutput = globals.verbose) {
   });
 }
 
+function dockerExec(libdragonInfo, dockerParams, cmdWithParams, showOutput) {
+  // TODO: assert for invalid args
+  const haveDockerParams =
+    Array.isArray(dockerParams) && Array.isArray(cmdWithParams);
+  return spawnProcess(
+    'docker',
+    [
+      'exec',
+      ...(haveDockerParams ? dockerParams : []),
+      libdragonInfo.containerId,
+      ...(haveDockerParams ? cmdWithParams : dockerParams),
+    ],
+    haveDockerParams ? showOutput : cmdWithParams
+  );
+}
+
 function runNPM(params) {
   return spawnProcess(
     /^win/.test(process.platform) ? 'npm.cmd' : 'npm',
@@ -92,6 +109,23 @@ async function findNPMRoot() {
   if (PROJECT_NAME) {
     return path.resolve((await runNPM(['root'])).trim(), '..');
   }
+}
+
+function dockerRelativeWorkdirParams(libdragonInfo) {
+  return [
+    '--workdir',
+    '/libdragon/' +
+      toPosixPath(path.relative(libdragonInfo.root, process.cwd())),
+  ];
+}
+
+function dockerByteSwapParams(libdragonInfo) {
+  return libdragonInfo.options.BYTE_SWAP ? ['-e', 'N64_BYTE_SWAP=true'] : [];
+}
+
+function dockerHostUserParams(libdragonInfo) {
+  const { uid, gid } = libdragonInfo.userInfo;
+  return ['-u', `${uid >= 0 ? uid : ''}:${gid >= 0 ? gid : ''}`];
 }
 
 async function findGitRoot() {
@@ -142,11 +176,13 @@ async function checkContainerRunning(containerId) {
 }
 
 async function readProjectInfo() {
-  const info = {};
-  info.root =
-    (await findLibdragonRoot()) ??
-    (await findNPMRoot()) ??
-    (await findGitRoot());
+  const info = {
+    root:
+      (await findLibdragonRoot()) ??
+      (await findNPMRoot()) ??
+      (await findGitRoot()),
+    userInfo: os.userInfo(),
+  };
 
   if (!info.root) {
     log('Could not find project root, set as cwd.', true);
@@ -261,5 +297,9 @@ module.exports = {
   runNPM,
   findNPMRoot,
   log,
+  dockerExec,
+  dockerRelativeWorkdirParams,
+  dockerByteSwapParams,
+  dockerHostUserParams,
   globals,
 };
