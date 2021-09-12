@@ -23,7 +23,7 @@ const {
   dockerExec,
   dockerRelativeWorkdirParams,
   dockerByteSwapParams,
-  runGitMaybeHost,
+  dockerHostUserParams,
 } = require('./helpers');
 
 const destroyContainer = async (libdragonInfo) => {
@@ -74,10 +74,17 @@ const initContainer = withProject(async (libdragonInfo) => {
       imageName,
     };
 
-    await runGitMaybeHost(newInfo, ['init']);
+    await dockerExec(
+      newInfo,
+      // Use the host user when initializing git as we will need access from
+      // the script
+      [...dockerHostUserParams(newInfo)],
+      ['git', 'init']
+    );
 
     // Add the submodule
-    await runGitMaybeHost(newInfo, [
+    await dockerExec(newInfo, [
+      'git',
       'submodule',
       'add',
       '--force',
@@ -314,7 +321,8 @@ const update = withProject(async (libdragonInfo) => {
   // Update submodule
   log('Updating submodule...');
 
-  await runGitMaybeHost(libdragonInfo, [
+  await dockerExec(libdragonInfo, [
+    'git',
     'submodule',
     'update',
     '--remote',
