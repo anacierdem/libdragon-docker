@@ -8,7 +8,6 @@ on:
 jobs:
   Release:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -37,4 +36,4 @@ jobs:
             libdragon-linux-x86_64.tar.gz
             libdragon-macos-x86_64.tar.gz
             libdragon-win-x86_64.zip
-          prerelease: ${{ endsWith(github.ref, 'pre') }}
+          prerelease: ${{ contains(github.ref, 'rc') }}

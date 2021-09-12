@@ -16,6 +16,15 @@ const globals = {
   verbose: false,
 };
 
+class CommandError extends Error {
+  constructor(message, { code, out, showOutput }) {
+    super(message);
+    this.code = code;
+    this.out = out;
+    this.showOutput = showOutput;
+  }
+}
+
 // A simple Promise wrapper for child_process.spawn
 function spawnProcess(cmd, params = [], showOutput = globals.verbose) {
   return new Promise((resolve, reject) => {
@@ -52,13 +61,14 @@ function spawnProcess(cmd, params = [], showOutput = globals.verbose) {
       if (code === 0) {
         resolve(Buffer.concat(stdout).toString());
       } else {
-        const err = new Error(
-          `Command ${cmd} ${params.join(' ')} exited with code ${code}.`
+        const err = new CommandError(
+          `Command ${cmd} ${params.join(' ')} exited with code ${code}.`,
+          {
+            code,
+            out: Buffer.concat(stderr),
+            showOutput,
+          }
         );
-        // TODO: Use an extended Error here
-        err.code = code;
-        err.out = Buffer.concat(stderr);
-        err.showOutput = showOutput;
         reject(err);
       }
     };
@@ -199,8 +209,6 @@ async function readProjectInfo() {
     info.containerId = id;
   }
 
-  info.imageName = DOCKER_HUB_IMAGE;
-
   const imageFile = path.join(
     info.root,
     LIBDRAGON_PROJECT_MANIFEST,
@@ -214,18 +222,6 @@ async function readProjectInfo() {
   return info;
 }
 
-function withProject(fn) {
-  return function (...args) {
-    if (!args[0].root) {
-      console.error(
-        'No libdragon project found. You can initialize one here with `libdragon init`.'
-      );
-      process.exit(1);
-    }
-    return fn(...args);
-  };
-}
-
 async function updateImageName(libdragonInfo) {
   const manifestPath = path.join(
     libdragonInfo.root,
@@ -233,18 +229,22 @@ async function updateImageName(libdragonInfo) {
   );
 
   // flag has the highest priority followed by the one read from the file
-  // and then if there is any matching container, name is read from it
+  // and then if there is any matching container, name is read from it. As last
+  // option fallback to default value.
   const imageName =
     libdragonInfo.options.DOCKER_IMAGE ??
     libdragonInfo.imageName ??
-    (await spawnProcess('docker', [
-      'container',
-      'inspect',
-      libdragonInfo.containerId,
-      '--format',
-      '{{.Config.Image}}',
-    ]));
+    (libdragonInfo.containerId &&
+      (await spawnProcess('docker', [
+        'container',
+        'inspect',
+        libdragonInfo.containerId,
+        '--format',
+        '{{.Config.Image}}',
+      ]))) ??
+    DOCKER_HUB_IMAGE;
 
+  await createManifestIfNotExist(libdragonInfo);
   fs.writeFileSync(path.resolve(manifestPath, IMAGE_FILE), imageName);
   log(`Image name updated: ${imageName}`, true);
   return imageName;
@@ -256,10 +256,9 @@ async function createManifestIfNotExist(libdragonInfo) {
     LIBDRAGON_PROJECT_MANIFEST
   );
   if (fs.existsSync(manifestPath) && !fs.statSync(manifestPath).isDirectory()) {
-    console.error(
+    throw new Error(
       'There is already a `.libdragon` file and it is not a directory.'
     );
-    process.exit(1);
   }
 
   if (!fs.existsSync(manifestPath)) {
@@ -276,10 +275,12 @@ function toPosixPath(p) {
 
 function log(text, verboseOnly = false) {
   if (!verboseOnly) {
+    // eslint-disable-next-line no-console
     console.log(text);
     return;
   }
   if (globals.verbose) {
+    // eslint-disable-next-line no-console
     console.log(chalk.gray(text));
     return;
   }
@@ -291,7 +292,6 @@ module.exports = {
   checkContainerAndClean,
   checkContainerRunning,
   toPosixPath,
-  withProject,
   updateImageName,
   createManifestIfNotExist,
   runNPM,

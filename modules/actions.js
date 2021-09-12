@@ -7,13 +7,11 @@ const {
   LIBDRAGON_BRANCH,
   LIBDRAGON_GIT,
   CACHED_CONTAINER_FILE,
-  PROJECT_NAME,
 } = require('./constants');
 const {
   spawnProcess,
   checkContainerAndClean,
   checkContainerRunning,
-  withProject,
   toPosixPath,
   updateImageName,
   createManifestIfNotExist,
@@ -42,7 +40,7 @@ const destroyContainer = async (libdragonInfo) => {
 /**
  * Will donload image, create a new container and install everything in it
  */
-const initContainer = withProject(async (libdragonInfo) => {
+const initContainer = async (libdragonInfo) => {
   let newId;
   try {
     const imageName = await updateImageName(libdragonInfo);
@@ -106,17 +104,6 @@ const initContainer = withProject(async (libdragonInfo) => {
     throw new Error('We were unable to initialize libdragon. Done cleanup.');
   }
 
-  console.log(
-    'libdragonInfo.root',
-    libdragonInfo.root,
-    CACHED_CONTAINER_FILE,
-    path.resolve(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE),
-    fs.existsSync(
-      path.resolve(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE)
-    ),
-    fs.existsSync(path.resolve(libdragonInfo.root, '.git'))
-  );
-
   // We have created a new container, save the new info
   fs.writeFileSync(
     path.resolve(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE),
@@ -124,7 +111,7 @@ const initContainer = withProject(async (libdragonInfo) => {
   );
   log(chalk.green('Successfully initialized docker container.'));
   return newId;
-});
+};
 
 /**
  * Initialize a new libdragon project in current working directory
@@ -139,7 +126,7 @@ async function init(libdragonInfo) {
   log(chalk.green(`libdragon ready at \`${libdragonInfo.root}\`.\n`));
 }
 
-const start = withProject(async (libdragonInfo) => {
+const start = async (libdragonInfo) => {
   const running =
     libdragonInfo.containerId &&
     (await checkContainerRunning(libdragonInfo.containerId));
@@ -164,18 +151,20 @@ const start = withProject(async (libdragonInfo) => {
     libdragonInfo.containerId,
   ]);
   return id;
-});
+};
 
-const stop = withProject(async (libdragonInfo) => {
-  const running = await checkContainerRunning(libdragonInfo.containerId);
+const stop = async (libdragonInfo) => {
+  const running =
+    libdragonInfo.containerId &&
+    (await checkContainerRunning(libdragonInfo.containerId));
   if (!running) {
     return;
   }
 
   await spawnProcess('docker', ['container', 'stop', running]);
-});
+};
 
-const make = withProject(async (libdragonInfo, params) => {
+const make = async (libdragonInfo, params) => {
   const workdir = toPosixPath(path.relative(libdragonInfo.root, process.cwd()));
   log(`Running make at ${workdir} with [${params}]`, true);
 
@@ -218,9 +207,9 @@ const make = withProject(async (libdragonInfo, params) => {
     }
     await startOnceAndMake();
   }
-});
+};
 
-const installDependencies = withProject(async (libdragonInfo) => {
+const installDependencies = async (libdragonInfo) => {
   log('Vendoring libdragon...');
 
   await dockerExec(
@@ -302,10 +291,16 @@ const installDependencies = withProject(async (libdragonInfo) => {
       })
     );
   }
-});
+};
 
-const update = withProject(async (libdragonInfo) => {
+const update = async (libdragonInfo) => {
   const oldImageName = libdragonInfo.imageName;
+  if (!oldImageName) {
+    throw new Error(
+      'No libdragon project found. You can initialize one here with `libdragon init`.'
+    );
+  }
+
   const imageName = await updateImageName(libdragonInfo);
   if (oldImageName !== imageName) {
     log(`Changing image from \`${oldImageName}\` to \`${imageName}\``);
@@ -334,17 +329,10 @@ const update = withProject(async (libdragonInfo) => {
   await installDependencies(libdragonInfo);
 
   log(chalk.green('Successfully updated.'));
-});
+};
 
-const help = (showTitle) => {
-  showTitle &&
-    log(`
-libdragon docker ${
-      PROJECT_NAME === 'libdragon' ? 'v' + process.env.npm_package_version : ''
-    }`);
-
-  log(`
-${chalk.green('Usage:')}
+const help = () => {
+  log(`${chalk.green('Usage:')}
   libdragon [flags] <command>
 
 ${chalk.green('Available Commands:')}

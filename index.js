@@ -18,11 +18,14 @@ const options = {
   PARAMS: undefined,
 };
 
+// Allow standard io here
+/* eslint-disable no-console */
+
 for (let i = 2; i < process.argv.length; i++) {
   const val = process.argv[i];
 
   if (val === '--help') {
-    actions.help();
+    actions.help(true);
     process.exit(STATUS_OK);
   }
 
