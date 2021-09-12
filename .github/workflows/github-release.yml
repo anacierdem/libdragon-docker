@@ -21,9 +21,18 @@ jobs:
         run: npm ci
 
       - name: Package
-        run: npm run pack
+        run: |
+          npm run pack
+          tar --transform='s/-linux//' -cvzf libdragon-linux-x86_64.tar.gz libdragon-linux
+          tar --transform='s/-macos//' -cvzf libdragon-macos-x86_64.tar.gz libdragon-macos
+          mv libdragon-win.exe libdragon.exe
+          zip libdragon-win-x86_64.zip libdragon.exe
 
       - name: Release executable
         uses: softprops/action-gh-release@v1
         with:
-          files: libdragon.exe
+          files: |
+            libdragon-linux-x86_64.tar.gz
+            libdragon-macos-x86_64.tar.gz
+            libdragon-win-x86_64.zip
+          prerelease: ${{ endsWith(github.ref, 'pre') }}
