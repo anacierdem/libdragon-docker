@@ -94,6 +94,24 @@ function dockerExec(libdragonInfo, dockerParams, cmdWithParams, showOutput) {
   );
 }
 
+/**
+ * Invokes host git with provided params. If host does not have git, falls back
+ * to the docker git, with the user set to the user running libdragon.
+ */
+async function runGitMaybeHost(libdragonInfo, params, showOutput) {
+  try {
+    return await spawnProcess('git', params, showOutput);
+  } catch {
+    return await dockerExec(
+      libdragonInfo,
+      // Use the host user when initializing git as we will need access
+      [...dockerHostUserParams(libdragonInfo)],
+      ['git', ...params],
+      showOutput
+    );
+  }
+}
+
 function runNPM(params) {
   return spawnProcess(
     /^win/.test(process.platform) ? 'npm.cmd' : 'npm',
@@ -301,5 +319,6 @@ module.exports = {
   dockerRelativeWorkdirParams,
   dockerByteSwapParams,
   dockerHostUserParams,
+  runGitMaybeHost,
   globals,
 };
