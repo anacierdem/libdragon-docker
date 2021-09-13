@@ -95,13 +95,18 @@ const initContainer = async (libdragonInfo) => {
     ]);
 
     await installDependencies(newInfo);
-  } catch {
+  } catch (e) {
     // Dispose the invalid container, clean and exit
     await destroyContainer({
       ...libdragonInfo,
       containerId: newId,
     });
-    throw new Error('We were unable to initialize libdragon. Done cleanup.');
+    log(
+      chalk.red(
+        'We were unable to initialize libdragon. Done cleanup. Check following logs for the actual error.'
+      )
+    );
+    throw e;
   }
 
   // We have created a new container, save the new info
@@ -166,7 +171,7 @@ const stop = async (libdragonInfo) => {
 
 const make = async (libdragonInfo, params) => {
   const workdir = toPosixPath(path.relative(libdragonInfo.root, process.cwd()));
-  log(`Running make at ${workdir} with [${params}]`, true);
+  log(`Running make at ${workdir ?? '.'} with [${params}]`, true);
 
   const tryMake = (libdragonInfo) =>
     libdragonInfo.containerId &&
@@ -352,10 +357,23 @@ ${chalk.green('Flags:')}
 };
 
 module.exports = {
-  start,
-  init,
-  make,
-  stop,
-  update,
-  help,
+  start: {
+    fn: start,
+  },
+  init: {
+    fn: init,
+  },
+  make: {
+    fn: make,
+    forwardsRestParams: true,
+  },
+  stop: {
+    fn: stop,
+  },
+  update: {
+    fn: update,
+  },
+  help: {
+    fn: help,
+  },
 };

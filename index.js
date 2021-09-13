@@ -25,7 +25,7 @@ for (let i = 2; i < process.argv.length; i++) {
   const val = process.argv[i];
 
   if (val === '--help') {
-    actions.help(true);
+    actions.help.fn();
     process.exit(STATUS_OK);
   }
 
@@ -47,25 +47,35 @@ for (let i = 2; i < process.argv.length; i++) {
 
   if (val.indexOf('--') >= 0) {
     console.error(chalk.red(`Invalid flag \`${val}\``));
-    actions.help();
+    actions.help.fn();
+    process.exit(STATUS_BAD_PARAM);
+  }
+
+  if (options.ACTION) {
+    console.error(
+      chalk.red(`Expected only a single action, found: \`${val}\``)
+    );
+    actions.help.fn();
     process.exit(STATUS_BAD_PARAM);
   }
 
   options.ACTION = actions[val];
 
-  if (typeof options.ACTION !== 'function') {
+  if (!options.ACTION) {
     console.error(chalk.red(`Invalid action \`${val}\``));
-    actions.help();
+    actions.help.fn();
     process.exit(STATUS_BAD_PARAM);
   }
 
-  options.PARAMS = process.argv.slice(i + 1);
-  break;
+  if (options.ACTION.forwardsRestParams) {
+    options.PARAMS = process.argv.slice(i + 1);
+    break;
+  }
 }
 
 readProjectInfo()
   .then((info) =>
-    options.ACTION(
+    options.ACTION.fn(
       {
         ...info,
         options,
@@ -76,7 +86,7 @@ readProjectInfo()
   .catch((e) => {
     if (!e.showOutput || globals.verbose) {
       console.error(chalk.red(e.stack ?? e.message));
-      e.out && process.stderr.write(e.out);
+      e.out && process.stderr.write(`Command error output:\n${e.out}`);
       process.exit(STATUS_ERROR);
     }
     process.exit(e.code || STATUS_ERROR);

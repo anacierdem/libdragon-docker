@@ -24,7 +24,7 @@ This is primarily a node.js script packaged into an executable. If you have [nod
 
     npm install -g libdragon
 
-and use it as usual. To update the tool to the latest, you can similarky use `npm i -g libdragon@latest`.
+and use it as usual. To update the tool to the latest, you can similarly do `npm i -g libdragon@latest`.
 
 Getting latest libdragon is achieved via creating a local git repository as a submodule at `./libradon-source`. The tool also keeps track of the active image in the `.libdragon` folder, which also marks the location as a libdragon project. You should commit the contents of this folder.
 
@@ -78,7 +78,7 @@ To update the submodule and re-build everything;
 
 This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can just hit F5 on vscode (The `Run Test Bench` launch configuration) to run the test code in `src` folder to develop libdragon itself quicker if you have an everdrive. There is a caveat though: If you want the problem matcher to work properly, you should name this repository folder `libdragon` exactly.
 
-There are also additional vscode launch configurations to build libdragon examples and tests based on the currently built and installed libdragon in the docker container. Most of these will always rebuild so that they will use the latest if you made and install an alternative libdragon. The test bench itself and a few examples (that use the new build system) will already build and install libdragon automatically. These will always produce a rom image using the latest libdragon code in the active repository via its make dependencies and relative includes. You can clean everything with the `clean` task (open the command palette and choose `Run Task -> clean`).
+There are also additional vscode launch configurations to build libdragon examples and tests based on the currently built and installed libdragon in the docker container. Most of these will always rebuild so that they will use the latest if you made and installed an alternative libdragon. The test bench itself and a few examples (that use the new build system) will already build and install libdragon automatically. These will always produce a rom image using the latest libdragon code in the active repository via its make dependencies and relative includes. You can clean everything with the `clean` task (open the command palette and choose `Run Task -> clean`).
 
 ## As an NPM dependency
 
