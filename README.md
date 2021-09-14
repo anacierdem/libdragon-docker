@@ -34,7 +34,7 @@ To update the library and rebuild all the artifacts;
 
     libdragon update
 
-This will update the submodule from the remote branch, which is `trunk` when a libdragon project is first initialized. You can also switch to another branch in the submodule and run the command again to switch to that version. Keep in mind that this will first try to sync it with the upstream branch with a merge strategy, defaulting to remote HEAD.
+This will update the submodule from the remote branch (`trunk`) with a merge strategy.
 
 ## Working on this repository
 
@@ -85,7 +85,7 @@ There are also additional vscode launch configurations to build libdragon exampl
 You can install libdragon as an NPM dependency by `npm install libdragon --save` in order to use docker in your N64 projects. A `libdragon` command similar to global intallation is provided that can be used in your NPM scripts as follows;
 
     "scripts": {
-        "prepare": "libdragon install"
+        "prepare": "libdragon init"
         "build": "libdragon make",
         "clean": "libdragon make clean"
     }
