@@ -84,12 +84,20 @@ readProjectInfo()
     )
   )
   .catch((e) => {
-    if (!e.showOutput || globals.verbose) {
+    if (e.showOutput && !globals.verbose) {
+      process.exit(e.code || STATUS_ERROR);
+    }
+    if (e.showOutput && globals.verbose) {
       console.error(chalk.red(e.stack ?? e.message));
       e.out && process.stderr.write(`Command error output:\n${e.out}`);
+      process.exit(e.code || STATUS_ERROR);
+    }
+    if (!e.showOutput) {
+      console.error(
+        chalk.red(globals.verbose ? e.stack ?? e.message : e.message)
+      );
       process.exit(STATUS_ERROR);
     }
-    process.exit(e.code || STATUS_ERROR);
   })
   .finally(() => {
     process.exit(STATUS_OK);

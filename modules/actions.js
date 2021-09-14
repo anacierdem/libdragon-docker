@@ -293,23 +293,16 @@ const installDependencies = async (libdragonInfo) => {
 
 const update = async (libdragonInfo) => {
   const oldImageName = libdragonInfo.imageName;
-  if (!oldImageName) {
+  let id = await checkContainerAndClean(libdragonInfo);
+
+  if (!id || !oldImageName) {
     throw new Error(
-      'No libdragon project found. You can initialize one here with `libdragon init`.'
+      'libdragon is not properly initialized. Initialize with `libdragon init` first.'
     );
   }
 
-  const imageName = await updateImageName(libdragonInfo);
-  if (oldImageName !== imageName) {
-    log(`Changing image from \`${oldImageName}\` to \`${imageName}\``);
-    await destroyContainer(libdragonInfo);
-  }
-
-  // Start the new image
-  await start({
-    ...libdragonInfo,
-    imageName,
-  });
+  // Start existing
+  id = await start(libdragonInfo);
 
   // Update submodule
   log('Updating submodule...');
@@ -322,8 +315,20 @@ const update = async (libdragonInfo) => {
     './' + LIBDRAGON_SUBMODULE,
   ]);
 
-  // Re-install vendors
-  await installDependencies(libdragonInfo);
+  const imageName = await updateImageName(libdragonInfo);
+  if (oldImageName !== imageName) {
+    log(`Changing image from \`${oldImageName}\` to \`${imageName}\``);
+    await destroyContainer(libdragonInfo);
+
+    // Start the new image
+    id = await start({
+      ...libdragonInfo,
+      imageName,
+    });
+  }
+
+  // Re-install vendors on new image
+  await installDependencies({ ...libdragonInfo, imageName, containerId: id });
 
   log(chalk.green('Successfully updated.'));
 };

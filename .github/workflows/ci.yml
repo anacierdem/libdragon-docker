@@ -30,9 +30,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install
-        run: |
-          npm ci
-          git submodule update --init
+        run: npm ci
 
       - name: Test
         run: |
@@ -53,9 +51,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install
-        run: |
-          npm ci
-          git submodule update --init
+        run: npm ci
 
       - name: Test
         run: |
