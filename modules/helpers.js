@@ -322,5 +322,6 @@ module.exports = {
   dockerRelativeWorkdirParams,
   dockerByteSwapParams,
   runGitMaybeHost,
+  CommandError,
   globals,
 };

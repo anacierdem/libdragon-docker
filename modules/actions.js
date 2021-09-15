@@ -38,6 +38,12 @@ const destroyContainer = async (libdragonInfo) => {
 };
 
 const initSubmodule = async (libdragonInfo) => {
+  // Try to make sure submodule is there, in case it is deleted manually
+  try {
+    await runGitMaybeHost(libdragonInfo, ['restore', '.gitmodules']);
+  } catch {
+    // No need to do anything else here
+  }
   await runGitMaybeHost(libdragonInfo, [
     'submodule',
     'add',
@@ -336,12 +342,6 @@ const update = async (libdragonInfo) => {
   // Update submodule
   log('Updating submodule...');
 
-  // Try to make sure submodule is there, in case it is deleted manually
-  try {
-    await runGitMaybeHost(libdragonInfo, ['restore', '.gitmodules']);
-  } catch {
-    // No need to do anything else here
-  }
   await initSubmodule(libdragonInfo);
 
   await runGitMaybeHost(libdragonInfo, [

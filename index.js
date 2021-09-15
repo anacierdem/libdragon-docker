@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const chalk = require('chalk');
-const { readProjectInfo, globals } = require('./modules/helpers');
+const { readProjectInfo, CommandError, globals } = require('./modules/helpers');
 const actions = require('./modules/actions');
 
 const STATUS_OK = 0;
@@ -79,22 +79,27 @@ readProjectInfo()
     )
   )
   .catch((e) => {
-    if (e.showOutput && !globals.verbose) {
-      process.exit(e.code || STATUS_ERROR);
-    }
-    if (e.showOutput && globals.verbose) {
+    const userTargetedError = e instanceof CommandError && e.showOutput;
+
+    // Show additional information to user if verbose or we did a mistake
+    if (globals.verbose || !userTargetedError) {
       console.error(chalk.red(e.stack ?? e.message));
-      e.out && process.stderr.write(`Command error output:\n${e.out}`);
-      process.exit(e.code || STATUS_ERROR);
     }
-    if (!e.showOutput) {
-      console.error(
-        chalk.red(globals.verbose ? e.stack ?? e.message : e.message)
-      );
+
+    // Print the underlying error out only if verbose and we did a mistake
+    // user errors wil already pipe their stderr.
+    if (globals.verbose && !userTargetedError) {
       e.out &&
         process.stderr.write(chalk.red(`Command error output:\n${e.out}`));
-      process.exit(STATUS_ERROR);
     }
+
+    // Try to exit with underlying code
+    if (userTargetedError) {
+      process.exit(e.code || STATUS_ERROR);
+    }
+
+    // We don't have a user targeted error anymore, we did a mistake for sure
+    process.exit(STATUS_ERROR);
   })
   .finally(() => {
     process.exit(STATUS_OK);
