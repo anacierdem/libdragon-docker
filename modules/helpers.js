@@ -101,14 +101,17 @@ function dockerExec(libdragonInfo, dockerParams, cmdWithParams, showOutput) {
 async function runGitMaybeHost(libdragonInfo, params, showOutput) {
   try {
     return await spawnProcess('git', params, showOutput);
-  } catch {
-    return await dockerExec(
-      libdragonInfo,
-      // Use the host user when initializing git as we will need access
-      [...dockerHostUserParams(libdragonInfo)],
-      ['git', ...params],
-      showOutput
-    );
+  } catch (e) {
+    if (!(e instanceof CommandError)) {
+      return await dockerExec(
+        libdragonInfo,
+        // Use the host user when initializing git as we will need access
+        [...dockerHostUserParams(libdragonInfo)],
+        ['git', ...params],
+        showOutput
+      );
+    }
+    throw e;
   }
 }
 
@@ -318,7 +321,6 @@ module.exports = {
   dockerExec,
   dockerRelativeWorkdirParams,
   dockerByteSwapParams,
-  dockerHostUserParams,
   runGitMaybeHost,
   globals,
 };

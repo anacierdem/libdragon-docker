@@ -24,11 +24,6 @@ const options = {
 for (let i = 2; i < process.argv.length; i++) {
   const val = process.argv[i];
 
-  if (val === '--help') {
-    actions.help.fn();
-    process.exit(STATUS_OK);
-  }
-
   if (val === '--byte-swap') {
     options.BYTE_SWAP = true;
     continue;
@@ -96,6 +91,8 @@ readProjectInfo()
       console.error(
         chalk.red(globals.verbose ? e.stack ?? e.message : e.message)
       );
+      e.out &&
+        process.stderr.write(chalk.red(`Command error output:\n${e.out}`));
       process.exit(STATUS_ERROR);
     }
   })

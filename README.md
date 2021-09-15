@@ -12,29 +12,69 @@ On a machine with [docker](https://www.docker.com/products/docker-desktop) (`>= 
 
 On first init the container will be downloaded, started and latest libdragon will get installed on it with all the example ROMs built. Now you should see all the example ROMs built in the `libdragon-source` folder.
 
-The container's `make` action can be invoked on your current working directory via;
+The container's `make` can be invoked on your current working directory via;
 
     libdragon make
 
-Any additonal parameters are passed down to the actual make command. Then you will be able to work on the files simultaneously with the docker container and any built binaries will be available in the current directory as it is also mounted on the container. Also if you change your working directory, the `make` will be executed there.
+Any additonal parameters are passed down to the actual make command. Then you will be able to work on the files simultaneously with the docker container and any built binaries will be available in the current directory as it is also mounted on the container.
 
-## How does this work?
+To update the library and rebuild/install all the artifacts;
 
-This is primarily a node.js script packaged into an executable. If you have [node.js](https://nodejs.org/en/download/) (`>= 14`), you can also do a global install and use the tool as well. For this, install `libdragon` as a global NPM package;
+    libdragon update
+
+See [Overall usage](#overall-usage) for more details.
+
+## Overall usage
+
+This is primarily a node.js script which is also packaged as an executable. If you have [node.js](https://nodejs.org/en/download/) (`>= 14`), you can also do a global install and use the tool as well. For this, install `libdragon` as a global NPM package;
 
     npm install -g libdragon
 
 and use it as usual. To update the tool to the latest, you can similarly do `npm i -g libdragon@latest`.
 
-Getting latest libdragon is achieved via creating a local git repository as a submodule at `./libradon-source`. The tool also keeps track of the active image in the `.libdragon` folder, which also marks the location as a libdragon project. You should commit the contents of this folder.
+You can invoke libdragon as follows;
 
-### Updating libdragon
+    libdragon [flags] <action>
 
-To update the library and rebuild all the artifacts;
+### Available actions
 
-    libdragon update
+__`init`__
 
-This will update the submodule from the remote branch (`trunk`) with a merge strategy.
+Creates a libdragon project in the current directory. Every libdragon project will have its own container instance. If you are in a git repository or an NPM project, libdragon will be created at their root also marking there with a `.libdragon` folder. Do not remove this folder as it keeps libdragon project information. You should commit the contents of this folder if you are using git.
+
+__`make`__
+
+Run the libdragon build system in the current directory. It will properly mirror your current working directory to the container, so if you change your working directory, `make` will be executed there in the container as well.
+
+__`install`__
+
+Attempts to build and install everything libdragon related (i.e `libdragon-source`) into the container. This includes all the tools and third parties used by libdragon except for the toolchain. If you have made changes to libdragon, you can execute this action to build everything based on your changes. If you are not working on libdragon, you can just use the `update` action instead.
+
+__`update`__
+
+This action will update the submodule from the remote branch (`trunk`) with a merge strategy and then perform a `libdragon install`. (A local git repository is created as a submodule at `./libradon-source` when the project is first initialized) You can use the `install` action to only update all libdragon related artifacts in the container given you have an intact `libdragon-source` at the root without touching the existing submodule.
+
+__`start`__
+
+Start the container assigned to the current libdragon project.
+
+__`stop`__
+
+Stop the container assigned to the current libdragon project.
+
+### Available flags
+
+__`--image <docker-image>`__
+
+Use this flag to provide a custom image `<docker-image>` to use instead of the default. It should include the toolchain. It will be effective for `init`, `install` and `update` actions and will cause a re-initialization of the container if an image different from what was written to project configuration is provided.
+
+__`--byte-swap`__
+
+Enable byte-swapped ROM output for the build system.
+
+__`--verbose`__
+
+Be verbose. This will print all commands dispatched to the container and their outputs as well.
 
 ## Working on this repository
 

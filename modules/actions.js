@@ -37,6 +37,20 @@ const destroyContainer = async (libdragonInfo) => {
   });
 };
 
+const initSubmodule = async (libdragonInfo) => {
+  await runGitMaybeHost(libdragonInfo, [
+    'submodule',
+    'add',
+    '--force',
+    '--name',
+    LIBDRAGON_SUBMODULE,
+    '--branch',
+    LIBDRAGON_BRANCH,
+    LIBDRAGON_GIT,
+    LIBDRAGON_SUBMODULE,
+  ]);
+};
+
 /**
  * Will donload image, create a new container and install everything in it
  */
@@ -72,20 +86,8 @@ const initContainer = async (libdragonInfo) => {
       imageName,
     };
 
-    await runGitMaybeHost(newInfo, ['init']);
-
-    // Add the submodule
-    await runGitMaybeHost(newInfo, [
-      'submodule',
-      'add',
-      '--force',
-      '--name',
-      LIBDRAGON_SUBMODULE,
-      '--branch',
-      LIBDRAGON_BRANCH,
-      LIBDRAGON_GIT,
-      LIBDRAGON_SUBMODULE,
-    ]);
+    await runGitMaybeHost(libdragonInfo, ['init']);
+    await initSubmodule(libdragonInfo);
 
     await installDependencies(newInfo);
   } catch (e) {
@@ -291,21 +293,56 @@ const installDependencies = async (libdragonInfo) => {
   }
 };
 
-const update = async (libdragonInfo) => {
-  const oldImageName = libdragonInfo.imageName;
-  let id = await checkContainerAndClean(libdragonInfo);
+const requiresContainer = async (libdragonInfo) => {
+  const id = await checkContainerAndClean(libdragonInfo);
 
-  if (!id || !oldImageName) {
+  if (!id) {
     throw new Error(
       'libdragon is not properly initialized. Initialize with `libdragon init` first.'
     );
   }
 
+  return id;
+};
+
+const maybeStartNewImage = async (libdragonInfo) => {
+  let containerId = libdragonInfo.containerId;
+  const oldImageName = libdragonInfo.imageName;
+  const imageName = await updateImageName(libdragonInfo);
+  if (oldImageName !== imageName) {
+    log(`Changing image from \`${oldImageName}\` to \`${imageName}\``);
+    await destroyContainer(libdragonInfo);
+
+    // Start the new image
+    containerId = await start({
+      ...libdragonInfo,
+      imageName,
+    });
+  }
+
+  return {
+    ...libdragonInfo,
+    imageName,
+    containerId,
+  };
+};
+
+const update = async (libdragonInfo) => {
+  let containerId = await requiresContainer(libdragonInfo);
+
   // Start existing
-  id = await start(libdragonInfo);
+  containerId = await start(libdragonInfo);
 
   // Update submodule
   log('Updating submodule...');
+
+  // Try to make sure submodule is there, in case it is deleted manually
+  try {
+    await runGitMaybeHost(libdragonInfo, ['restore', '.gitmodules']);
+  } catch {
+    // No need to do anything else here
+  }
+  await initSubmodule(libdragonInfo);
 
   await runGitMaybeHost(libdragonInfo, [
     'submodule',
@@ -315,27 +352,27 @@ const update = async (libdragonInfo) => {
     './' + LIBDRAGON_SUBMODULE,
   ]);
 
-  const imageName = await updateImageName(libdragonInfo);
-  if (oldImageName !== imageName) {
-    log(`Changing image from \`${oldImageName}\` to \`${imageName}\``);
-    await destroyContainer(libdragonInfo);
+  await install({
+    ...libdragonInfo,
+    containerId,
+  });
+};
 
-    // Start the new image
-    id = await start({
-      ...libdragonInfo,
-      imageName,
-    });
-  }
+const install = async (libdragonInfo) => {
+  let containerId = await requiresContainer(libdragonInfo);
+
+  const newInfo = await maybeStartNewImage({
+    ...libdragonInfo,
+    containerId,
+  });
 
   // Re-install vendors on new image
-  await installDependencies({ ...libdragonInfo, imageName, containerId: id });
-
-  log(chalk.green('Successfully updated.'));
+  await installDependencies(newInfo);
 };
 
 const help = () => {
   log(`${chalk.green('Usage:')}
-  libdragon [flags] <command>
+  libdragon [flags] <action>
 
 ${chalk.green('Available Commands:')}
   help        Display this help information.
@@ -343,13 +380,13 @@ ${chalk.green('Available Commands:')}
   make        Run the libdragon build system in the current directory.
   start       Start the container for current project.
   stop        Stop the container for current project.
-  update      Update libdragon for current project.
+  install     Vendor libdragon as is.
+  update      Update libdragon and do an install.
 
 ${chalk.green('Flags:')}
   --image <docker-image>  Provide a custom image.
   --byte-swap             Enable byte-swapped ROM output.
   --verbose               Be verbose
-  --help                  Display this help information.
 `);
 };
 
@@ -366,6 +403,9 @@ module.exports = {
   },
   stop: {
     fn: stop,
+  },
+  install: {
+    fn: install,
   },
   update: {
     fn: update,
