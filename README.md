@@ -134,7 +134,7 @@ See [here](https://github.com/anacierdem/ed64-example) for a full example.
 
 ## Developing a dependency
 
-You can make an NPM package that a `libdragon` project can depend on. Just include a `Makefile` on the repository root with a default recipe and an `install` recipe. On the depending project, after installing libdragon and the dependency with `npm install [dep name] --save`, one can install libdragon dependencies on the current docker container using `package.json` scripts.
+You can make an NPM package that a `libdragon` project can depend on. Just include a `Makefile` on the repository root with a default recipe and an `install` recipe. On the depending project, after installing libdragon and the dependency with `npm install <dep name> --save`, one can install libdragon dependencies on the current docker container using `package.json` scripts.
 
 For example this `package.json` in the dependent project;
 
@@ -148,7 +148,8 @@ For example this `package.json` in the dependent project;
             "prepare": "libdragon init"
         },
         "dependencies": {
-            "ed64": [version]
+            "libdragon": <version>,
+            "ed64": <version>
         }
     }
 

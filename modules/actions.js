@@ -208,7 +208,11 @@ const make = async (libdragonInfo, params) => {
   try {
     await tryMake(libdragonInfo);
   } catch (e) {
-    if (!e.out || !e.out.toString().startsWith('Error: No such container:')) {
+    if (
+      !e.out ||
+      // TODO: is there a better way?
+      !e.out.toString().includes(libdragonInfo.containerId)
+    ) {
       throw e;
     }
     await startOnceAndMake();
