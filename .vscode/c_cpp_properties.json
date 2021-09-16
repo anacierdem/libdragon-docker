@@ -7,7 +7,7 @@
       "cStandard": "c99",
       "cppStandard": "c++11",
       "intelliSenseMode": "gcc-x64",
-      "forcedInclude": ["${workspaceFolder}/libdragon-source/tests/testrom.c"]
+      "forcedInclude": ["${workspaceFolder}/libdragon/tests/testrom.c"]
     }
   ],
   "version": 4

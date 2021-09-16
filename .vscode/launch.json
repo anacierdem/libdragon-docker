@@ -21,7 +21,7 @@
       "name": "Run Tests",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon-source/tests/testrom.z64",
+        "${workspaceFolder}/libdragon/tests/testrom.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildTests",
@@ -35,7 +35,7 @@
       "name": "Run C++ Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon-source/examples/cpptest/cpptest.z64",
+        "${workspaceFolder}/libdragon/examples/cpptest/cpptest.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildCPPTest",
@@ -49,7 +49,7 @@
       "name": "Run Controller Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon-source/examples/ctest/ctest.z64",
+        "${workspaceFolder}/libdragon/examples/ctest/ctest.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildCTest",
@@ -63,7 +63,7 @@
       "name": "Run DFS Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon-source/examples/dfsdemo/dfsdemo.z64",
+        "${workspaceFolder}/libdragon/examples/dfsdemo/dfsdemo.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildDFSDemo",
@@ -77,7 +77,7 @@
       "name": "Run Mempak Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon-source/examples/mptest/mptest.z64",
+        "${workspaceFolder}/libdragon/examples/mptest/mptest.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildMPTest",
@@ -91,7 +91,7 @@
       "name": "Run Mempak Example 2",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon-source/examples/mputest/mputest.z64",
+        "${workspaceFolder}/libdragon/examples/mputest/mputest.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildMPUTest",
@@ -105,7 +105,7 @@
       "name": "Run Spritemap Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon-source/examples/spritemap/spritemap.z64",
+        "${workspaceFolder}/libdragon/examples/spritemap/spritemap.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildSpritemap",
@@ -119,7 +119,7 @@
       "name": "Run Video Test Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon-source/examples/test/test.z64",
+        "${workspaceFolder}/libdragon/examples/test/test.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildTest",
@@ -133,7 +133,7 @@
       "name": "Run Timers Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon-source/examples/timers/timers.z64",
+        "${workspaceFolder}/libdragon/examples/timers/timers.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildTimers",
@@ -147,7 +147,7 @@
       "name": "Run VRU Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon-source/examples/vrutest/vrutest.z64",
+        "${workspaceFolder}/libdragon/examples/vrutest/vrutest.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildVRUTest",
@@ -161,7 +161,7 @@
       "name": "Run Video Resolution Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon-source/examples/vtest/VidResTest.z64",
+        "${workspaceFolder}/libdragon/examples/vtest/VidResTest.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildVTest",
@@ -175,7 +175,7 @@
       "name": "Run uCode Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon-source/examples/ucodetest/ucodetest.z64",
+        "${workspaceFolder}/libdragon/examples/ucodetest/ucodetest.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildUCodeTest",

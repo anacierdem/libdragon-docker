@@ -39,7 +39,7 @@
         "owner": "c",
         "fileLocation": [
           "relative",
-          "${workspaceFolder}/libdragon-source/tests"
+          "${workspaceFolder}/libdragon/tests"
         ],
         "pattern": {
           "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
@@ -55,7 +55,7 @@
       "label": "buildCTest",
       "type": "shell",
       "group": "build",
-      "command": "npm run libdragon -- make -BC ./libdragon-source/examples ctest",
+      "command": "npm run libdragon -- make -BC ./libdragon/examples ctest",
       "problemMatcher": {
         "owner": "c",
         "fileLocation": ["relative", "${workspaceFolder}/.."],
@@ -73,7 +73,7 @@
       "label": "buildCPPTest",
       "type": "shell",
       "group": "build",
-      "command": "npm run libdragon -- make -BC ./libdragon-source/examples cpptest",
+      "command": "npm run libdragon -- make -BC ./libdragon/examples cpptest",
       "problemMatcher": {
         "owner": "c",
         "fileLocation": ["relative", "${workspaceFolder}/.."],
@@ -91,7 +91,7 @@
       "label": "buildDFSDemo",
       "type": "shell",
       "group": "build",
-      "command": "npm run libdragon -- make -BC ./libdragon-source/examples dfsdemo",
+      "command": "npm run libdragon -- make -BC ./libdragon/examples dfsdemo",
       "problemMatcher": {
         "owner": "c",
         "fileLocation": ["relative", "${workspaceFolder}/.."],
@@ -109,7 +109,7 @@
       "label": "buildMPTest",
       "type": "shell",
       "group": "build",
-      "command": "npm run libdragon -- make -BC ./libdragon-source/examples mptest",
+      "command": "npm run libdragon -- make -BC ./libdragon/examples mptest",
       "problemMatcher": {
         "owner": "c",
         "fileLocation": ["relative", "${workspaceFolder}/.."],
@@ -127,7 +127,7 @@
       "label": "buildMPUTest",
       "type": "shell",
       "group": "build",
-      "command": "npm run libdragon -- make -BC ./libdragon-source/examples mputest",
+      "command": "npm run libdragon -- make -BC ./libdragon/examples mputest",
       "problemMatcher": {
         "owner": "c",
         "fileLocation": ["relative", "${workspaceFolder}/.."],
@@ -145,7 +145,7 @@
       "label": "buildSpritemap",
       "type": "shell",
       "group": "build",
-      "command": "npm run libdragon -- make -BC ./libdragon-source/examples spritemap",
+      "command": "npm run libdragon -- make -BC ./libdragon/examples spritemap",
       "problemMatcher": {
         "owner": "c",
         "fileLocation": ["relative", "${workspaceFolder}/.."],
@@ -163,7 +163,7 @@
       "label": "buildTest",
       "type": "shell",
       "group": "build",
-      "command": "npm run libdragon -- make -BC ./libdragon-source/examples test",
+      "command": "npm run libdragon -- make -BC ./libdragon/examples test",
       "problemMatcher": {
         "owner": "c",
         "fileLocation": ["relative", "${workspaceFolder}/.."],
@@ -181,7 +181,7 @@
       "label": "buildTimers",
       "type": "shell",
       "group": "build",
-      "command": "npm run libdragon -- make -BC ./libdragon-source/examples timers",
+      "command": "npm run libdragon -- make -BC ./libdragon/examples timers",
       "problemMatcher": {
         "owner": "c",
         "fileLocation": ["relative", "${workspaceFolder}/.."],
@@ -199,7 +199,7 @@
       "label": "buildVRUTest",
       "type": "shell",
       "group": "build",
-      "command": "npm run libdragon -- make -BC ./libdragon-source/examples vrutest",
+      "command": "npm run libdragon -- make -BC ./libdragon/examples vrutest",
       "problemMatcher": {
         "owner": "c",
         "fileLocation": ["relative", "${workspaceFolder}/.."],
@@ -217,7 +217,7 @@
       "label": "buildVTest",
       "type": "shell",
       "group": "build",
-      "command": "npm run libdragon -- make -BC ./libdragon-source/examples vtest",
+      "command": "npm run libdragon -- make -BC ./libdragon/examples vtest",
       "problemMatcher": {
         "owner": "c",
         "fileLocation": ["relative", "${workspaceFolder}/.."],
@@ -235,7 +235,7 @@
       "label": "buildUCodeTest",
       "type": "shell",
       "group": "build",
-      "command": "npm run libdragon -- make -BC ./libdragon-source/examples ucodetest",
+      "command": "npm run libdragon -- make -BC ./libdragon/examples ucodetest",
       "problemMatcher": {
         "owner": "c",
         "fileLocation": ["relative", "${workspaceFolder}/.."],

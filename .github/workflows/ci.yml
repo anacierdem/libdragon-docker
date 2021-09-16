@@ -72,7 +72,7 @@ jobs:
       - name: Install
         run: |
           npm ci
-          rm -rf ./libdragon-source
+          rm -rf ./libdragon
           rm -rf .git
 
       - name: Test

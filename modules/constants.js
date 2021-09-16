@@ -4,7 +4,7 @@ module.exports = {
 
   LIBDRAGON_GIT: 'https://github.com/DragonMinded/libdragon',
   LIBDRAGON_BRANCH: 'trunk',
-  LIBDRAGON_SUBMODULE: 'libdragon-source',
+  LIBDRAGON_SUBMODULE: 'libdragon',
 
   LIBDRAGON_PROJECT_MANIFEST: '.libdragon',
   CACHED_CONTAINER_FILE: 'libdragon-docker-container',

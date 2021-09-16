@@ -10,7 +10,7 @@ On a machine with [docker](https://www.docker.com/products/docker-desktop) (`>= 
 
     libdragon init
 
-On first init the container will be downloaded, started and latest libdragon will get installed on it with all the example ROMs built. Now you should see all the example ROMs built in the `libdragon-source` folder.
+On first init the container will be downloaded, started and latest libdragon will get installed on it with all the example ROMs built. Now you should see all the example ROMs built in the `libdragon` folder.
 
 The container's `make` can be invoked on your current working directory via;
 
@@ -48,11 +48,11 @@ Run the libdragon build system in the current directory. It will properly mirror
 
 __`install`__
 
-Attempts to build and install everything libdragon related (i.e `libdragon-source`) into the container. This includes all the tools and third parties used by libdragon except for the toolchain. If you have made changes to libdragon, you can execute this action to build everything based on your changes. If you are not working on libdragon, you can just use the `update` action instead.
+Attempts to build and install everything libdragon related (i.e `libdragon`) into the container. This includes all the tools and third parties used by libdragon except for the toolchain. If you have made changes to libdragon, you can execute this action to build everything based on your changes. If you are not working on libdragon, you can just use the `update` action instead.
 
 __`update`__
 
-This action will update the submodule from the remote branch (`trunk`) with a merge strategy and then perform a `libdragon install`. (A local git repository is created as a submodule at `./libradon-source` when the project is first initialized) You can use the `install` action to only update all libdragon related artifacts in the container given you have an intact `libdragon-source` at the root without touching the existing submodule.
+This action will update the submodule from the remote branch (`trunk`) with a merge strategy and then perform a `libdragon install`. (A local git repository is created as a submodule at `./libdragon` when the project is first initialized) You can use the `install` action to only update all libdragon related artifacts in the container given you have an intact `libdragon` at the root without touching the existing submodule.
 
 __`start`__
 

@@ -2,21 +2,21 @@ bench: libdragon-install
 	$(MAKE) -C ./src
 
 examples: libdragon-install
-	$(MAKE) -BC ./libdragon-source/examples
+	$(MAKE) -BC ./libdragon/examples
 
 tests: libdragon-install
-	$(MAKE) -BC ./libdragon-source/tests
+	$(MAKE) -BC ./libdragon/tests
 
 libdragon-install: libdragon
-	$(MAKE) -C ./libdragon-source install
+	$(MAKE) -C ./libdragon install
 
 libdragon:
-	$(MAKE) -C ./libdragon-source
+	$(MAKE) -C ./libdragon
 
 clean: clean-bench
-	$(MAKE) -C ./libdragon-source clean
-	$(MAKE) -C ./libdragon-source/tests clean
-	$(MAKE) -C ./libdragon-source/tests clean
+	$(MAKE) -C ./libdragon clean
+	$(MAKE) -C ./libdragon/tests clean
+	$(MAKE) -C ./libdragon/tests clean
 
 clean-bench:
 	$(MAKE) -C ./src clean
