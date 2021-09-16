@@ -44,7 +44,7 @@ Creates a libdragon project in the current directory. Every libdragon project wi
 
 __`make`__
 
-Run the libdragon build system in the current directory. It will properly mirror your current working directory to the container, so if you change your working directory, `make` will be executed there in the container as well.
+Run the libdragon build system in the current directory. It will properly mirror your current working directory to the container, so if you change your working directory, `make` will be executed there in the container as well. This will first try to execute `make` in the container and if the container is not accessible, it will attempt a complete `start` cycle.
 
 __`install`__
 
@@ -56,7 +56,7 @@ This action will update the submodule from the remote branch (`trunk`) with a me
 
 __`start`__
 
-Start the container assigned to the current libdragon project.
+Start the container assigned to the current libdragon project. Will first attempt to start an existing container if exists followed by a new container run and `install`.
 
 __`stop`__
 

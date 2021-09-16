@@ -137,8 +137,15 @@ function findLibdragonRoot(start = '.') {
 }
 
 async function findNPMRoot() {
-  if (PROJECT_NAME) {
-    return path.resolve((await runNPM(['root'])).trim(), '..');
+  try {
+    const root = path.resolve((await runNPM(['root'])).trim(), '..');
+    // Only report if package.json really exists. npm fallbacks to cwd
+    if (fs.existsSync(path.resolve(root, 'package.json'))) {
+      return root;
+    }
+  } catch {
+    // User does not have and does not care about NPM if it didn't work
+    return undefined;
   }
 }
 
