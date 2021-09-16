@@ -66,11 +66,11 @@ const initContainer = async (libdragonInfo) => {
     const imageName = await updateImageName(libdragonInfo);
 
     // Download image
-    log(`Downloading docker image: ${imageName}`);
+    libdragonInfo.showStatus && log(`Downloading docker image: ${imageName}`);
     await spawnProcess('docker', ['pull', imageName]);
 
     // Create a new container
-    log('Creating new container...');
+    libdragonInfo.showStatus && log('Creating new container...');
     newId = (
       await spawnProcess('docker', [
         'run',
@@ -110,12 +110,23 @@ const initContainer = async (libdragonInfo) => {
     throw e;
   }
 
+  const name = await spawnProcess('docker', [
+    'container',
+    'inspect',
+    newId,
+    '--format',
+    '{{.Name}}',
+  ]);
+
   // We have created a new container, save the new info
   fs.writeFileSync(
     path.resolve(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE),
     newId
   );
-  log(chalk.green('Successfully initialized docker container.'));
+  libdragonInfo.showStatus &&
+    log(
+      chalk.green(`Successfully initialized docker container: ${name.trim()}`)
+    );
   return newId;
 };
 
@@ -129,7 +140,7 @@ async function init(libdragonInfo) {
   log(`Preparing the docker container...`);
   await start(libdragonInfo);
 
-  log(chalk.green(`libdragon ready at \`${libdragonInfo.root}\`.\n`));
+  log(chalk.green(`libdragon ready at \`${libdragonInfo.root}\`.`));
 }
 
 const start = async (libdragonInfo) => {
@@ -139,6 +150,7 @@ const start = async (libdragonInfo) => {
 
   if (running) {
     log(`Container ${running} already running.`, true);
+    log(libdragonInfo.containerId);
     return running;
   }
 
@@ -147,6 +159,7 @@ const start = async (libdragonInfo) => {
   if (!id) {
     log(`Container does not exist, re-initializing...`, true);
     id = await initContainer(libdragonInfo);
+    log(id);
     return id;
   }
 
@@ -156,6 +169,8 @@ const start = async (libdragonInfo) => {
     'start',
     libdragonInfo.containerId,
   ]);
+
+  log(id);
   return id;
 };
 
@@ -220,7 +235,7 @@ const make = async (libdragonInfo, params) => {
 };
 
 const installDependencies = async (libdragonInfo) => {
-  log('Vendoring libdragon...');
+  libdragonInfo.showStatus && log('Vendoring libdragon...');
 
   await dockerExec(
     libdragonInfo,
@@ -397,24 +412,31 @@ ${chalk.green('Flags:')}
 module.exports = {
   start: {
     fn: start,
+    showStatus: false, // This will only print out the id
   },
   init: {
     fn: init,
+    showStatus: true,
   },
   make: {
     fn: make,
     forwardsRestParams: true,
+    showStatus: true,
   },
   stop: {
     fn: stop,
+    showStatus: false, // This will only print out the id
   },
   install: {
     fn: install,
+    showStatus: true,
   },
   update: {
     fn: update,
+    showStatus: true,
   },
   help: {
     fn: help,
+    showStatus: true,
   },
 };

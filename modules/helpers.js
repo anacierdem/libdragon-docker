@@ -9,7 +9,6 @@ const {
   LIBDRAGON_PROJECT_MANIFEST,
   IMAGE_FILE,
   DOCKER_HUB_IMAGE,
-  PROJECT_NAME,
 } = require('./constants');
 
 const globals = {
@@ -210,7 +209,7 @@ async function checkContainerRunning(containerId) {
       '-f id=' + containerId,
     ])
   ).trim();
-  return running;
+  return running ? containerId : undefined;
 }
 
 async function readProjectInfo() {

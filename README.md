@@ -56,7 +56,7 @@ This action will update the submodule from the remote branch (`trunk`) with a me
 
 __`start`__
 
-Start the container assigned to the current libdragon project. Will first attempt to start an existing container if exists followed by a new container run and `install`.
+Start the container assigned to the current libdragon project. Will first attempt to start an existing container if exists followed by a new container run and `install`. Will print out the container id.
 
 __`stop`__
 

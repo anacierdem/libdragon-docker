@@ -74,6 +74,7 @@ readProjectInfo()
       {
         ...info,
         options,
+        ...options.ACTION,
       },
       options.PARAMS
     )
