@@ -139,7 +139,7 @@ async function findNPMRoot() {
   try {
     const root = path.resolve((await runNPM(['root'])).trim(), '..');
     // Only report if package.json really exists. npm fallbacks to cwd
-    if (fs.existsSync(path.resolve(root, 'package.json'))) {
+    if (fs.existsSync(path.join(root, 'package.json'))) {
       return root;
     }
   } catch {
@@ -272,7 +272,7 @@ async function updateImageName(libdragonInfo) {
     DOCKER_HUB_IMAGE;
 
   await createManifestIfNotExist(libdragonInfo);
-  fs.writeFileSync(path.resolve(manifestPath, IMAGE_FILE), imageName);
+  fs.writeFileSync(path.join(manifestPath, IMAGE_FILE), imageName);
   log(`Image name updated: ${imageName}`, true);
   return imageName;
 }

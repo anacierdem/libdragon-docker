@@ -68,6 +68,13 @@ for (let i = 2; i < process.argv.length; i++) {
   }
 }
 
+if (!options.ACTION) {
+  console.error(chalk.red('No action provided'));
+  actions.help.fn();
+  process.exit(STATUS_BAD_PARAM);
+}
+
+
 readProjectInfo()
   .then((info) =>
     options.ACTION.fn(

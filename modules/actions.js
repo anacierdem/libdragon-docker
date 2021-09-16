@@ -120,7 +120,7 @@ const initContainer = async (libdragonInfo) => {
 
   // We have created a new container, save the new info
   fs.writeFileSync(
-    path.resolve(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE),
+    path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE),
     newId
   );
   libdragonInfo.showStatus &&
@@ -131,6 +131,40 @@ const initContainer = async (libdragonInfo) => {
 };
 
 /**
+ * Recursively copies directories and files
+ */
+function copyDirContents(src, dst) {
+  if (fs.existsSync(dst) && !fs.statSync(dst).isDirectory()) {
+    log(`${dst} is not a directory, skipping.`);
+    return;
+  }
+
+  if (!fs.existsSync(dst)) {
+    fs.mkdirSync(dst);
+  }
+
+  const files = fs.readdirSync(src);
+  files.forEach((name) => {
+    const source = path.join(src, name);
+    const dest = path.join(dst, name);
+    const stats = fs.statSync(source);
+    if (stats.isDirectory()) {
+      copyDirContents(source, dest);
+    } else if (stats.isFile()) {
+      const content = fs.readFileSync(source);
+      try {
+        fs.writeFileSync(dest, content, {
+          flag: 'wx',
+        });
+      } catch (e) {
+        log(`${dest} already exists, skipping.`);
+        return;
+      }
+    }
+  });
+}
+
+/**
  * Initialize a new libdragon project in current working directory
  */
 async function init(libdragonInfo) {
@@ -139,6 +173,11 @@ async function init(libdragonInfo) {
 
   log(`Preparing the docker container...`);
   await start(libdragonInfo);
+
+  log(`Copying project files...`);
+  const skeletonFolder = path.join(__dirname, '../skeleton');
+  // node copy functions does not work with pkg
+  copyDirContents(skeletonFolder, libdragonInfo.root);
 
   log(chalk.green(`libdragon ready at \`${libdragonInfo.root}\`.`));
 }
@@ -272,7 +311,7 @@ const installDependencies = async (libdragonInfo) => {
     await Promise.all(
       deps.map(({ name, paths }) => {
         return new Promise((resolve, reject) => {
-          fs.access(path.resolve(paths[0], 'Makefile'), fs.F_OK, async (e) => {
+          fs.access(path.join(paths[0], 'Makefile'), fs.F_OK, async (e) => {
             if (e) {
               // File does not exist - skip
               resolve();
