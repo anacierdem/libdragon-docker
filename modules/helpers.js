@@ -277,6 +277,10 @@ async function updateImageName(libdragonInfo) {
   return imageName;
 }
 
+/**
+ * Creates the manifest folder if it does not exist. Will return true if
+ * created, false otherwise.
+ */
 async function createManifestIfNotExist(libdragonInfo) {
   const manifestPath = path.join(
     libdragonInfo.root,
@@ -293,7 +297,9 @@ async function createManifestIfNotExist(libdragonInfo) {
       `Creating libdragon project configuration at \`${libdragonInfo.root}\`.`
     );
     fs.mkdirSync(manifestPath);
+    return true;
   }
+  return false;
 }
 
 function toPosixPath(p) {

@@ -169,15 +169,17 @@ function copyDirContents(src, dst) {
  */
 async function init(libdragonInfo) {
   log(`Initializing a libdragon project at ${libdragonInfo.root}.`);
-  await createManifestIfNotExist(libdragonInfo);
+  const isNewProject = await createManifestIfNotExist(libdragonInfo);
 
   log(`Preparing the docker container...`);
   await start(libdragonInfo);
 
-  log(`Copying project files...`);
-  const skeletonFolder = path.join(__dirname, '../skeleton');
-  // node copy functions does not work with pkg
-  copyDirContents(skeletonFolder, libdragonInfo.root);
+  if (isNewProject) {
+    log(`Copying project files...`);
+    const skeletonFolder = path.join(__dirname, '../skeleton');
+    // node copy functions does not work with pkg
+    copyDirContents(skeletonFolder, libdragonInfo.root);
+  }
 
   log(chalk.green(`libdragon ready at \`${libdragonInfo.root}\`.`));
 }

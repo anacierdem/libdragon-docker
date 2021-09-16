@@ -40,7 +40,7 @@ You can invoke libdragon as follows;
 
 __`init`__
 
-Creates a libdragon project in the current directory. Every libdragon project will have its own container instance. If you are in a git repository or an NPM project, libdragon will be created at their root also marking there with a `.libdragon` folder. Do not remove this folder as it keeps libdragon project information. You should commit the contents of this folder if you are using git.
+Creates a libdragon project in the current directory. Every libdragon project will have its own docker container instance. If you are in a git repository or an NPM project, libdragon will be initialized at their root also marking there with a `.libdragon` folder. Do not remove this folder as it keeps libdragon project information. You should commit the contents of this folder if you are using git. If this is the first time you are creating a libdragon project at that location, this action will also create the skeleton project files to kickstart things.
 
 __`make`__
 
