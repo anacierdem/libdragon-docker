@@ -1,5 +1,12 @@
 # Change Log
 
+## [10.0.0] - 2021-10-04
+
+### Changed
+
+- A complete re-write of the tool. Check documentation for the new usage. It is
+much more straightforward to use now. `libdragon make` behaves almost the same.
+
 ## [9.0.0] - 2021-09-06
 
 ### Changed
