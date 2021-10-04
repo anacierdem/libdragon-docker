@@ -1,6 +1,7 @@
 V=1
+SOURCE_DIR=src
 BUILD_DIR=build
-include n64.mk
+include $(N64_INST)/include/n64.mk
 
 src=main.c
 

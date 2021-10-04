@@ -91,14 +91,14 @@ readProjectInfo()
 
     // Show additional information to user if verbose or we did a mistake
     if (globals.verbose || !userTargetedError) {
-      console.error(chalk.red(e.stack ?? e.message));
+      console.error(chalk.red(globals.verbose? e.stack : e.message));
     }
 
-    // Print the underlying error out only if verbose and we did a mistake
-    // user errors wil already pipe their stderr.
-    if (globals.verbose && !userTargetedError) {
-      e.out &&
-        process.stderr.write(chalk.red(`Command error output:\n${e.out}`));
+    // Print the underlying error out only if not verbose and we did a mistake
+    // user errors will already pipe their stderr. All command errors also go
+    // to the stderr when verbose
+    if (!globals.verbose && !userTargetedError && e.out) {
+      process.stderr.write(chalk.red(`Command error output:\n${e.out}`));
     }
 
     // Try to exit with underlying code

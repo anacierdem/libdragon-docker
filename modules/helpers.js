@@ -25,7 +25,7 @@ class CommandError extends Error {
 }
 
 // A simple Promise wrapper for child_process.spawn
-function spawnProcess(cmd, params = [], showOutput = globals.verbose) {
+function spawnProcess(cmd, params = [], showOutput) {
   return new Promise((resolve, reject) => {
     let stdout = [];
     let stderr = [];
@@ -37,14 +37,14 @@ function spawnProcess(cmd, params = [], showOutput = globals.verbose) {
     const command = spawn(cmd, params);
 
     command.stdout.on('data', function (data) {
-      if (showOutput) {
+      if (showOutput || globals.verbose) {
         process.stdout.write(data);
       }
       stdout.push(Buffer.from(data));
     });
 
     command.stderr.on('data', function (data) {
-      if (showOutput) {
+      if (showOutput || globals.verbose) {
         process.stderr.write(data);
       }
       stderr.push(Buffer.from(data));
@@ -64,7 +64,7 @@ function spawnProcess(cmd, params = [], showOutput = globals.verbose) {
           `Command ${cmd} ${params.join(' ')} exited with code ${code}.`,
           {
             code,
-            out: Buffer.concat(stderr),
+            out: Buffer.concat(stderr).toString(),
             showOutput,
           }
         );
@@ -258,18 +258,23 @@ async function updateImageName(libdragonInfo) {
   // flag has the highest priority followed by the one read from the file
   // and then if there is any matching container, name is read from it. As last
   // option fallback to default value.
-  const imageName =
-    libdragonInfo.options.DOCKER_IMAGE ??
-    libdragonInfo.imageName ??
-    (libdragonInfo.containerId &&
-      (await spawnProcess('docker', [
+  let imageName = libdragonInfo.options.DOCKER_IMAGE ?? libdragonInfo.imageName;
+
+  if (!imageName) {
+    // If still have the container, read the image name
+    const containerId = await checkContainerAndClean(libdragonInfo);
+    if (containerId) {
+      imageName = await spawnProcess('docker', [
         'container',
         'inspect',
-        libdragonInfo.containerId,
+        containerId,
         '--format',
         '{{.Config.Image}}',
-      ]))) ??
-    DOCKER_HUB_IMAGE;
+      ]);
+    }
+  }
+
+  imageName = imageName ?? DOCKER_HUB_IMAGE;
 
   await createManifestIfNotExist(libdragonInfo);
   fs.writeFileSync(path.join(manifestPath, IMAGE_FILE), imageName);
@@ -334,6 +339,7 @@ module.exports = {
   dockerRelativeWorkdirParams,
   dockerByteSwapParams,
   runGitMaybeHost,
+  dockerHostUserParams,
   CommandError,
   globals,
 };

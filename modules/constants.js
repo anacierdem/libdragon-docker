@@ -1,5 +1,5 @@
 module.exports = {
-  DOCKER_HUB_IMAGE: 'anacierdem/libdragon:toolchain',
+  DOCKER_HUB_IMAGE: 'ghcr.io/dragonminded/libdragon:latest',
   PROJECT_NAME: process.env.npm_package_name,
 
   LIBDRAGON_GIT: 'https://github.com/DragonMinded/libdragon',

@@ -22,15 +22,19 @@ const {
   dockerRelativeWorkdirParams,
   dockerByteSwapParams,
   runGitMaybeHost,
+  dockerHostUserParams,
 } = require('./helpers');
 
 const destroyContainer = async (libdragonInfo) => {
-  await spawnProcess('docker', [
-    'container',
-    'rm',
-    libdragonInfo.containerId,
-    '--force',
-  ]);
+  if (libdragonInfo.containerId) {
+    await spawnProcess('docker', [
+      'container',
+      'rm',
+      libdragonInfo.containerId,
+      '--force',
+    ]);
+  }
+
   await checkContainerAndClean({
     ...libdragonInfo,
     containerId: undefined, // We just destroyed it
@@ -91,6 +95,15 @@ const initContainer = async (libdragonInfo) => {
       containerId: newId,
       imageName,
     };
+
+    // chown the installation folder once on init
+    const { uid, gid } = libdragonInfo.userInfo;
+    await dockerExec(newInfo, [
+      'chown',
+      '-R',
+      `${uid >= 0 ? uid : ''}:${gid >= 0 ? gid : ''}`,
+      '/n64_toolchain',
+    ]);
 
     await runGitMaybeHost(libdragonInfo, ['init']);
     await initSubmodule(libdragonInfo);
@@ -237,6 +250,7 @@ const make = async (libdragonInfo, params) => {
       [
         ...dockerRelativeWorkdirParams(libdragonInfo),
         ...dockerByteSwapParams(libdragonInfo),
+        ...dockerHostUserParams(libdragonInfo),
       ],
       ['make', ...params],
       true
@@ -284,6 +298,7 @@ const installDependencies = async (libdragonInfo) => {
       '--workdir',
       '/libdragon/' + LIBDRAGON_SUBMODULE,
       ...dockerByteSwapParams(libdragonInfo),
+      ...dockerHostUserParams(libdragonInfo),
     ],
     ['/bin/bash', './build.sh']
   );
@@ -336,17 +351,21 @@ const installDependencies = async (libdragonInfo) => {
               const containerPath = path.posix.join('/libdragon', relativePath);
               const makePath = path.posix.join(containerPath, 'Makefile');
 
-              await dockerExec(libdragonInfo, [
-                '/bin/bash',
-                '-c',
-                '[ -f ' +
-                  makePath +
-                  ' ] && make -C ' +
-                  containerPath +
-                  ' && make -C ' +
-                  containerPath +
-                  ' install',
-              ]);
+              await dockerExec(
+                libdragonInfo,
+                [...dockerHostUserParams(libdragonInfo)],
+                [
+                  '/bin/bash',
+                  '-c',
+                  '[ -f ' +
+                    makePath +
+                    ' ] && make -C ' +
+                    containerPath +
+                    ' && make -C ' +
+                    containerPath +
+                    ' install',
+                ]
+              );
 
               resolve();
             } catch (e) {

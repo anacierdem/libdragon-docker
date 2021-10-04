@@ -1,8 +1,8 @@
 V=1
 BUILD_DIR=build
-include n64.mk
+include $(N64_INST)/include/n64.mk
 
-src=test_bench.c
+src=main.c
 
 all: test_bench.z64
 
