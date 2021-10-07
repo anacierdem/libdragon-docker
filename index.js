@@ -10,7 +10,6 @@ const STATUS_BAD_PARAM = 2;
 
 // Command line options
 const options = {
-  BYTE_SWAP: false,
   DOCKER_IMAGE: undefined,
   VERBOSE: false,
 
@@ -23,11 +22,6 @@ const options = {
 
 for (let i = 2; i < process.argv.length; i++) {
   const val = process.argv[i];
-
-  if (val === '--byte-swap') {
-    options.BYTE_SWAP = true;
-    continue;
-  }
 
   if (val === '--verbose') {
     options.VERBOSE = true;
@@ -74,6 +68,11 @@ if (!options.ACTION) {
   process.exit(STATUS_BAD_PARAM);
 }
 
+if (options.ACTION === actions.exec && options.PARAMS.length === 0) {
+  console.error(chalk.red('You should provide a command to exec'));
+  actions.help.fn();
+  process.exit(STATUS_BAD_PARAM);
+}
 
 readProjectInfo()
   .then((info) =>
@@ -91,7 +90,7 @@ readProjectInfo()
 
     // Show additional information to user if verbose or we did a mistake
     if (globals.verbose || !userTargetedError) {
-      console.error(chalk.red(globals.verbose? e.stack : e.message));
+      console.error(chalk.red(globals.verbose ? e.stack : e.message));
     }
 
     // Print the underlying error out only if not verbose and we did a mistake

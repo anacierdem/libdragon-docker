@@ -1,5 +1,22 @@
 # Change Log
 
+## [10.1.0] - 2021-10-07
+
+### Added
+
+- `exec` action to execute arbitrary commands in the container with TTY support.
+This also improves the color output support as docker now knows it is using TTY.
+- Add more verbose logging for skeleton project copy.
+
+### Changed
+
+- Removed partially not working `--byte-swap` option. It does not already work
+with the new libdragon build system so there is no need keeping it in the tool.
+
+### Fixed
+
+- Publish skeleton project files to NPM.
+
 ## [10.0.0] - 2021-10-04
 
 ### Changed

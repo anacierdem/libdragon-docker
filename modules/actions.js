@@ -20,9 +20,9 @@ const {
   log,
   dockerExec,
   dockerRelativeWorkdirParams,
-  dockerByteSwapParams,
   runGitMaybeHost,
   dockerHostUserParams,
+  dockerRelativeWorkdir,
 } = require('./helpers');
 
 const destroyContainer = async (libdragonInfo) => {
@@ -78,7 +78,6 @@ const initContainer = async (libdragonInfo) => {
     newId = (
       await spawnProcess('docker', [
         'run',
-        ...dockerByteSwapParams(libdragonInfo),
         '-d', // Detached
         '--mount',
         'type=bind,source=' + libdragonInfo.root + ',target=/libdragon', // Mount files
@@ -147,12 +146,15 @@ const initContainer = async (libdragonInfo) => {
  * Recursively copies directories and files
  */
 function copyDirContents(src, dst) {
+  log(`Copying from ${src} to ${dst}`, true);
+
   if (fs.existsSync(dst) && !fs.statSync(dst).isDirectory()) {
     log(`${dst} is not a directory, skipping.`);
     return;
   }
 
   if (!fs.existsSync(dst)) {
+    log(`Creating a directory at ${dst}.`, true);
     fs.mkdirSync(dst);
   }
 
@@ -166,6 +168,7 @@ function copyDirContents(src, dst) {
     } else if (stats.isFile()) {
       const content = fs.readFileSync(source);
       try {
+        log(`Writing to ${dest}`, true);
         fs.writeFileSync(dest, content, {
           flag: 'wx',
         });
@@ -239,29 +242,35 @@ const stop = async (libdragonInfo) => {
   await spawnProcess('docker', ['container', 'stop', running]);
 };
 
-const make = async (libdragonInfo, params) => {
-  const workdir = toPosixPath(path.relative(libdragonInfo.root, process.cwd()));
-  log(`Running make at ${workdir ?? '.'} with [${params}]`, true);
+const exec = async (libdragonInfo, commandAndParams) => {
+  log(
+    `Running ${commandAndParams[0]} at ${dockerRelativeWorkdir(
+      libdragonInfo
+    )} with [${commandAndParams.slice(1)}]`,
+    true
+  );
 
-  const tryMake = (libdragonInfo) =>
+  const isTTY = process.stdin.isTTY && process.stdout.isTTY;
+
+  const tryCmd = (libdragonInfo) =>
     libdragonInfo.containerId &&
     dockerExec(
       libdragonInfo,
       [
         ...dockerRelativeWorkdirParams(libdragonInfo),
-        ...dockerByteSwapParams(libdragonInfo),
         ...dockerHostUserParams(libdragonInfo),
+        ...(isTTY ? ['-it'] : []), // interactive and TTY
       ],
-      ['make', ...params],
+      commandAndParams,
       true
     );
 
   let started = false;
-  const startOnceAndMake = async () => {
+  const startOnceAndCmd = async () => {
     if (!started) {
       const newId = await start(libdragonInfo);
       started = true;
-      await tryMake({
+      await tryCmd({
         ...libdragonInfo,
         containerId: newId,
       });
@@ -271,12 +280,12 @@ const make = async (libdragonInfo, params) => {
 
   if (!libdragonInfo.containerId) {
     log(`Container does not exist for sure, restart`, true);
-    await startOnceAndMake();
+    await startOnceAndCmd();
     return;
   }
 
   try {
-    await tryMake(libdragonInfo);
+    await tryCmd(libdragonInfo);
   } catch (e) {
     if (
       !e.out ||
@@ -285,8 +294,12 @@ const make = async (libdragonInfo, params) => {
     ) {
       throw e;
     }
-    await startOnceAndMake();
+    await startOnceAndCmd();
   }
+};
+
+const make = async (libdragonInfo, params) => {
+  await exec(libdragonInfo, ['make', ...params]);
 };
 
 const installDependencies = async (libdragonInfo) => {
@@ -297,7 +310,6 @@ const installDependencies = async (libdragonInfo) => {
     [
       '--workdir',
       '/libdragon/' + LIBDRAGON_SUBMODULE,
-      ...dockerByteSwapParams(libdragonInfo),
       ...dockerHostUserParams(libdragonInfo),
     ],
     ['/bin/bash', './build.sh']
@@ -457,6 +469,7 @@ ${chalk.green('Available Commands:')}
   help        Display this help information.
   init        Create a libdragon project in the current directory.
   make        Run the libdragon build system in the current directory.
+  exec        Execute given command in the current directory.
   start       Start the container for current project.
   stop        Stop the container for current project.
   install     Vendor libdragon as is.
@@ -464,7 +477,6 @@ ${chalk.green('Available Commands:')}
 
 ${chalk.green('Flags:')}
   --image <docker-image>  Provide a custom image.
-  --byte-swap             Enable byte-swapped ROM output.
   --verbose               Be verbose
 `);
 };
@@ -480,6 +492,11 @@ module.exports = {
   },
   make: {
     fn: make,
+    forwardsRestParams: true,
+    showStatus: true,
+  },
+  exec: {
+    fn: exec,
     forwardsRestParams: true,
     showStatus: true,
   },

@@ -50,7 +50,15 @@ __`make`__
 
 Runs the libdragon build system in the current directory. It will mirror your current working directory to the container. If you change your host working directory, `make` will be executed in the corresponding folder in the container as well.
 
-This action will first try to execute `make` in the container and if the container is not accessible, it will attempt a complete `start` cycle.
+This action is a shortcut to the `exec` action under the hood.
+
+__`exec`__
+
+Executes the given command in the container passing down any arguments provided. It will mirror your current working directory to the container. If you change your host working directory, the command will be executed in the corresponding folder in the container as well.
+
+This action will first try to execute the command in the container and if the container is not accessible, it will attempt a complete `start` cycle.
+
+This will properly passthrough your TTY if you have one. So by running `libdragon exec bash` you can start an interactive bash session with full TTY support.
 
 __`install`__
 
@@ -73,10 +81,6 @@ Stop the container assigned to the current libdragon project.
 __`--image <docker-image>`__
 
 Use this flag to provide a custom image to use instead of the default. It should include the toolchain at `/n64_toolchain`. It will be effective for `init`, `install` and `update` actions and will cause a re-initialization of the container if an image different from what was written to project configuration is provided.
-
-__`--byte-swap`__
-
-Enable byte-swapped ROM output for the build system.
 
 __`--verbose`__
 

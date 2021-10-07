@@ -24,7 +24,8 @@
     "url": "git+https://github.com/anacierdem/libdragon-docker.git"
   },
   "files": [
-    "modules/**/*"
+    "modules/**/*",
+    "skeleton/**"
   ],
   "author": "Ali Naci Erdem",
   "license": "MIT",

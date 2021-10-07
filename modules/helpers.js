@@ -24,7 +24,9 @@ class CommandError extends Error {
   }
 }
 
-// A simple Promise wrapper for child_process.spawn
+// A simple Promise wrapper for child_process.spawn. If showOutput is true,
+// std in/out becomes a tty when available and we cannot read the stdout from
+// the command anymore.
 function spawnProcess(cmd, params = [], showOutput) {
   return new Promise((resolve, reject) => {
     let stdout = [];
@@ -34,19 +36,32 @@ function spawnProcess(cmd, params = [], showOutput) {
       log(chalk.grey(`Spawning: ${cmd} ${params.join(' ')}`), true);
     }
 
-    const command = spawn(cmd, params);
-
-    command.stdout.on('data', function (data) {
-      if (showOutput || globals.verbose) {
-        process.stdout.write(data);
-      }
-      stdout.push(Buffer.from(data));
+    const command = spawn(cmd, params, {
+      // We should redirect stdout and stdin in tandem for the TTY to work
+      // properly otherwise it somehow causes issues in the stream
+      stdio: [
+        showOutput ? process.stdin : 'pipe',
+        showOutput ? process.stdout : 'pipe',
+        'pipe',
+      ],
     });
 
+    // If showOutput is set, there is no stdout o/w only redirect if verbose
+    if (!showOutput && globals.verbose) {
+      command.stdout.pipe(process.stdout);
+    }
+
+    if (showOutput || globals.verbose) {
+      command.stderr.pipe(process.stderr);
+    }
+
+    if (!showOutput) {
+      command.stdout.on('data', function (data) {
+        stdout.push(Buffer.from(data));
+      });
+    }
+
     command.stderr.on('data', function (data) {
-      if (showOutput || globals.verbose) {
-        process.stderr.write(data);
-      }
       stderr.push(Buffer.from(data));
     });
 
@@ -148,16 +163,15 @@ async function findNPMRoot() {
   }
 }
 
-function dockerRelativeWorkdirParams(libdragonInfo) {
-  return [
-    '--workdir',
+function dockerRelativeWorkdir(libdragonInfo) {
+  return (
     '/libdragon/' +
-      toPosixPath(path.relative(libdragonInfo.root, process.cwd())),
-  ];
+    toPosixPath(path.relative(libdragonInfo.root, process.cwd()))
+  );
 }
 
-function dockerByteSwapParams(libdragonInfo) {
-  return libdragonInfo.options.BYTE_SWAP ? ['-e', 'N64_BYTE_SWAP=true'] : [];
+function dockerRelativeWorkdirParams(libdragonInfo) {
+  return ['--workdir', dockerRelativeWorkdir(libdragonInfo)];
 }
 
 function dockerHostUserParams(libdragonInfo) {
@@ -337,9 +351,9 @@ module.exports = {
   log,
   dockerExec,
   dockerRelativeWorkdirParams,
-  dockerByteSwapParams,
   runGitMaybeHost,
   dockerHostUserParams,
+  dockerRelativeWorkdir,
   CommandError,
   globals,
 };
