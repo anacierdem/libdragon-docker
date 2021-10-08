@@ -445,12 +445,11 @@ const requiresContainer = async (libdragonInfo) => {
 const update = async (libdragonInfo) => {
   let containerId = await requiresContainer(libdragonInfo);
 
-  // Start existing
-  containerId = await startAndInstall({
+  // Start existing - this is primarily to guarantee a git
+  containerId = await start({
     ...libdragonInfo,
     containerId,
   });
-  containerId = await start(libdragonInfo);
 
   // Update submodule
   log('Updating submodule...');
