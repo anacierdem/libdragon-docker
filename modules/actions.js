@@ -67,12 +67,17 @@ const initSubmodule = async (libdragonInfo) => {
 };
 
 /**
- * Will donload image, create a new container and install everything in it
+ * Will download image and create a new container
  */
 const initContainer = async (libdragonInfo) => {
   let newId;
   try {
-    const imageName = await updateImageName(libdragonInfo);
+    const imageName =
+      libdragonInfo.imageName ?? libdragonInfo.options.DOCKER_IMAGE;
+    await updateImageName({
+      ...libdragonInfo,
+      imageName,
+    });
 
     // Download image
     libdragonInfo.showStatus && log(`Downloading docker image: ${imageName}`);
@@ -474,7 +479,7 @@ const install = async (libdragonInfo) => {
   let containerId = await requiresContainer(libdragonInfo);
 
   const oldImageName = libdragonInfo.imageName;
-  const imageName = await updateImageName(libdragonInfo);
+  const imageName = libdragonInfo.options.DOCKER_IMAGE;
   if (oldImageName !== imageName) {
     log(`Changing image from \`${oldImageName}\` to \`${imageName}\``);
     await destroyContainer(libdragonInfo);
