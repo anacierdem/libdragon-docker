@@ -35,33 +35,15 @@ jobs:
       - name: Test
         run: |
           npm run libdragon -- --verbose init
-          npm run libdragon -- --verbose make clean
-          npm run libdragon -- --verbose make bench
-          npm run libdragon -- --verbose make examples
-          npm run libdragon -- --verbose make tests
+          npm run libdragon -- --verbose make
           npm run libdragon -- --verbose help
-
-  ci-start-stop-update:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Install
-        run: npm ci
-
-      - name: Test
-        run: |
-          npm run libdragon -- --verbose init
+          npm run libdragon -- --verbose exec ls
           npm run libdragon -- --verbose stop
           npm run libdragon -- --verbose start
           npm run libdragon -- --verbose update
           npm run libdragon -- --verbose install
 
-  ci-no-git-make-update:
+  ci-clean-make-update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -73,14 +55,20 @@ jobs:
       - name: Install
         run: |
           npm ci
-          rm -rf ./libdragon
+          rm -rf .libdragon
           rm -rf .git
 
       - name: Test
         run: |
           npm run libdragon -- --verbose init
+          rm -rf .libdragon
+          rm -rf .git
           npm run libdragon -- --verbose make
+          rm -rf .libdragon
+          rm -rf .git
           npm run libdragon -- --verbose update
+            rm -rf .libdragon
+          rm -rf .git
           npm run libdragon -- --verbose install
 
   ci-pack:
