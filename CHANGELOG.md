@@ -16,6 +16,7 @@ was making some actions inconsistent. For example `install` or `make` action
 was trying to re-initialize the submodule unnecessarily. This is fixed by only
 initializing it with the `init` action. If any of those need to re-init the
 container, now they assume there is an intact libdragon folder to use.
+- `update` and `install` are now able to start containers if necessary.
 
 ### Fixed
 

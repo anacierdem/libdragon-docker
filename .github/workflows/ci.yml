@@ -67,7 +67,7 @@ jobs:
           rm -rf .libdragon
           rm -rf .git
           npm run libdragon -- --verbose update
-            rm -rf .libdragon
+          rm -rf .libdragon
           rm -rf .git
           npm run libdragon -- --verbose install
 

@@ -337,7 +337,7 @@ async function readProjectInfo() {
     ).trim();
 
     // Cache the image name
-    updateImageName(info);
+    await updateImageName(info);
   }
 
   info.imageName = info.imageName ?? DOCKER_HUB_IMAGE;

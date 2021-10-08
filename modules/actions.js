@@ -433,26 +433,8 @@ async function startAndInstall(libdragonInfo) {
   return containerId;
 }
 
-const requiresContainer = async (libdragonInfo) => {
-  const id = await checkContainerAndClean(libdragonInfo);
-
-  if (!id) {
-    throw new Error(
-      'libdragon is not properly initialized. Initialize with `libdragon init` first.'
-    );
-  }
-
-  return id;
-};
-
 const update = async (libdragonInfo) => {
-  let containerId = await requiresContainer(libdragonInfo);
-
-  // Start existing - this is primarily to guarantee a git
-  containerId = await start({
-    ...libdragonInfo,
-    containerId,
-  });
+  const containerId = await start(libdragonInfo);
 
   // Update submodule
   log('Updating submodule...');
@@ -474,10 +456,9 @@ const update = async (libdragonInfo) => {
 };
 
 const install = async (libdragonInfo) => {
-  let containerId = await requiresContainer(libdragonInfo);
-
+  let containerId;
   const oldImageName = libdragonInfo.imageName;
-  const imageName = libdragonInfo.options.DOCKER_IMAGE;
+  const imageName = libdragonInfo.options.DOCKER_IMAGE ?? oldImageName;
   if (oldImageName !== imageName) {
     log(`Changing image from \`${oldImageName}\` to \`${imageName}\``);
     await destroyContainer(libdragonInfo);
@@ -486,6 +467,9 @@ const install = async (libdragonInfo) => {
       ...libdragonInfo,
       imageName,
     });
+  } else {
+    // Make sure existing one is running
+    containerId = await start(libdragonInfo);
   }
 
   // Re-install vendors on new image
