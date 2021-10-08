@@ -9,6 +9,7 @@ const {
   LIBDRAGON_PROJECT_MANIFEST,
   IMAGE_FILE,
   DOCKER_HUB_IMAGE,
+  CONTAINER_TARGET_PATH,
 } = require('./constants');
 
 const globals = {
@@ -178,7 +179,8 @@ async function findNPMRoot() {
 
 function dockerRelativeWorkdir(libdragonInfo) {
   return (
-    '/libdragon/' +
+    CONTAINER_TARGET_PATH +
+    '/' +
     toPosixPath(path.relative(libdragonInfo.root, process.cwd()))
   );
 }
@@ -198,6 +200,42 @@ async function findGitRoot() {
   } catch {
     // No need to do anything if the user does not have git
     return undefined;
+  }
+}
+
+async function findContainerId(libdragonInfo) {
+  const idFile = path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE);
+  if (fs.existsSync(idFile)) {
+    const id = fs.readFileSync(idFile, { encoding: 'utf8' }).trim();
+    log(`Read containerId: ${id}`, true);
+    return id;
+  }
+
+  const candidates = (
+    await spawnProcess('docker', [
+      'container',
+      'ls',
+      '-a',
+      '--format',
+      '{{.}}{{.ID}}',
+      '-f',
+      'volume=' + CONTAINER_TARGET_PATH,
+      '-f',
+      'ancestor=' + libdragonInfo.imageName,
+    ])
+  )
+    .split('\n')
+    .filter((s) => s.includes(`${libdragonInfo.root} `));
+
+  if (candidates.length > 0) {
+    const str = candidates[0];
+    const shortId = str.slice(-12);
+    const idIndex = str.indexOf(shortId);
+    const longId = str.slice(idIndex, idIndex + 64);
+    if (longId.length === 64) {
+      tryCacheContainerId({ ...libdragonInfo, containerId: longId });
+      return longId;
+    }
   }
 }
 
@@ -256,13 +294,6 @@ async function readProjectInfo() {
 
   log(`Project root: ${info.root}`, true);
 
-  const idFile = path.join(info.root, '.git', CACHED_CONTAINER_FILE);
-  if (fs.existsSync(idFile)) {
-    const id = fs.readFileSync(idFile, { encoding: 'utf8' }).trim();
-    log(`Read containerId: ${id}`, true);
-    info.containerId = id;
-  }
-
   const imageFile = path.join(
     info.root,
     LIBDRAGON_PROJECT_MANIFEST,
@@ -271,6 +302,10 @@ async function readProjectInfo() {
 
   if (fs.existsSync(imageFile) && !fs.statSync(imageFile).isDirectory()) {
     info.imageName = fs.readFileSync(imageFile, { encoding: 'utf8' }).trim();
+  }
+
+  if (!info.containerId) {
+    info.containerId = await findContainerId(info);
   }
 
   return info;
@@ -334,6 +369,16 @@ async function createManifestIfNotExist(libdragonInfo) {
   return false;
 }
 
+function tryCacheContainerId(libdragonInfo) {
+  const gitFolder = path.join(libdragonInfo.root, '.git');
+  if (fs.existsSync(gitFolder) && fs.statSync(gitFolder).isDirectory()) {
+    fs.writeFileSync(
+      path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE),
+      libdragonInfo.containerId
+    );
+  }
+}
+
 function toPosixPath(p) {
   return p.replace(new RegExp('\\' + path.sep), path.posix.sep);
 }
@@ -367,6 +412,7 @@ module.exports = {
   runGitMaybeHost,
   dockerHostUserParams,
   dockerRelativeWorkdir,
+  tryCacheContainerId,
   CommandError,
   globals,
 };

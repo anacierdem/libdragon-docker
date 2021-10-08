@@ -3,6 +3,11 @@
 
 ## [10.1.1] - 2021-10-08
 
+### Added
+
+- Container discovery. The tool can now find a container even if the `.git` is
+lost.
+
 ### Changed
 
 - Show more output for downloading the container and initial git operations.

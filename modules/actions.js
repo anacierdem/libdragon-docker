@@ -6,7 +6,7 @@ const {
   LIBDRAGON_SUBMODULE,
   LIBDRAGON_BRANCH,
   LIBDRAGON_GIT,
-  CACHED_CONTAINER_FILE,
+  CONTAINER_TARGET_PATH,
 } = require('./constants');
 const {
   spawnProcess,
@@ -23,6 +23,7 @@ const {
   runGitMaybeHost,
   dockerHostUserParams,
   dockerRelativeWorkdir,
+  tryCacheContainerId,
 } = require('./helpers');
 
 const destroyContainer = async (libdragonInfo) => {
@@ -86,8 +87,11 @@ const initContainer = async (libdragonInfo) => {
           'run',
           '-d', // Detached
           '--mount',
-          'type=bind,source=' + libdragonInfo.root + ',target=/libdragon', // Mount files
-          '-w=/libdragon', // Set working directory
+          'type=bind,source=' +
+            libdragonInfo.root +
+            ',target=' +
+            CONTAINER_TARGET_PATH, // Mount files
+          '-w=' + CONTAINER_TARGET_PATH, // Set working directory
           imageName,
           'tail',
           '-f',
@@ -137,10 +141,11 @@ const initContainer = async (libdragonInfo) => {
   ]);
 
   // We have created a new container, save the new info
-  fs.writeFileSync(
-    path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE),
-    newId
-  );
+  tryCacheContainerId({
+    ...libdragonInfo,
+    containerId: newId,
+  });
+
   libdragonInfo.showStatus &&
     log(
       chalk.green(`Successfully initialized docker container: ${name.trim()}`)
@@ -232,12 +237,8 @@ const start = async (libdragonInfo) => {
     return id;
   }
 
-  log(`Starting container: ${libdragonInfo.containerId}`, true);
-  await spawnProcess('docker', [
-    'container',
-    'start',
-    libdragonInfo.containerId,
-  ]);
+  log(`Starting container: ${id}`, true);
+  await spawnProcess('docker', ['container', 'start', id]);
 
   log(id);
   return id;
@@ -335,7 +336,7 @@ const installDependencies = async (libdragonInfo) => {
     libdragonInfo,
     [
       '--workdir',
-      '/libdragon/' + LIBDRAGON_SUBMODULE,
+      CONTAINER_TARGET_PATH + '/' + LIBDRAGON_SUBMODULE,
       ...dockerHostUserParams(libdragonInfo),
     ],
     ['/bin/bash', './build.sh']
@@ -386,7 +387,10 @@ const installDependencies = async (libdragonInfo) => {
               const relativePath = toPosixPath(
                 path.relative(libdragonInfo.root, paths[0])
               );
-              const containerPath = path.posix.join('/libdragon', relativePath);
+              const containerPath = path.posix.join(
+                CONTAINER_TARGET_PATH,
+                relativePath
+              );
               const makePath = path.posix.join(containerPath, 'Makefile');
 
               await dockerExec(
