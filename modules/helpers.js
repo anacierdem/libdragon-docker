@@ -16,18 +16,20 @@ const globals = {
 };
 
 class CommandError extends Error {
-  constructor(message, { code, out, showOutput }) {
+  constructor(message, { code, out, userCommand }) {
     super(message);
     this.code = code;
     this.out = out;
-    this.showOutput = showOutput;
+    this.userCommand = userCommand;
   }
 }
 
-// A simple Promise wrapper for child_process.spawn. If showOutput is true,
-// std in/out becomes a tty when available and we cannot read the stdout from
-// the command anymore.
-function spawnProcess(cmd, params = [], showOutput) {
+// A simple Promise wrapper for child_process.spawn. If interactive is true,
+// stdout becomes a tty when available and we cannot read the stdout from the
+// command anymore. If interactive is "full", the error stream is also piped to
+// the main process as TTY, so it is not readable anymore as well. For the
+// commands using stderr as TTY it should be set to "full"
+function spawnProcess(cmd, params = [], userCommand, interactive = false) {
   return new Promise((resolve, reject) => {
     let stdout = [];
     let stderr = [];
@@ -36,34 +38,41 @@ function spawnProcess(cmd, params = [], showOutput) {
       log(chalk.grey(`Spawning: ${cmd} ${params.join(' ')}`), true);
     }
 
+    const isTTY =
+      process.stdin.isTTY && process.stdout.isTTY && process.stderr.isTTY;
+    const enableTTY = isTTY && !!interactive;
+    const enableErrorTTY = isTTY && interactive === 'full';
+
     const command = spawn(cmd, params, {
-      // We should redirect stdout and stdin in tandem for the TTY to work
-      // properly otherwise it somehow causes issues in the stream
+      // We should redirect streams together for the TTY to work
+      // properly if they are all used as TTY
       stdio: [
-        showOutput ? process.stdin : 'pipe',
-        showOutput ? process.stdout : 'pipe',
-        'pipe',
+        enableTTY ? 'inherit' : 'pipe',
+        enableTTY ? 'inherit' : 'pipe',
+        enableErrorTTY ? 'inherit' : 'pipe',
       ],
     });
 
-    // If showOutput is set, there is no stdout o/w only redirect if verbose
-    if (!showOutput && globals.verbose) {
+    if (!enableTTY && (globals.verbose || userCommand)) {
       command.stdout.pipe(process.stdout);
     }
 
-    if (showOutput || globals.verbose) {
+    if (!enableErrorTTY && (globals.verbose || userCommand)) {
       command.stderr.pipe(process.stderr);
     }
 
-    if (!showOutput) {
+    // We shouldn't need to collect the data if it is a user command.
+    if (!enableTTY && !userCommand) {
       command.stdout.on('data', function (data) {
         stdout.push(Buffer.from(data));
       });
     }
 
-    command.stderr.on('data', function (data) {
-      stderr.push(Buffer.from(data));
-    });
+    if (!enableErrorTTY) {
+      command.stderr.on('data', function (data) {
+        stderr.push(Buffer.from(data));
+      });
+    }
 
     const errorHandler = (err) => {
       command.off('close', closeHandler);
@@ -80,7 +89,7 @@ function spawnProcess(cmd, params = [], showOutput) {
           {
             code,
             out: Buffer.concat(stderr).toString(),
-            showOutput,
+            userCommand,
           }
         );
         reject(err);
@@ -92,29 +101,49 @@ function spawnProcess(cmd, params = [], showOutput) {
   });
 }
 
-function dockerExec(libdragonInfo, dockerParams, cmdWithParams, showOutput) {
+function dockerExec(
+  libdragonInfo,
+  dockerParams,
+  cmdWithParams,
+  userCommand,
+  interactive
+) {
   // TODO: assert for invalid args
   const haveDockerParams =
     Array.isArray(dockerParams) && Array.isArray(cmdWithParams);
+  const isTTY = process.stdin.isTTY && process.stdout.isTTY;
+  // interactive and TTY?
+  const additionalParams =
+    isTTY && (haveDockerParams ? interactive : userCommand) ? ['-it'] : [];
   return spawnProcess(
     'docker',
     [
       'exec',
-      ...(haveDockerParams ? dockerParams : []),
+      ...(haveDockerParams
+        ? [...dockerParams, ...additionalParams]
+        : additionalParams),
       libdragonInfo.containerId,
       ...(haveDockerParams ? cmdWithParams : dockerParams),
     ],
-    haveDockerParams ? showOutput : cmdWithParams
+    haveDockerParams ? userCommand : cmdWithParams,
+    haveDockerParams ? interactive : userCommand
   );
 }
 
 /**
  * Invokes host git with provided params. If host does not have git, falls back
- * to the docker git, with the user set to the user running libdragon.
+ * to the docker git, with the nix user set to the user running libdragon.
  */
-async function runGitMaybeHost(libdragonInfo, params, showOutput) {
+async function runGitMaybeHost(libdragonInfo, params, interactive = 'full') {
   try {
-    return await spawnProcess('git', params, showOutput);
+    return await spawnProcess(
+      'git',
+      params,
+      false,
+      // Windows git is breaking the TTY somehow - disable interactive for now
+      // We are not able to display progress for the initial clone b/c of this
+      /^win/.test(process.platform) ? false : interactive
+    );
   } catch (e) {
     if (!(e instanceof CommandError)) {
       return await dockerExec(
@@ -122,7 +151,8 @@ async function runGitMaybeHost(libdragonInfo, params, showOutput) {
         // Use the host user when initializing git as we will need access
         [...dockerHostUserParams(libdragonInfo)],
         ['git', ...params],
-        showOutput
+        false,
+        interactive
       );
     }
     throw e;

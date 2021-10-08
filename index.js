@@ -86,7 +86,7 @@ readProjectInfo()
     )
   )
   .catch((e) => {
-    const userTargetedError = e instanceof CommandError && e.showOutput;
+    const userTargetedError = e instanceof CommandError && e.userCommand;
 
     // Show additional information to user if verbose or we did a mistake
     if (globals.verbose || !userTargetedError) {
