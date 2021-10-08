@@ -41,7 +41,7 @@ jobs:
           npm run libdragon -- --verbose make tests
           npm run libdragon -- --verbose help
 
-  ci-without-init-start-stop-update:
+  ci-start-stop-update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -55,10 +55,11 @@ jobs:
 
       - name: Test
         run: |
-          npm run libdragon -- --verbose make
+          npm run libdragon -- --verbose init
           npm run libdragon -- --verbose stop
           npm run libdragon -- --verbose start
           npm run libdragon -- --verbose update
+          npm run libdragon -- --verbose install
 
   ci-no-git-make-update:
     runs-on: ubuntu-latest
@@ -77,8 +78,10 @@ jobs:
 
       - name: Test
         run: |
+          npm run libdragon -- --verbose init
           npm run libdragon -- --verbose make
           npm run libdragon -- --verbose update
+          npm run libdragon -- --verbose install
 
   ci-pack:
     runs-on: ubuntu-latest
