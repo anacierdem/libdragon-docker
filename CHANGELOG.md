@@ -5,8 +5,7 @@
 
 ### Added
 
-- Container discovery. The tool can now find a container even if the `.git` is
-lost.
+- Container discovery. The tool can now find a container even if `.git` is lost.
 
 ### Changed
 
@@ -21,6 +20,8 @@ container, now they assume there is an intact libdragon folder to use.
 ### Fixed
 
 - Fix wording for libdragon install on the container.
+- Improve image name persitence such that the tool finds and updates it more
+consistently.
 
 ## [10.1.0] - 2021-10-07
 

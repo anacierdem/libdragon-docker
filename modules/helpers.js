@@ -237,8 +237,6 @@ async function findContainerId(libdragonInfo) {
       '{{.}}{{.ID}}',
       '-f',
       'volume=' + CONTAINER_TARGET_PATH,
-      '-f',
-      'ancestor=' + libdragonInfo.imageName,
     ])
   )
     .split('\n')
@@ -317,13 +315,32 @@ async function readProjectInfo() {
     IMAGE_FILE
   );
 
+  // flag has the highest priority followed by the one read from the file
+  // and then if there is any matching container, name is read from it. As last
+  // option fallback to default value.
   if (fs.existsSync(imageFile) && !fs.statSync(imageFile).isDirectory()) {
     info.imageName = fs.readFileSync(imageFile, { encoding: 'utf8' }).trim();
   }
 
-  if (!info.containerId) {
-    info.containerId = await findContainerId(info);
+  info.containerId = await findContainerId(info);
+
+  // If still have the container, read the image name from it
+  if (!info.imageName && (await checkContainerAndClean(info))) {
+    info.imageName = (
+      await spawnProcess('docker', [
+        'container',
+        'inspect',
+        info.containerId,
+        '--format',
+        '{{.Config.Image}}',
+      ])
+    ).trim();
+
+    // Cache the image name
+    updateImageName(info);
   }
+
+  info.imageName = info.imageName ?? DOCKER_HUB_IMAGE;
 
   return info;
 }
@@ -333,32 +350,12 @@ async function updateImageName(libdragonInfo) {
     libdragonInfo.root,
     LIBDRAGON_PROJECT_MANIFEST
   );
-
-  // flag has the highest priority followed by the one read from the file
-  // and then if there is any matching container, name is read from it. As last
-  // option fallback to default value.
-  let imageName = libdragonInfo.options.DOCKER_IMAGE ?? libdragonInfo.imageName;
-
-  if (!imageName) {
-    // If still have the container, read the image name
-    const containerId = await checkContainerAndClean(libdragonInfo);
-    if (containerId) {
-      imageName = await spawnProcess('docker', [
-        'container',
-        'inspect',
-        containerId,
-        '--format',
-        '{{.Config.Image}}',
-      ]);
-    }
-  }
-
-  imageName = imageName ?? DOCKER_HUB_IMAGE;
-
   await createManifestIfNotExist(libdragonInfo);
-  fs.writeFileSync(path.join(manifestPath, IMAGE_FILE), imageName);
-  log(`Image name updated: ${imageName}`, true);
-  return imageName;
+  fs.writeFileSync(
+    path.join(manifestPath, IMAGE_FILE),
+    libdragonInfo.imageName
+  );
+  log(`Image name updated: ${libdragonInfo.imageName}`, true);
 }
 
 /**
