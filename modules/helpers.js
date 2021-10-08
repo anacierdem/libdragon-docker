@@ -95,7 +95,13 @@ function spawnProcess(cmd, params = [], showOutput, interactive = true) {
   });
 }
 
-function dockerExec(libdragonInfo, dockerParams, cmdWithParams, showOutput, interactive) {
+function dockerExec(
+  libdragonInfo,
+  dockerParams,
+  cmdWithParams,
+  showOutput,
+  interactive
+) {
   // TODO: assert for invalid args
   const haveDockerParams =
     Array.isArray(dockerParams) && Array.isArray(cmdWithParams);
@@ -108,7 +114,7 @@ function dockerExec(libdragonInfo, dockerParams, cmdWithParams, showOutput, inte
       ...(haveDockerParams ? cmdWithParams : dockerParams),
     ],
     haveDockerParams ? showOutput : cmdWithParams,
-    haveDockerParams ? interactive : showOutput,
+    haveDockerParams ? interactive : showOutput
   );
 }
 

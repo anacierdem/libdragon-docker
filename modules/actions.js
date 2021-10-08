@@ -114,9 +114,6 @@ const initContainer = async (libdragonInfo) => {
     ]);
 
     await runGitMaybeHost(libdragonInfo, ['init']);
-    await initSubmodule(libdragonInfo);
-
-    await installDependencies(newInfo);
   } catch (e) {
     // Dispose the invalid container, clean and exit
     await destroyContainer({
@@ -196,16 +193,23 @@ async function init(libdragonInfo) {
   log(`Initializing a libdragon project at ${libdragonInfo.root}.`);
   const isNewProject = await createManifestIfNotExist(libdragonInfo);
 
-  await start(libdragonInfo);
+  const newId = await start(libdragonInfo);
+  const newInfo = {
+    ...libdragonInfo,
+    containerId: newId,
+  };
+
+  await initSubmodule(newInfo);
+  await installDependencies(newInfo);
 
   if (isNewProject) {
     log(`Copying project files...`);
     const skeletonFolder = path.join(__dirname, '../skeleton');
     // node copy functions does not work with pkg
-    copyDirContents(skeletonFolder, libdragonInfo.root);
+    copyDirContents(skeletonFolder, newInfo.root);
   }
 
-  log(chalk.green(`libdragon ready at \`${libdragonInfo.root}\`.`));
+  log(chalk.green(`libdragon ready at \`${newInfo.root}\`.`));
 }
 
 const start = async (libdragonInfo) => {
@@ -276,7 +280,7 @@ const exec = async (libdragonInfo, commandAndParams) => {
   let started = false;
   const startOnceAndCmd = async () => {
     if (!started) {
-      const newId = await start(libdragonInfo);
+      const newId = await startAndInstall(libdragonInfo);
       started = true;
       await tryCmd({
         ...libdragonInfo,
@@ -311,6 +315,20 @@ const make = async (libdragonInfo, params) => {
 };
 
 const installDependencies = async (libdragonInfo) => {
+  const buildScriptPath = path.join(
+    libdragonInfo.root,
+    'libdragon',
+    'build.sh'
+  );
+  if (
+    !fs.existsSync(buildScriptPath) ||
+    !fs.statSync(buildScriptPath).isFile()
+  ) {
+    throw new Error(
+      'build.sh not found. Make sure you have a vendored libdragon copy at ./libdragon'
+    );
+  }
+
   libdragonInfo.showStatus && log('Installing libdragon to the container...');
 
   await dockerExec(
@@ -398,6 +416,16 @@ const installDependencies = async (libdragonInfo) => {
   }
 };
 
+async function startAndInstall(libdragonInfo) {
+  const containerId = await start(libdragonInfo);
+
+  await installDependencies({
+    ...libdragonInfo,
+    containerId,
+  });
+  return containerId;
+}
+
 const requiresContainer = async (libdragonInfo) => {
   const id = await checkContainerAndClean(libdragonInfo);
 
@@ -410,32 +438,14 @@ const requiresContainer = async (libdragonInfo) => {
   return id;
 };
 
-const maybeStartNewImage = async (libdragonInfo) => {
-  let containerId = libdragonInfo.containerId;
-  const oldImageName = libdragonInfo.imageName;
-  const imageName = await updateImageName(libdragonInfo);
-  if (oldImageName !== imageName) {
-    log(`Changing image from \`${oldImageName}\` to \`${imageName}\``);
-    await destroyContainer(libdragonInfo);
-
-    // Start the new image
-    containerId = await start({
-      ...libdragonInfo,
-      imageName,
-    });
-  }
-
-  return {
-    ...libdragonInfo,
-    imageName,
-    containerId,
-  };
-};
-
 const update = async (libdragonInfo) => {
   let containerId = await requiresContainer(libdragonInfo);
 
   // Start existing
+  containerId = await startAndInstall({
+    ...libdragonInfo,
+    containerId,
+  });
   containerId = await start(libdragonInfo);
 
   // Update submodule
@@ -460,13 +470,24 @@ const update = async (libdragonInfo) => {
 const install = async (libdragonInfo) => {
   let containerId = await requiresContainer(libdragonInfo);
 
-  const newInfo = await maybeStartNewImage({
-    ...libdragonInfo,
-    containerId,
-  });
+  const oldImageName = libdragonInfo.imageName;
+  const imageName = await updateImageName(libdragonInfo);
+  if (oldImageName !== imageName) {
+    log(`Changing image from \`${oldImageName}\` to \`${imageName}\``);
+    await destroyContainer(libdragonInfo);
+
+    containerId = await start({
+      ...libdragonInfo,
+      imageName,
+    });
+  }
 
   // Re-install vendors on new image
-  await installDependencies(newInfo);
+  await installDependencies({
+    ...libdragonInfo,
+    imageName,
+    containerId,
+  });
 };
 
 const help = () => {

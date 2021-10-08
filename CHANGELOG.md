@@ -7,6 +7,11 @@
 
 - Show more output for downloading the container and initial git operations.
 - Remove an extra log during initialization.
+- The submodule was always being initialized when a container is started. This
+was making some actions inconsistent. For example `install` or `make` action
+was trying to re-initialize the submodule unnecessarily. This is fixed by only
+initializing it with the `init` action. If any of those need to re-init the
+container, now they assume there is an intact libdragon folder to use.
 
 ### Fixed
 
