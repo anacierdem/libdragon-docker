@@ -1,5 +1,17 @@
 # Change Log
 
+
+## [10.1.1] - 2021-10-08
+
+### Changed
+
+- Show more output for downloading the container and initial git operations.
+- Remove an extra log during initialization.
+
+### Fixed
+
+- Fix wording for libdragon install on the container.
+
 ## [10.1.0] - 2021-10-07
 
 ### Added

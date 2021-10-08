@@ -44,21 +44,25 @@ const destroyContainer = async (libdragonInfo) => {
 const initSubmodule = async (libdragonInfo) => {
   // Try to make sure submodule is there, in case it is deleted manually
   try {
-    await runGitMaybeHost(libdragonInfo, ['restore', '.gitmodules']);
+    await runGitMaybeHost(libdragonInfo, ['restore', '.gitmodules'], true);
   } catch {
     // No need to do anything else here
   }
-  await runGitMaybeHost(libdragonInfo, [
-    'submodule',
-    'add',
-    '--force',
-    '--name',
-    LIBDRAGON_SUBMODULE,
-    '--branch',
-    LIBDRAGON_BRANCH,
-    LIBDRAGON_GIT,
-    LIBDRAGON_SUBMODULE,
-  ]);
+  await runGitMaybeHost(
+    libdragonInfo,
+    [
+      'submodule',
+      'add',
+      '--force',
+      '--name',
+      LIBDRAGON_SUBMODULE,
+      '--branch',
+      LIBDRAGON_BRANCH,
+      LIBDRAGON_GIT,
+      LIBDRAGON_SUBMODULE,
+    ],
+    true
+  );
 };
 
 /**
@@ -71,22 +75,27 @@ const initContainer = async (libdragonInfo) => {
 
     // Download image
     libdragonInfo.showStatus && log(`Downloading docker image: ${imageName}`);
-    await spawnProcess('docker', ['pull', imageName]);
+    await spawnProcess('docker', ['pull', imageName], libdragonInfo.showStatus);
 
     // Create a new container
     libdragonInfo.showStatus && log('Creating new container...');
     newId = (
-      await spawnProcess('docker', [
-        'run',
-        '-d', // Detached
-        '--mount',
-        'type=bind,source=' + libdragonInfo.root + ',target=/libdragon', // Mount files
-        '-w=/libdragon', // Set working directory
-        imageName,
-        'tail',
-        '-f',
-        '/dev/null',
-      ])
+      await spawnProcess(
+        'docker',
+        [
+          'run',
+          '-d', // Detached
+          '--mount',
+          'type=bind,source=' + libdragonInfo.root + ',target=/libdragon', // Mount files
+          '-w=/libdragon', // Set working directory
+          imageName,
+          'tail',
+          '-f',
+          '/dev/null',
+        ],
+        libdragonInfo.showStatus,
+        false
+      )
     ).trim();
 
     const newInfo = {
@@ -187,7 +196,6 @@ async function init(libdragonInfo) {
   log(`Initializing a libdragon project at ${libdragonInfo.root}.`);
   const isNewProject = await createManifestIfNotExist(libdragonInfo);
 
-  log(`Preparing the docker container...`);
   await start(libdragonInfo);
 
   if (isNewProject) {
@@ -303,7 +311,7 @@ const make = async (libdragonInfo, params) => {
 };
 
 const installDependencies = async (libdragonInfo) => {
-  libdragonInfo.showStatus && log('Vendoring libdragon...');
+  libdragonInfo.showStatus && log('Installing libdragon to the container...');
 
   await dockerExec(
     libdragonInfo,
