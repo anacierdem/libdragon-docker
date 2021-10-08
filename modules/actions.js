@@ -441,6 +441,7 @@ const update = async (libdragonInfo) => {
   // Update submodule
   log('Updating submodule...');
 
+  await runGitMaybeHost(libdragonInfo, ['init']);
   await initSubmodule(libdragonInfo);
 
   await runGitMaybeHost(libdragonInfo, [
