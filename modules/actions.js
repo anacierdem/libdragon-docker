@@ -7,6 +7,7 @@ const {
   LIBDRAGON_BRANCH,
   LIBDRAGON_GIT,
   CONTAINER_TARGET_PATH,
+  LIBDRAGON_PROJECT_MANIFEST,
 } = require('./constants');
 const {
   spawnProcess,
@@ -185,6 +186,37 @@ function copyDirContents(src, dst) {
  */
 async function init(libdragonInfo) {
   log(`Initializing a libdragon project at ${libdragonInfo.root}`);
+
+  const files = fs.readdirSync(libdragonInfo.root);
+
+  const manifestFile = files.find(
+    (name) => name === LIBDRAGON_PROJECT_MANIFEST
+  );
+
+  if (manifestFile) {
+    log(
+      `${path.join(
+        libdragonInfo.root,
+        manifestFile
+      )} exists. This is probably already a libdragon project, starting it...`
+    );
+    await startAndInstall(libdragonInfo);
+    return;
+  }
+
+  const libdragonFile = files.find((name) =>
+    name.match(new RegExp(`^${LIBDRAGON_SUBMODULE}.?`))
+  );
+
+  if (libdragonFile) {
+    throw new Error(
+      `${path.join(
+        libdragonInfo.root,
+        libdragonFile
+      )} already exists. That is the libdragon vendoring target, please remove and retry.`
+    );
+  }
+
   await createManifestIfNotExist(libdragonInfo);
   const newId = await start(libdragonInfo);
   const newInfo = {
@@ -411,6 +443,7 @@ const installDependencies = async (libdragonInfo) => {
 async function startAndInstall(libdragonInfo) {
   const containerId = await start(libdragonInfo);
 
+  // TODO: skip if unnecessary
   await installDependencies({
     ...libdragonInfo,
     containerId,
@@ -429,7 +462,16 @@ const update = async (libdragonInfo) => {
   // Update submodule
   log('Updating submodule...');
 
-  await initSubmodule(newInfo);
+  try {
+    await initSubmodule(newInfo);
+  } catch {
+    throw new Error(
+      `Unable to re-initialize vendored libdragon. Probably git does not know the vendoring target (${path.join(
+        libdragonInfo.root,
+        LIBDRAGON_SUBMODULE
+      )}) Removing it might resolve this issue.`
+    );
+  }
 
   await runGitMaybeHost(newInfo, [
     'submodule',

@@ -6,6 +6,8 @@
 ### Added
 
 - Container discovery. The tool can now find a container even if `.git` is lost.
+- A few additional error messages for some potentially confusing cases such as
+already having a file with `libdragon` like name.
 
 ### Changed
 
@@ -19,6 +21,9 @@ container, now they assume there is an intact libdragon folder to use.
 - Similarly a git repository is not initialized unnecessarily anymore.
 - `update` and `install` are now able to start containers if necessary.
 - Always try to copy skeleton files, they won't overwrite anything already.
+- Do not re-initialize if there is a `.libdragon` folder. We now only try to
+start it in this case. If it is not a complete container, it can probably be
+recovered by a `libdragon install` or `libdragon update`.
 
 ### Fixed
 

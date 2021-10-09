@@ -92,11 +92,15 @@ After cloning this repository on a system with node.js (`>= 14`) & docker (`>= 1
 
     npm install
 
-This will install all necessary NPM dependencies. Then run;
+This will install all necessary NPM dependencies. Now it is time to get the original libdragon repository. (you can also clone this repository with `--recurse-submodules`)
+
+    git submodule update --init
+
+Then run;
 
     npm run libdragon -- init
 
-to download the pre-built toolchain image from docker hub, get the original libdragon repository as a submodule, start and initialize it. This will also install [test bench](#local-test-bench) dependencies into the container if any.
+to download the pre-built toolchain image, start and initialize it. This will also install [test bench](#local-test-bench) dependencies into the container if any.
 
 Now you will be able to work on the files simultaneously with the docker container and any built binaries will be available in your workspace as it is mounted on the container.
 
