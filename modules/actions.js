@@ -43,27 +43,19 @@ const destroyContainer = async (libdragonInfo) => {
 };
 
 const initSubmodule = async (libdragonInfo) => {
-  // Try to make sure submodule is there, in case it is deleted manually
-  try {
-    await runGitMaybeHost(libdragonInfo, ['restore', '.gitmodules'], true);
-  } catch {
-    // No need to do anything else here
-  }
-  await runGitMaybeHost(
-    libdragonInfo,
-    [
-      'submodule',
-      'add',
-      '--force',
-      '--name',
-      LIBDRAGON_SUBMODULE,
-      '--branch',
-      LIBDRAGON_BRANCH,
-      LIBDRAGON_GIT,
-      LIBDRAGON_SUBMODULE,
-    ],
-    true
-  );
+  await runGitMaybeHost(libdragonInfo, ['init']);
+
+  await runGitMaybeHost(libdragonInfo, [
+    'submodule',
+    'add',
+    '--force',
+    '--name',
+    LIBDRAGON_SUBMODULE,
+    '--branch',
+    LIBDRAGON_BRANCH,
+    LIBDRAGON_GIT,
+    LIBDRAGON_SUBMODULE,
+  ]);
 };
 
 /**
@@ -121,8 +113,6 @@ const initContainer = async (libdragonInfo) => {
       `${uid >= 0 ? uid : ''}:${gid >= 0 ? gid : ''}`,
       '/n64_toolchain',
     ]);
-
-    await runGitMaybeHost(libdragonInfo, ['init']);
   } catch (e) {
     // Dispose the invalid container, clean and exit
     await destroyContainer({
@@ -144,12 +134,6 @@ const initContainer = async (libdragonInfo) => {
     '--format',
     '{{.Name}}',
   ]);
-
-  // We have created a new container, save the new info
-  tryCacheContainerId({
-    ...libdragonInfo,
-    containerId: newId,
-  });
 
   libdragonInfo.showStatus &&
     log(
@@ -200,9 +184,8 @@ function copyDirContents(src, dst) {
  * Initialize a new libdragon project in current working directory
  */
 async function init(libdragonInfo) {
-  log(`Initializing a libdragon project at ${libdragonInfo.root}.`);
-  const isNewProject = await createManifestIfNotExist(libdragonInfo);
-
+  log(`Initializing a libdragon project at ${libdragonInfo.root}`);
+  await createManifestIfNotExist(libdragonInfo);
   const newId = await start(libdragonInfo);
   const newInfo = {
     ...libdragonInfo,
@@ -210,14 +193,16 @@ async function init(libdragonInfo) {
   };
 
   await initSubmodule(newInfo);
+
+  // We have created a new container, save the new info
+  tryCacheContainerId(newInfo);
+
   await installDependencies(newInfo);
 
-  if (isNewProject) {
-    log(`Copying project files...`);
-    const skeletonFolder = path.join(__dirname, '../skeleton');
-    // node copy functions does not work with pkg
-    copyDirContents(skeletonFolder, newInfo.root);
-  }
+  log(`Copying project files...`);
+  const skeletonFolder = path.join(__dirname, '../skeleton');
+  // node copy functions does not work with pkg
+  copyDirContents(skeletonFolder, newInfo.root);
 
   log(chalk.green(`libdragon ready at \`${newInfo.root}\`.`));
 }
@@ -436,13 +421,17 @@ async function startAndInstall(libdragonInfo) {
 const update = async (libdragonInfo) => {
   const containerId = await start(libdragonInfo);
 
+  const newInfo = {
+    ...libdragonInfo,
+    containerId,
+  };
+
   // Update submodule
   log('Updating submodule...');
 
-  await runGitMaybeHost(libdragonInfo, ['init']);
-  await initSubmodule(libdragonInfo);
+  await initSubmodule(newInfo);
 
-  await runGitMaybeHost(libdragonInfo, [
+  await runGitMaybeHost(newInfo, [
     'submodule',
     'update',
     '--remote',
@@ -450,10 +439,7 @@ const update = async (libdragonInfo) => {
     './' + LIBDRAGON_SUBMODULE,
   ]);
 
-  await install({
-    ...libdragonInfo,
-    containerId,
-  });
+  await install(newInfo);
 };
 
 const install = async (libdragonInfo) => {

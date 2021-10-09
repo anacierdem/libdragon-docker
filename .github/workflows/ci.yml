@@ -43,7 +43,7 @@ jobs:
           npm run libdragon -- --verbose update
           npm run libdragon -- --verbose install
 
-  ci-clean-make-update:
+  ci-clean-files:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -62,13 +62,13 @@ jobs:
         run: |
           npm run libdragon -- --verbose init
           rm -rf .libdragon
-          rm -rf .git
+          rm .git/libdragon-docker-container
           npm run libdragon -- --verbose make
           rm -rf .libdragon
-          rm -rf .git
+          rm .git/libdragon-docker-container
           npm run libdragon -- --verbose update
           rm -rf .libdragon
-          rm -rf .git
+          rm .git/libdragon-docker-container
           npm run libdragon -- --verbose install
 
   ci-pack:

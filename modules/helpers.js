@@ -304,7 +304,6 @@ async function readProjectInfo() {
   if (!info.root) {
     log('Could not find project root, set as cwd.', true);
     info.root = process.cwd();
-    return info;
   }
 
   log(`Project root: ${info.root}`, true);
@@ -323,6 +322,7 @@ async function readProjectInfo() {
   }
 
   info.containerId = await findContainerId(info);
+  log(`Active container id: ${info.containerId}`, true);
 
   // If still have the container, read the image name from it
   if (!info.imageName && (await checkContainerAndClean(info))) {
@@ -341,11 +341,12 @@ async function readProjectInfo() {
   }
 
   info.imageName = info.imageName ?? DOCKER_HUB_IMAGE;
-
+  log(`Active image name: ${info.imageName}`, true);
   return info;
 }
 
 async function updateImageName(libdragonInfo) {
+  if (!libdragonInfo.imageName) return;
   const manifestPath = path.join(
     libdragonInfo.root,
     LIBDRAGON_PROJECT_MANIFEST
@@ -378,9 +379,7 @@ async function createManifestIfNotExist(libdragonInfo) {
       `Creating libdragon project configuration at \`${libdragonInfo.root}\`.`
     );
     fs.mkdirSync(manifestPath);
-    return true;
   }
-  return false;
 }
 
 function tryCacheContainerId(libdragonInfo) {
