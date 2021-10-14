@@ -4,8 +4,6 @@
 
 int main(void)
 {
-    init_interrupts();
-
     console_init();
 
     debug_init_usblog();

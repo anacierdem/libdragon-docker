@@ -1,5 +1,14 @@
 # Change Log
 
+## [10.2.1] - 2021-10-14
+
+### Changed
+
+- Updated ed64.
+
+### Fixed
+
+- Fix skeleton project to match latest libdragon.
 
 ## [10.2.0] - 2021-10-10
 

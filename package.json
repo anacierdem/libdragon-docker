@@ -1,6 +1,6 @@
 {
   "name": "libdragon",
-  "version": "10.2.0",
+  "version": "10.2.1",
   "description": "This is a docker wrapper for libdragon",
   "main": "index.js",
   "engines": {
@@ -38,7 +38,7 @@
     "lodash": "^4.17.20"
   },
   "devDependencies": {
-    "ed64": "^2.0.2",
+    "ed64": "^2.0.3",
     "eslint": "^7.32.0",
     "pkg": "^5.3.1",
     "prettier": "^2.4.0"
