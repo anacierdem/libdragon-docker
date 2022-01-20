@@ -7,6 +7,7 @@
 - Update dependencies.
 - Detailed help output.
 - Move action descriptions to `libdragon help`.
+- Update libdragon to latest version for local build.
 
 ### Added
 
