@@ -1,5 +1,17 @@
 # Change Log
 
+## [10.3.0] - 2022-01-20
+
+### Changed
+
+- Update dependencies.
+- Detailed help output.
+- Move action descriptions to `libdragon help`.
+
+### Added
+
+- Shorthand flag support.
+
 ## [10.2.1] - 2021-10-14
 
 ### Changed
@@ -16,42 +28,42 @@
 
 - Container discovery. The tool can now find a container even if `.git` is lost.
 - A few additional error messages for some potentially confusing cases such as
-already having a file with `libdragon` like name.
+  already having a file with `libdragon` like name.
 
 ### Changed
 
 - Show more output for downloading the container and initial git operations.
 - Remove an extra log during initialization.
 - The submodule was always being initialized when a container is started. This
-was making some actions inconsistent. For example `install` or `make` action
-was trying to re-initialize the submodule unnecessarily. This is fixed by only
-initializing it with the `init` action. If any of those need to re-init the
-container, now they assume there is an intact libdragon folder to use.
+  was making some actions inconsistent. For example `install` or `make` action
+  was trying to re-initialize the submodule unnecessarily. This is fixed by only
+  initializing it with the `init` action. If any of those need to re-init the
+  container, now they assume there is an intact libdragon folder to use.
 - Similarly a git repository is not initialized unnecessarily anymore.
 - `update` and `install` are now able to start containers if necessary.
 - Always try to copy skeleton files, they won't overwrite anything already.
 - Do not re-initialize if there is a `.libdragon` folder. We now only try to
-start it in this case. If it is not a complete container, it can probably be
-recovered by a `libdragon install` or `libdragon update`.
+  start it in this case. If it is not a complete container, it can probably be
+  recovered by a `libdragon install` or `libdragon update`.
 
 ### Fixed
 
 - Fix wording for libdragon install on the container.
 - Improve image name persitence such that the tool finds and updates it more
-consistently.
+  consistently.
 
 ## [10.1.0] - 2021-10-07
 
 ### Added
 
 - `exec` action to execute arbitrary commands in the container with TTY support.
-This also improves the color output support as docker now knows it is using TTY.
+  This also improves the color output support as docker now knows it is using TTY.
 - Add more verbose logging for skeleton project copy.
 
 ### Changed
 
 - Removed partially not working `--byte-swap` option. It does not already work
-with the new libdragon build system so there is no need keeping it in the tool.
+  with the new libdragon build system so there is no need keeping it in the tool.
 
 ### Fixed
 
@@ -62,14 +74,14 @@ with the new libdragon build system so there is no need keeping it in the tool.
 ### Changed
 
 - A complete re-write of the tool. Check documentation for the new usage. It is
-much more straightforward to use now. `libdragon make` behaves almost the same.
+  much more straightforward to use now. `libdragon make` behaves almost the same.
 
 ## [9.0.0] - 2021-09-06
 
 ### Changed
 
 - Updated libdragon. We will be changing the update mechanism to be based on a
-git pull, so listing them here will not be useful anymore, let's not bother now.
+  git pull, so listing them here will not be useful anymore, let's not bother now.
 - Start using the new build system.
 - Update node engine spec to be at least 14.
 - Added minimum docker version to readme.
@@ -118,7 +130,6 @@ git pull, so listing them here will not be useful anymore, let's not bother now.
 - ed64romconfig binary (https://github.com/DragonMinded/libdragon/pull/153, https://github.com/DragonMinded/libdragon/pull/155)
 - Support for RTC status/read/write commands (https://github.com/DragonMinded/libdragon/pull/152)
 - Generic libdragon NPM script
-
 
 ## [7.0.0] - 2021-06-06
 

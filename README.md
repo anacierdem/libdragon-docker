@@ -36,53 +36,15 @@ You can invoke libdragon as follows;
 
     libdragon [flags] <action>
 
-### Available actions
-
-__`init`__
-
-Creates a libdragon project in the current directory. Every libdragon project will have its own docker container instance. If you are in a git repository or an NPM project, libdragon will be initialized at their root also marking there with a `.libdragon` folder.
-
-A git repository and a submodule at `./libdragon` will also be created. Do not remove the `.libdragon` folder and commit its contents if you are using git, as it keeps persistent libdragon project information.
-
-If this is the first time you are creating a libdragon project at that location, this action will also create skeleton project files to kickstart things.
-
-__`make`__
-
-Runs the libdragon build system in the current directory. It will mirror your current working directory to the container.
-
-This action is a shortcut to the `exec` action under the hood.
-
-__`exec`__
-
-Executes the given command in the container passing down any arguments provided. If you change your host working directory, the command will be executed in the corresponding folder in the container as well.
-
-This action will first try to execute the command in the container and if the container is not accessible, it will attempt a complete `start` cycle.
-
-This will properly passthrough your TTY if you have one. So by running `libdragon exec bash` you can start an interactive bash session with full TTY support.
-
-__`install`__
-
-Attempts to build and install everything libdragon related into the container. This includes all the tools and third parties used by libdragon except for the toolchain. If you have made changes to libdragon, you can execute this action to build everything based on your changes. Requires you to have an intact `libdragon` at the root of the project. If you are not working on libdragon, you can just use the `update` action instead.
-
-__`update`__
-
-This action will update the submodule from the remote branch (`trunk`) with a merge strategy and then perform a `libdragon install`. You can use the `install` action to only update all libdragon related artifacts in the container.
-
-__`start`__
-
-Start the container assigned to the current libdragon project. Will first attempt to start an existing container if found, followed by a new container run and installation similar to the `install` action. Will always print out the container id on success.
-
-__`stop`__
-
-Stop the container assigned to the current libdragon project.
+Run `libdragon help [action]` for more details on individual actions.
 
 ### Available flags
 
-__`--image <docker-image>`__
+**`--image <docker-image>`**
 
 Use this flag to provide a custom image to use instead of the default. It should include the toolchain at `/n64_toolchain`. It will be effective for `init`, `install` and `update` actions and will cause a re-initialization of the container if an image different from what was written to project configuration is provided.
 
-__`--verbose`__
+**`--verbose`**
 
 Be verbose. This will print all commands dispatched and their outputs as well.
 

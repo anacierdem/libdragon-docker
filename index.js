@@ -1,88 +1,91 @@
 #!/usr/bin/env node
 
+const commandLineArgs = require('command-line-args');
 const chalk = require('chalk');
 const { readProjectInfo, CommandError, globals } = require('./modules/helpers');
 const actions = require('./modules/actions');
+const { printUsage } = require('./modules/usage');
 
 const STATUS_OK = 0;
 const STATUS_ERROR = 1;
 const STATUS_BAD_PARAM = 2;
 
-// Command line options
-const options = {
-  DOCKER_IMAGE: undefined,
-  VERBOSE: false,
+let options = {},
+  currentAction;
 
-  ACTION: undefined,
-  PARAMS: undefined,
-};
+try {
+  options = commandLineArgs(
+    [
+      { name: 'action', defaultOption: true },
+      { name: 'verbose', alias: 'v', type: Boolean },
+    ],
+    { stopAtFirstUnknown: true }
+  );
+  globals.verbose = options.verbose;
 
-// Allow standard io here
-/* eslint-disable no-console */
+  const imageOption = { name: 'image', alias: 'i', type: String };
 
-for (let i = 2; i < process.argv.length; i++) {
-  const val = process.argv[i];
+  // Allow console here
+  /* eslint-disable no-console */
 
-  if (val === '--verbose') {
-    options.VERBOSE = true;
-    globals.verbose = true;
-    continue;
-  }
+  currentAction = actions[options.action];
 
-  if (val === '--image') {
-    options.DOCKER_IMAGE = process.argv[++i];
-    continue;
-  }
+  if (!currentAction) {
+    if (options.action === undefined) {
+      console.error(chalk.red('No action provided'));
+    } else {
+      console.error(chalk.red(`Invalid action \`${options.action}\``));
+    }
 
-  if (val.indexOf('--') >= 0) {
-    console.error(chalk.red(`Invalid flag \`${val}\``));
-    actions.help.fn();
+    printUsage();
     process.exit(STATUS_BAD_PARAM);
   }
 
-  if (options.ACTION) {
+  // Parse additional options
+  const argv = options._unknown || [];
+  if (['init', 'install', 'update'].includes(options.action)) {
+    options = {
+      ...options,
+      ...commandLineArgs([imageOption], {
+        argv,
+      }),
+    };
+  }
+
+  if (currentAction === actions.exec && options._unknown.length === 0) {
+    console.error(chalk.red('You should provide a command to exec'));
+    printUsage();
+    process.exit(STATUS_BAD_PARAM);
+  }
+} catch (err) {
+  if (err.name === 'UNKNOWN_OPTION') {
+    console.error(chalk.red(`Invalid flag \`${err.optionName}\``));
+    printUsage();
+    process.exit(STATUS_BAD_PARAM);
+  }
+
+  if (err.name === 'UNKNOWN_VALUE') {
     console.error(
-      chalk.red(`Expected only a single action, found: \`${val}\``)
+      chalk.red(`Expected only a single action, found: \`${err.value}\``)
     );
-    actions.help.fn();
+    printUsage();
     process.exit(STATUS_BAD_PARAM);
   }
 
-  options.ACTION = actions[val];
-
-  if (!options.ACTION) {
-    console.error(chalk.red(`Invalid action \`${val}\``));
-    actions.help.fn();
-    process.exit(STATUS_BAD_PARAM);
-  }
-
-  if (options.ACTION.forwardsRestParams) {
-    options.PARAMS = process.argv.slice(i + 1);
-    break;
-  }
-}
-
-if (!options.ACTION) {
-  console.error(chalk.red('No action provided'));
-  actions.help.fn();
-  process.exit(STATUS_BAD_PARAM);
-}
-
-if (options.ACTION === actions.exec && options.PARAMS.length === 0) {
-  console.error(chalk.red('You should provide a command to exec'));
-  actions.help.fn();
-  process.exit(STATUS_BAD_PARAM);
+  // Other parsing error
+  console.error(chalk.red(globals.verbose ? err.stack : err.message));
+  process.exit(STATUS_ERROR);
 }
 
 readProjectInfo()
   .then((info) =>
-    options.ACTION.fn(
+    currentAction.fn(
       {
         ...info,
         options,
-        ...options.ACTION,
+        ...currentAction,
       },
-      options.PARAMS
+      currentAction.forwardsRestParams ? options._unknown ?? [] : undefined
     )
   )
   .catch((e) => {

@@ -27,6 +27,8 @@ const {
   tryCacheContainerId,
 } = require('./helpers');
 
+const { printUsage } = require('./usage');
+
 const destroyContainer = async (libdragonInfo) => {
   if (libdragonInfo.containerId) {
     await spawnProcess('docker', [
@@ -65,8 +67,7 @@ const initSubmodule = async (libdragonInfo) => {
 const initContainer = async (libdragonInfo) => {
   let newId;
   try {
-    const imageName =
-      libdragonInfo.imageName ?? libdragonInfo.options.DOCKER_IMAGE;
+    const imageName = libdragonInfo.imageName ?? libdragonInfo.options.image;
     await updateImageName({
       ...libdragonInfo,
       imageName,
@@ -487,7 +488,7 @@ const update = async (libdragonInfo) => {
 const install = async (libdragonInfo) => {
   let containerId;
   const oldImageName = libdragonInfo.imageName;
-  const imageName = libdragonInfo.options.DOCKER_IMAGE ?? oldImageName;
+  const imageName = libdragonInfo.options.image ?? oldImageName;
   if (oldImageName !== imageName) {
     log(`Changing image from \`${oldImageName}\` to \`${imageName}\``);
     await destroyContainer(libdragonInfo);
@@ -509,26 +510,7 @@ const install = async (libdragonInfo) => {
   });
 };
 
-const help = () => {
-  log(`${chalk.green('Usage:')}
-  libdragon [flags] <action>
-
-${chalk.green('Available Commands:')}
-  help        Display this help information.
-  init        Create a libdragon project in the current directory.
-  make        Run the libdragon build system in the current directory.
-  exec        Execute given command in the current directory.
-  start       Start the container for current project.
-  stop        Stop the container for current project.
-  install     Vendor libdragon as is.
-  update      Update libdragon and do an install.
-
-${chalk.green('Flags:')}
-  --image <docker-image>  Provide a custom image.
-  --verbose               Be verbose
-`);
-};
-
+// TODO: separate into files
 module.exports = {
   start: {
     fn: start,
@@ -561,7 +543,8 @@ module.exports = {
     showStatus: true,
   },
   help: {
-    fn: help,
+    fn: printUsage,
     showStatus: true,
+    forwardsRestParams: true,
   },
 };
