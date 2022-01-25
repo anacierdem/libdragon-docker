@@ -1,5 +1,25 @@
 # Change Log
 
+## [10.3.1] - 2022-01-25
+
+### Fixed
+
+- Do not try to parse arguments after exec/make. They used to get evaluated as
+  libdragon paramaters previously, preventing passing down -v to the container
+  make for example.
+
+### Changed
+
+- Only accept he image flag for init, install, and update actions as documented.
+- Improve documentation for the `init` and `install` actions.
+- Do not attempt an `install` when running `exec`, just start the container. If
+  there is a half-baked container, a manual `install` will potentially restore it.
+
+### Added
+
+- Extra information for skipping the image flag when doing init for an already
+  initialized project.
+
 ## [10.3.0] - 2022-01-20
 
 ### Changed

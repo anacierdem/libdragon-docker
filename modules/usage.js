@@ -9,7 +9,6 @@ const printUsage = (_, actionArr) => {
       name: 'verbose',
       description: 'Be verbose',
       alias: 'v',
-      type: Boolean,
       group: 'global',
     },
   ];
@@ -19,7 +18,6 @@ const printUsage = (_, actionArr) => {
       name: 'image',
       description: 'Provide a custom image.',
       alias: 'i',
-      type: String,
       typeLabel: '<docker-image>',
       group: 'docker',
     },
@@ -37,7 +35,7 @@ const printUsage = (_, actionArr) => {
 
       A git repository and a submodule at \`./libdragon\` will also be created. Do not remove the \`.libdragon\` folder and commit its contents if you are using git, as it keeps persistent libdragon project information.
 
-      If this is the first time you are creating a libdragon project at that location, this action will also create skeleton project files to kickstart things.`,
+      If this is the first time you are creating a libdragon project at that location, this action will also create skeleton project files to kickstart things with the given image, if provided. For subsequent runs, it will act like \`start\` thus can be used to revive an existing project without modifying it.`,
       group: ['docker'],
     },
     make: {
@@ -72,8 +70,9 @@ const printUsage = (_, actionArr) => {
       name: 'install',
       summary: 'Vendor libdragon as is.',
       group: ['docker'],
-      description:
-        'Attempts to build and install everything libdragon related into the container. This includes all the tools and third parties used by libdragon except for the toolchain. If you have made changes to libdragon, you can execute this action to build everything based on your changes. Requires you to have an intact `libdragon` at the root of the project. If you are not working on libdragon, you can just use the `update` action instead.',
+      description: `Attempts to build and install everything libdragon related into the container. This includes all the tools and third parties used by libdragon except for the toolchain. If you have made changes to libdragon, you can execute this action to build everything based on your changes. Requires you to have an intact \`libdragon\` at the root of the project. If you are not working on libdragon, you can just use the \`update\` action instead.
+
+        This can be useful to recover from a half-baked container.`,
     },
     update: {
       name: 'update',

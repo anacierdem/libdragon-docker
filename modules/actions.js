@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const _ = require('lodash');
+
 const {
   LIBDRAGON_SUBMODULE,
   LIBDRAGON_BRANCH,
@@ -9,6 +10,7 @@ const {
   CONTAINER_TARGET_PATH,
   LIBDRAGON_PROJECT_MANIFEST,
 } = require('./constants');
+
 const {
   spawnProcess,
   checkContainerAndClean,
@@ -67,7 +69,8 @@ const initSubmodule = async (libdragonInfo) => {
 const initContainer = async (libdragonInfo) => {
   let newId;
   try {
-    const imageName = libdragonInfo.imageName ?? libdragonInfo.options.image;
+    const imageName =
+      libdragonInfo.imageName ?? libdragonInfo.options.DOCKER_IMAGE;
     await updateImageName({
       ...libdragonInfo,
       imageName,
@@ -199,9 +202,14 @@ async function init(libdragonInfo) {
       `${path.join(
         libdragonInfo.root,
         manifestFile
-      )} exists. This is probably already a libdragon project, starting it...`
+      )} exists. This is already a libdragon project, starting it...`
     );
-    await startAndInstall(libdragonInfo);
+    if (libdragonInfo.options.DOCKER_IMAGE) {
+      log(
+        `Not changing docker image. Use the install action if you want to override the image.`
+      );
+    }
+    await install(libdragonInfo);
     return;
   }
 
@@ -302,7 +310,7 @@ const exec = async (libdragonInfo, commandAndParams) => {
   let started = false;
   const startOnceAndCmd = async () => {
     if (!started) {
-      const newId = await startAndInstall(libdragonInfo);
+      const newId = await start(libdragonInfo);
       started = true;
       await tryCmd({
         ...libdragonInfo,
@@ -441,17 +449,6 @@ const installDependencies = async (libdragonInfo) => {
   }
 };
 
-async function startAndInstall(libdragonInfo) {
-  const containerId = await start(libdragonInfo);
-
-  // TODO: skip if unnecessary
-  await installDependencies({
-    ...libdragonInfo,
-    containerId,
-  });
-  return containerId;
-}
-
 const update = async (libdragonInfo) => {
   const containerId = await start(libdragonInfo);
 
@@ -488,7 +485,7 @@ const update = async (libdragonInfo) => {
 const install = async (libdragonInfo) => {
   let containerId;
   const oldImageName = libdragonInfo.imageName;
-  const imageName = libdragonInfo.options.image ?? oldImageName;
+  const imageName = libdragonInfo.options.DOCKER_IMAGE ?? oldImageName;
   if (oldImageName !== imageName) {
     log(`Changing image from \`${oldImageName}\` to \`${imageName}\``);
     await destroyContainer(libdragonInfo);
@@ -503,6 +500,7 @@ const install = async (libdragonInfo) => {
   }
 
   // Re-install vendors on new image
+  // TODO: skip this if unnecessary
   await installDependencies({
     ...libdragonInfo,
     imageName,
@@ -513,36 +511,44 @@ const install = async (libdragonInfo) => {
 // TODO: separate into files
 module.exports = {
   start: {
+    name: 'start',
     fn: start,
     showStatus: false, // This will only print out the id
   },
   init: {
+    name: 'init',
     fn: init,
     showStatus: true,
   },
   make: {
+    name: 'make',
     fn: make,
     forwardsRestParams: true,
     showStatus: true,
   },
   exec: {
+    name: 'exec',
     fn: exec,
     forwardsRestParams: true,
     showStatus: true,
   },
   stop: {
+    name: 'stop',
     fn: stop,
     showStatus: false, // This will only print out the id
   },
   install: {
+    name: 'install',
     fn: install,
     showStatus: true,
   },
   update: {
+    name: 'update',
     fn: update,
     showStatus: true,
   },
   help: {
+    name: 'help',
     fn: printUsage,
     showStatus: true,
     forwardsRestParams: true,
