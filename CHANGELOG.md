@@ -7,6 +7,15 @@
 - Do not try to parse arguments after exec/make. They used to get evaluated as
   libdragon paramaters previously, preventing passing down -v to the container
   make for example.
+- Docker image update issues
+  - Attempt an image update whenever the image flag is provided. Previously this
+    was only done if a different image name is provided, preventing the update of
+    the latest image. Previously not providing an image name was behaving the same
+    so this is not a breaking change.
+  - Start action used to update the image if provided but this bug was already
+    prevented by previous fixes by not accepting the image flag for actions other
+    than init/update/install. Start action no longer tries to update the image
+    regardless.
 
 ### Changed
 

@@ -64,22 +64,60 @@ const initSubmodule = async (libdragonInfo) => {
 };
 
 /**
- * Will download image and create a new container
+ * Downloads the given docker image. Returns false if the local image is the
+ * same, new image name otherwise.
+ * @param libdragonInfo
+ * @param newImageName
+ * @returns false | string
  */
-const initContainer = async (libdragonInfo) => {
-  let newId, imageName;
-  try {
-    imageName = libdragonInfo.imageName ?? libdragonInfo.options.DOCKER_IMAGE;
-
-    // Download image
-    libdragonInfo.showStatus && log(`Downloading docker image: ${imageName}`);
+const updateImage = async (libdragonInfo, newImageName) => {
+  // Will not take too much time if already have the same
+  const download = async () => {
+    libdragonInfo.showStatus &&
+      log(`Downloading docker image: ${newImageName}`);
     await spawnProcess(
       'docker',
-      ['pull', imageName],
+      ['pull', newImageName],
+      false,
+      libdragonInfo.showStatus
+    );
+  };
+
+  const getDigest = async () =>
+    await spawnProcess(
+      'docker',
+      ['images', '-q', '--no-trunc', newImageName],
       false,
       libdragonInfo.showStatus
     );
 
+  // Attempt to compare digests if the new image name is the same
+  // Even if they are not the same tag, it is possible to have a different
+  // image but we already attempt a download in any case. It would just take
+  // less time as we already have the layers.
+  if (libdragonInfo.imageName === newImageName) {
+    const existingDigest = await getDigest();
+    await download();
+    const newDigest = await getDigest();
+
+    if (existingDigest === newDigest) {
+      libdragonInfo.showStatus && log(`Image is the same: ${newImageName}`);
+      return false;
+    }
+  } else {
+    await download();
+  }
+
+  libdragonInfo.showStatus && log(`Image is different: ${newImageName}`);
+  return newImageName;
+};
+
+/**
+ * Create a new container
+ */
+const initContainer = async (libdragonInfo) => {
+  let newId;
+  try {
     // Create a new container
     libdragonInfo.showStatus && log('Creating new container...');
     newId = (
@@ -92,7 +130,7 @@ const initContainer = async (libdragonInfo) => {
           ',target=' +
           CONTAINER_TARGET_PATH, // Mount files
         '-w=' + CONTAINER_TARGET_PATH, // Set working directory
-        imageName,
+        libdragonInfo.imageName,
         'tail',
         '-f',
         '/dev/null',
@@ -102,7 +140,6 @@ const initContainer = async (libdragonInfo) => {
     const newInfo = {
       ...libdragonInfo,
       containerId: newId,
-      imageName,
     };
 
     // chown the installation folder once on init
@@ -141,10 +178,7 @@ const initContainer = async (libdragonInfo) => {
     );
 
   // Update the image name only after everything is OK
-  await updateImageName({
-    ...libdragonInfo,
-    imageName: imageName,
-  });
+  await updateImageName(libdragonInfo);
   return newId;
 };
 
@@ -188,6 +222,7 @@ function copyDirContents(src, dst) {
 
 /**
  * Initialize a new libdragon project in current working directory
+ * Also downloads the image
  */
 async function init(libdragonInfo) {
   log(`Initializing a libdragon project at ${libdragonInfo.root}`);
@@ -228,7 +263,13 @@ async function init(libdragonInfo) {
   }
 
   await createManifestIfNotExist(libdragonInfo);
-  const newId = await start(libdragonInfo);
+  // Download image and start it
+  const newId = await start({
+    ...libdragonInfo,
+    imageName:
+      (await updateImage(libdragonInfo, libdragonInfo.imageName)) ||
+      libdragonInfo.imageName,
+  });
   const newInfo = {
     ...libdragonInfo,
     containerId: newId,
@@ -483,13 +524,26 @@ const update = async (libdragonInfo) => {
   await install(newInfo);
 };
 
+/**
+ * Updates the image if flag is provided and install vendors onto the container.
+ * We should probably remove the image installation responsibility from this
+ * action but it might be a breaking change. Maybe we can keep it backward
+ * compatible with additional flags.
+ * @param libdragonInfo
+ */
 const install = async (libdragonInfo) => {
   let containerId;
   const oldImageName = libdragonInfo.imageName;
-  const imageName = libdragonInfo.options.DOCKER_IMAGE ?? oldImageName;
-  if (oldImageName !== imageName) {
+  const imageName = libdragonInfo.options.DOCKER_IMAGE;
+  // If an image is provided, always attempt to install it
+  // See https://github.com/anacierdem/libdragon-docker/issues/47
+  if (imageName) {
     log(`Changing image from \`${oldImageName}\` to \`${imageName}\``);
-    await destroyContainer(libdragonInfo);
+
+    // Download the new image and if it is different, re-create the container
+    if (await updateImage(libdragonInfo, imageName)) {
+      await destroyContainer(libdragonInfo);
+    }
 
     containerId = await start({
       ...libdragonInfo,
