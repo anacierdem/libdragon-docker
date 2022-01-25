@@ -23,6 +23,7 @@
 - Improve documentation for the `init` and `install` actions.
 - Do not attempt an `install` when running `exec`, just start the container. If
   there is a half-baked container, a manual `install` will potentially restore it.
+- Update libdragon.
 
 ### Added
 
