@@ -67,14 +67,9 @@ const initSubmodule = async (libdragonInfo) => {
  * Will download image and create a new container
  */
 const initContainer = async (libdragonInfo) => {
-  let newId;
+  let newId, imageName;
   try {
-    const imageName =
-      libdragonInfo.imageName ?? libdragonInfo.options.DOCKER_IMAGE;
-    await updateImageName({
-      ...libdragonInfo,
-      imageName,
-    });
+    imageName = libdragonInfo.imageName ?? libdragonInfo.options.DOCKER_IMAGE;
 
     // Download image
     libdragonInfo.showStatus && log(`Downloading docker image: ${imageName}`);
@@ -144,6 +139,12 @@ const initContainer = async (libdragonInfo) => {
     log(
       chalk.green(`Successfully initialized docker container: ${name.trim()}`)
     );
+
+  // Update the image name only after everything is OK
+  await updateImageName({
+    ...libdragonInfo,
+    imageName: imageName,
+  });
   return newId;
 };
 
