@@ -2,6 +2,7 @@
 
 ### Fixed
 
+- Attach the error handler once for spawnProcess.
 - Update the root makefile to utilize SOURCE_DIR for example builds. Then we are
   able to map container files to local files properly with a generic regex in the
   problem matcher. This fixes #13 and does not change any behaviour.

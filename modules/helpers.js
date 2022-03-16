@@ -97,7 +97,7 @@ function spawnProcess(cmd, params = [], userCommand, interactive = false) {
       }
     };
 
-    command.on('error', errorHandler);
+    command.once('error', errorHandler);
     command.once('close', closeHandler);
   });
 }
