@@ -38,7 +38,7 @@
         "${workspaceFolder}/libdragon/examples/cpptest/cpptest.z64",
         "--keep-alive"
       ],
-      "preLaunchTask": "buildCPPTest",
+      "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
@@ -52,7 +52,7 @@
         "${workspaceFolder}/libdragon/examples/ctest/ctest.z64",
         "--keep-alive"
       ],
-      "preLaunchTask": "buildCTest",
+      "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
@@ -66,7 +66,49 @@
         "${workspaceFolder}/libdragon/examples/dfsdemo/dfsdemo.z64",
         "--keep-alive"
       ],
-      "preLaunchTask": "buildDFSDemo",
+      "preLaunchTask": "buildExamples",
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Mixer Example",
+      "program": "${workspaceFolder}/node_modules/ed64/loader.js",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/mixertest/mixertest.z64",
+        "--keep-alive"
+      ],
+      "preLaunchTask": "buildExamples",
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Audio Player Example",
+      "program": "${workspaceFolder}/node_modules/ed64/loader.js",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/audioplayer/audioplayer.z64",
+        "--keep-alive"
+      ],
+      "preLaunchTask": "buildExamples",
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run RTC Example",
+      "program": "${workspaceFolder}/node_modules/ed64/loader.js",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/rtctest/rtctest.z64",
+        "--keep-alive"
+      ],
+      "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
@@ -80,7 +122,7 @@
         "${workspaceFolder}/libdragon/examples/mptest/mptest.z64",
         "--keep-alive"
       ],
-      "preLaunchTask": "buildMPTest",
+      "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
@@ -94,7 +136,7 @@
         "${workspaceFolder}/libdragon/examples/mputest/mputest.z64",
         "--keep-alive"
       ],
-      "preLaunchTask": "buildMPUTest",
+      "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
@@ -108,7 +150,7 @@
         "${workspaceFolder}/libdragon/examples/spritemap/spritemap.z64",
         "--keep-alive"
       ],
-      "preLaunchTask": "buildSpritemap",
+      "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
@@ -122,7 +164,7 @@
         "${workspaceFolder}/libdragon/examples/test/test.z64",
         "--keep-alive"
       ],
-      "preLaunchTask": "buildTest",
+      "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
@@ -136,7 +178,7 @@
         "${workspaceFolder}/libdragon/examples/timers/timers.z64",
         "--keep-alive"
       ],
-      "preLaunchTask": "buildTimers",
+      "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
@@ -164,7 +206,7 @@
         "${workspaceFolder}/libdragon/examples/vtest/VidResTest.z64",
         "--keep-alive"
       ],
-      "preLaunchTask": "buildVTest",
+      "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     },
@@ -178,7 +220,7 @@
         "${workspaceFolder}/libdragon/examples/ucodetest/ucodetest.z64",
         "--keep-alive"
       ],
-      "preLaunchTask": "buildUCodeTest",
+      "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
     }

@@ -1,5 +1,12 @@
 # Change Log
 
+### Fixed
+
+- Update the root makefile to utilize SOURCE_DIR for example builds. Then we are
+  able to map container files to local files properly with a generic regex in the
+  problem matcher. This fixes #13 and does not change any behaviour.
+- Add missing examples to the vscode run configurations.
+
 ## [10.3.1] - 2022-01-25
 
 ### Fixed
