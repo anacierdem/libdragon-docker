@@ -10,6 +10,9 @@ const {
   IMAGE_FILE,
   DOCKER_HUB_IMAGE,
   CONTAINER_TARGET_PATH,
+  CONFIG_FILE,
+  LIBDRAGON_SUBMODULE,
+  DEFAULT_STRATEGY,
 } = require('./constants');
 
 const globals = {
@@ -136,6 +139,10 @@ function dockerExec(
  * to the docker git, with the nix user set to the user running libdragon.
  */
 async function runGitMaybeHost(libdragonInfo, params, interactive = 'full') {
+  assert(
+    libdragonInfo.vendorStrategy !== 'manual',
+    new Error('Should never run git if vendoring strategy is submodule.')
+  );
   try {
     return await spawnProcess(
       'git',
@@ -292,8 +299,41 @@ async function checkContainerRunning(containerId) {
   return running ? containerId : undefined;
 }
 
+let projectInfoToWrite = {};
+/**
+ * Updates project info to be written. The provided keys are overwritten without
+ * changing the existing values. When the process exists successfully these will
+ * get written to the configuration file. Echoes back the given info.
+ * @param libdragonInfo
+ */
+function setProjectInfoToSave(libdragonInfo) {
+  projectInfoToWrite = { ...projectInfoToWrite, ...libdragonInfo };
+  return libdragonInfo;
+}
+
+async function writeProjectInfo(libdragonInfo = projectInfoToWrite) {
+  await createManifestIfNotExist(libdragonInfo);
+  const manifestPath = path.join(
+    libdragonInfo.root,
+    LIBDRAGON_PROJECT_MANIFEST
+  );
+  fs.writeFileSync(
+    path.join(manifestPath, CONFIG_FILE),
+    JSON.stringify(
+      {
+        imageName: libdragonInfo.imageName,
+        vendorDirectory: libdragonInfo.vendorDirectory,
+        vendorStrategy: libdragonInfo.vendorStrategy,
+      },
+      null,
+      '  '
+    )
+  );
+  log(`Configuration file updated`, true);
+}
+
 async function readProjectInfo() {
-  const info = {
+  let info = {
     root:
       (await findLibdragonRoot()) ??
       (await findNPMRoot()) ??
@@ -308,21 +348,38 @@ async function readProjectInfo() {
 
   log(`Project root: ${info.root}`, true);
 
-  const imageFile = path.join(
+  const configFile = path.join(
     info.root,
     LIBDRAGON_PROJECT_MANIFEST,
-    IMAGE_FILE
+    CONFIG_FILE
   );
 
-  // flag has the highest priority followed by the one read from the file
-  // and then if there is any matching container, name is read from it. As last
-  // option fallback to default value.
-  if (fs.existsSync(imageFile) && !fs.statSync(imageFile).isDirectory()) {
-    info.imageName = fs.readFileSync(imageFile, { encoding: 'utf8' }).trim();
+  if (fs.existsSync(configFile) && fs.statSync(configFile).isFile()) {
+    info = {
+      ...info,
+      ...JSON.parse(fs.readFileSync(configFile, { encoding: 'utf8' })),
+    };
+  } else {
+    // Cleanup old files and migrate to the new config file
+    const imageFile = path.join(
+      info.root,
+      LIBDRAGON_PROJECT_MANIFEST,
+      IMAGE_FILE
+    );
+    if (fs.existsSync(imageFile) && fs.statSync(imageFile).isFile()) {
+      info.imageName = fs.readFileSync(imageFile, { encoding: 'utf8' }).trim();
+      // Immediately update the config as this is the first migration
+      await writeProjectInfo(info);
+      fs.rmSync(imageFile);
+    }
   }
 
   info.containerId = await findContainerId(info);
   log(`Active container id: ${info.containerId}`, true);
+
+  // For imageName, flag has the highest priority followed by the one read from
+  // the file and then if there is any matching container, name is read from it.
+  // As last option fallback to default value.
 
   // If still have the container, read the image name from it
   if (!info.imageName && (await checkContainerAndClean(info))) {
@@ -335,28 +392,21 @@ async function readProjectInfo() {
         '{{.Config.Image}}',
       ])
     ).trim();
-
-    // Cache the image name
-    await updateImageName(info);
   }
 
   info.imageName = info.imageName ?? DOCKER_HUB_IMAGE;
   log(`Active image name: ${info.imageName}`, true);
-  return info;
-}
 
-async function updateImageName(libdragonInfo) {
-  if (!libdragonInfo.imageName) return;
-  const manifestPath = path.join(
-    libdragonInfo.root,
-    LIBDRAGON_PROJECT_MANIFEST
-  );
-  await createManifestIfNotExist(libdragonInfo);
-  fs.writeFileSync(
-    path.join(manifestPath, IMAGE_FILE),
-    libdragonInfo.imageName
-  );
-  log(`Image name updated: ${libdragonInfo.imageName}`, true);
+  info.vendorDirectory =
+    info.vendorDirectory ?? path.join('.', LIBDRAGON_SUBMODULE);
+  log(`Active vendor directory: ${info.vendorDirectory}`, true);
+
+  info.vendorStrategy = info.vendorStrategy ?? DEFAULT_STRATEGY;
+  log(`Active vendor strategyy: ${info.vendorStrategy}`, true);
+
+  // Cache the latest image name
+  setProjectInfoToSave(info);
+  return info;
 }
 
 /**
@@ -396,6 +446,13 @@ function toPosixPath(p) {
   return p.replace(new RegExp('\\' + path.sep), path.posix.sep);
 }
 
+function assert(condition, error) {
+  if (!condition) {
+    error.message = `[ASSERTION FAILED] ${error.message}`;
+    throw error;
+  }
+}
+
 function log(text, verboseOnly = false) {
   if (!verboseOnly) {
     // eslint-disable-next-line no-console
@@ -415,8 +472,8 @@ module.exports = {
   checkContainerAndClean,
   checkContainerRunning,
   toPosixPath,
-  updateImageName,
-  createManifestIfNotExist,
+  writeProjectInfo,
+  setProjectInfoToSave,
   runNPM,
   findNPMRoot,
   log,

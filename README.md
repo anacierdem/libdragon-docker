@@ -38,16 +38,6 @@ You can invoke libdragon as follows;
 
 Run `libdragon help [action]` for more details on individual actions.
 
-### Available flags
-
-**`--image <docker-image>`**
-
-Use this flag to provide a custom image to use instead of the default. It should include the toolchain at `/n64_toolchain`. It will be effective for `init`, `install` and `update` actions and will cause a re-initialization of the container if an image different from what was written to project configuration is provided.
-
-**`--verbose`**
-
-Be verbose. This will print all commands dispatched and their outputs as well.
-
 ## Working on this repository
 
 After cloning this repository on a system with node.js (`>= 14`) & docker (`>= 18`), in this repository's root do;
@@ -92,7 +82,7 @@ To update the submodule and re-build everything;
 
 ### Local test bench
 
-This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can just hit F5 on vscode (The `Run Test Bench` launch configuration) to run the test code in `src` folder to develop libdragon itself quicker if you have an everdrive. There is a caveat though: If you want the problem matcher to work properly, you should name this repository folder `libdragon` exactly.
+This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can just hit F5 on vscode (The `Run Test Bench` launch configuration) to run the test code in `src` folder to develop libdragon itself quicker if you have an everdrive.
 
 There are also additional vscode launch configurations to build libdragon examples and tests based on the currently built and installed libdragon in the docker container. Most of these will always rebuild so that they will use the latest if you made and installed an alternative libdragon. The test bench itself and a few examples (that use the new build system) will already rebuild and reinstall libdragon automatically. These will always produce a rom image using the latest libdragon code in the active repository via its make dependencies. You can clean everything with the `clean` task (open the command palette and choose `Run Task -> clean`).
 

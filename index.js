@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 
 const chalk = require('chalk');
-const { readProjectInfo, CommandError, globals } = require('./modules/helpers');
+const {
+  readProjectInfo,
+  writeProjectInfo,
+  CommandError,
+  globals,
+} = require('./modules/helpers');
 const actions = require('./modules/actions');
 const { printUsage } = require('./modules/usage');
 
@@ -29,6 +34,22 @@ for (let i = 2; i < process.argv.length; i++) {
     continue;
   } else if (val.indexOf('--image=') === 0) {
     options.DOCKER_IMAGE = val.split('=')[1];
+    continue;
+  }
+
+  if (['--directory', '-d'].includes(val)) {
+    options.VENDOR_DIR = process.argv[++i];
+    continue;
+  } else if (val.indexOf('--directory=') === 0) {
+    options.VENDOR_DIR = val.split('=')[1];
+    continue;
+  }
+
+  if (['--strategy', '-s'].includes(val)) {
+    options.VENDOR_STRAT = process.argv[++i];
+    continue;
+  } else if (val.indexOf('--strategy=') === 0) {
+    options.VENDOR_STRAT = val.split('=')[1];
     continue;
   }
 
@@ -81,6 +102,15 @@ if (
   process.exit(STATUS_BAD_PARAM);
 }
 
+if (
+  options.VENDOR_STRAT &&
+  !['submodule', 'manual'].includes(options.VENDOR_STRAT)
+) {
+  console.error(chalk.red(`Invalid strategy \`${options.VENDOR_STRAT}\``));
+  printUsage();
+  process.exit(STATUS_BAD_PARAM);
+}
+
 readProjectInfo()
   .then((info) =>
     currentAction.fn(
@@ -114,6 +144,10 @@ readProjectInfo()
 
     // We don't have a user targeted error anymore, we did a mistake for sure
     process.exit(STATUS_ERROR);
+  })
+  .then(() => {
+    // Everything was done, update the configuration file if not exiting early
+    return writeProjectInfo();
   })
   .finally(() => {
     process.exit(STATUS_OK);

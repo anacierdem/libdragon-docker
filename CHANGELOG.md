@@ -1,12 +1,27 @@
 # Change Log
 
+## [10.4.0] - 2022-03-18
+
 ### Fixed
 
 - Attach the error handler once for spawnProcess.
-- Update the root makefile to utilize SOURCE_DIR for example builds. Then we are
+- Update the root makefile to utilize `SOURCE_DIR` for example builds. Then we are
   able to map container files to local files properly with a generic regex in the
   problem matcher. This fixes #13 and does not change any behaviour.
 - Add missing examples to the vscode run configurations.
+
+### Added
+
+- `--directory` option to customize vendoring location.
+- `--strategy` option to select a vendoring strategy. Currently supported options
+  are `submodule` and `manual`, which can be used to opt-out of auto vendoring
+  via submodule. Useful if the user wants to utilize a different vendoring strategy.
+
+### Changed
+
+- Migrate to a json file for persistent project information.
+- Only save the configuration file on successful exit except for the initial
+  migration.
 
 ## [10.3.1] - 2022-01-25
 

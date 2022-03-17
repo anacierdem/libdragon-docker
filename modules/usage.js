@@ -7,7 +7,8 @@ const printUsage = (_, actionArr) => {
   const globalOptionDefinitions = [
     {
       name: 'verbose',
-      description: 'Be verbose',
+      description:
+        'Be verbose. This will print all commands dispatched and their outputs as well.',
       alias: 'v',
       group: 'global',
     },
@@ -16,10 +17,27 @@ const printUsage = (_, actionArr) => {
   const optionDefinitions = [
     {
       name: 'image',
-      description: 'Provide a custom image.',
+      description:
+        'Use this flag to provide a custom image to use instead of the default. It should include the toolchain at `/n64_toolchain`. It will cause a re-initialization of the container if an image different from what was written to project configuration is provided.\n',
       alias: 'i',
       typeLabel: '<docker-image>',
       group: 'docker',
+    },
+    {
+      name: 'directory',
+      description: `Directory where libdragon files are expected. When using \`submodule\` strategy, it must be inside the project folder and the cli will create and manage a submodule at that location.\n`,
+      alias: 'd',
+      typeLabel: '<path>',
+      group: 'vendoring',
+    },
+    {
+      name: 'strategy',
+      description: `libdragon Vendoring strategy. Defaults to \`submodule\`, which creates and manages a git repository and a submodule at \`directory\` to automatically update the vendored libdragon files. To disable auto-vendoring init with \`manual\`. When using \`manual\`, libdragon files are expected at the location provided by \`--directory\` flag and the user is responsible for vendoring and updating them. This will allow using a git subtree flow or another manual vendoring method.
+
+        It is also possible to opt-out later on by running \`init\` with \`--strategy manual\`, though you will be responsible for managing the existing submodule. Only paths inside project folder are accepted in case of \`submodule\`.\n`,
+      alias: 'v',
+      typeLabel: '<submodule|manual>',
+      group: 'vendoring',
     },
   ];
 
@@ -31,12 +49,12 @@ const printUsage = (_, actionArr) => {
     init: {
       name: 'init',
       summary: 'Create a libdragon project in the current directory.',
-      description: `Creates a libdragon project in the current directory. Every libdragon project will have its own docker container instance. If you are in a git repository or an NPM project, libdragon will be initialized at their root also marking there with a \`.libdragon\` folder.
+      description: `Creates a libdragon project in the current directory. Every libdragon project will have its own docker container instance. If you are in a git repository or an NPM project, libdragon will be initialized at their root also marking there with a \`.libdragon\` folder. Do not remove the \`.libdragon\` folder and commit its contents if you are using git, as it keeps persistent libdragon project information.
 
-      A git repository and a submodule at \`./libdragon\` will also be created. Do not remove the \`.libdragon\` folder and commit its contents if you are using git, as it keeps persistent libdragon project information.
+      By default, a git repository and a submodule at \`./libdragon\` will be created to automatically update the vendored libdragon files on subsequent updates. If you intend to opt-out from this feature, see the \`--strategy manual\` flag to provide your self-managed libdragon copy. The default behaviour is intended for users who just want to consume libdragon.
 
       If this is the first time you are creating a libdragon project at that location, this action will also create skeleton project files to kickstart things with the given image, if provided. For subsequent runs, it will act like \`start\` thus can be used to revive an existing project without modifying it.`,
-      group: ['docker'],
+      group: ['docker', 'vendoring'],
     },
     make: {
       name: 'make [params]',

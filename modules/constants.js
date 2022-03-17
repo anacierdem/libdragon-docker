@@ -10,4 +10,6 @@ module.exports = {
   LIBDRAGON_PROJECT_MANIFEST: '.libdragon',
   CACHED_CONTAINER_FILE: 'libdragon-docker-container',
   IMAGE_FILE: 'docker-image',
+  CONFIG_FILE: 'config.json',
+  DEFAULT_STRATEGY: 'submodule',
 };

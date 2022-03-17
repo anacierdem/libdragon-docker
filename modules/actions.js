@@ -16,8 +16,7 @@ const {
   checkContainerAndClean,
   checkContainerRunning,
   toPosixPath,
-  updateImageName,
-  createManifestIfNotExist,
+  setProjectInfoToSave,
   runNPM,
   findNPMRoot,
   log,
@@ -59,7 +58,7 @@ const initSubmodule = async (libdragonInfo) => {
     '--branch',
     LIBDRAGON_BRANCH,
     LIBDRAGON_GIT,
-    LIBDRAGON_SUBMODULE,
+    libdragonInfo.vendorDirectory,
   ]);
 };
 
@@ -177,8 +176,8 @@ const initContainer = async (libdragonInfo) => {
       chalk.green(`Successfully initialized docker container: ${name.trim()}`)
     );
 
-  // Update the image name only after everything is OK
-  await updateImageName(libdragonInfo);
+  // Schedule an update to write image name
+  setProjectInfoToSave(libdragonInfo);
   return newId;
 };
 
@@ -227,55 +226,83 @@ function copyDirContents(src, dst) {
 async function init(libdragonInfo) {
   log(`Initializing a libdragon project at ${libdragonInfo.root}`);
 
+  // TODO: use exists instead & check if it is a directory
   const files = fs.readdirSync(libdragonInfo.root);
 
   const manifestFile = files.find(
     (name) => name === LIBDRAGON_PROJECT_MANIFEST
   );
 
+  let newInfo = libdragonInfo;
+
+  // Update the directory information for the project if the flag is provided
+  if (libdragonInfo.options.VENDOR_DIR) {
+    newInfo = setProjectInfoToSave({
+      ...newInfo,
+      vendorDirectory: libdragonInfo.options.VENDOR_DIR,
+    });
+  }
+
+  // Update the strategy information for the project if the flag is provided
+  if (libdragonInfo.options.VENDOR_STRAT) {
+    newInfo = setProjectInfoToSave({
+      ...newInfo,
+      vendorStrategy: libdragonInfo.options.VENDOR_STRAT,
+    });
+  }
+
   if (manifestFile) {
     log(
       `${path.join(
-        libdragonInfo.root,
+        newInfo.root,
         manifestFile
       )} exists. This is already a libdragon project, starting it...`
     );
-    if (libdragonInfo.options.DOCKER_IMAGE) {
+    if (newInfo.options.DOCKER_IMAGE) {
       log(
         `Not changing docker image. Use the install action if you want to override the image.`
       );
     }
-    await install(libdragonInfo);
+    await install(newInfo);
     return;
   }
 
-  const libdragonFile = files.find((name) =>
-    name.match(new RegExp(`^${LIBDRAGON_SUBMODULE}.?`))
-  );
-
-  if (libdragonFile) {
-    throw new Error(
-      `${path.join(
-        libdragonInfo.root,
-        libdragonFile
-      )} already exists. That is the libdragon vendoring target, please remove and retry.`
-    );
-  }
-
-  await createManifestIfNotExist(libdragonInfo);
   // Download image and start it
   const newId = await start({
-    ...libdragonInfo,
+    ...newInfo,
     imageName:
-      (await updateImage(libdragonInfo, libdragonInfo.imageName)) ||
-      libdragonInfo.imageName,
+      (await updateImage(newInfo, newInfo.imageName)) || newInfo.imageName,
   });
-  const newInfo = {
-    ...libdragonInfo,
+
+  newInfo = {
+    ...newInfo,
     containerId: newId,
   };
 
-  await initSubmodule(newInfo);
+  if (newInfo.vendorStrategy === 'submodule') {
+    const relativePath = path.relative(newInfo.root, newInfo.vendorDirectory);
+
+    if (relativePath.startsWith('..')) {
+      throw new Error(
+        'When using `submodule` strategy, `--directory` must be inside the project folder.'
+      );
+    }
+
+    const libdragonFile = files.find((name) =>
+      name.match(new RegExp(`^${relativePath}.?`))
+    );
+
+    if (libdragonFile) {
+      throw new Error(
+        `${path.join(
+          newInfo.root,
+          libdragonFile
+        )} already exists. That is the libdragon vendoring target, please remove and retry. Move libdragon.exe to somewhere else if you are trying to use it inside your project folder.`
+      );
+    }
+
+    await initSubmodule(newInfo);
+  }
 
   // We have created a new container, save the new info
   tryCacheContainerId(newInfo);
@@ -388,8 +415,7 @@ const make = async (libdragonInfo, params) => {
 
 const installDependencies = async (libdragonInfo) => {
   const buildScriptPath = path.join(
-    libdragonInfo.root,
-    'libdragon',
+    path.relative(libdragonInfo.root, libdragonInfo.vendorDirectory),
     'build.sh'
   );
   if (
@@ -397,7 +423,7 @@ const installDependencies = async (libdragonInfo) => {
     !fs.statSync(buildScriptPath).isFile()
   ) {
     throw new Error(
-      'build.sh not found. Make sure you have a vendored libdragon copy at ./libdragon'
+      `build.sh not found. Make sure you have a vendored libdragon copy at ${libdragonInfo.vendorDirectory}`
     );
   }
 
@@ -407,7 +433,11 @@ const installDependencies = async (libdragonInfo) => {
     libdragonInfo,
     [
       '--workdir',
-      CONTAINER_TARGET_PATH + '/' + LIBDRAGON_SUBMODULE,
+      CONTAINER_TARGET_PATH +
+        '/' +
+        toPosixPath(
+          path.relative(libdragonInfo.root, libdragonInfo.vendorDirectory)
+        ),
       ...dockerHostUserParams(libdragonInfo),
     ],
     ['/bin/bash', './build.sh']
@@ -499,27 +529,30 @@ const update = async (libdragonInfo) => {
     containerId,
   };
 
-  // Update submodule
-  log('Updating submodule...');
+  // Only do auto-update if there is no manual vendoring set-up
+  if (libdragonInfo.vendorStrategy === 'submodule') {
+    // Update submodule
+    log('Updating submodule...');
 
-  try {
-    await initSubmodule(newInfo);
-  } catch {
-    throw new Error(
-      `Unable to re-initialize vendored libdragon. Probably git does not know the vendoring target (${path.join(
-        libdragonInfo.root,
-        LIBDRAGON_SUBMODULE
-      )}) Removing it might resolve this issue.`
-    );
+    try {
+      await initSubmodule(newInfo);
+    } catch {
+      throw new Error(
+        `Unable to re-initialize vendored libdragon. Probably git does not know the vendoring target (${path.join(
+          libdragonInfo.root,
+          libdragonInfo.vendorDirectory
+        )}) Removing it might resolve this issue.`
+      );
+    }
+
+    await runGitMaybeHost(newInfo, [
+      'submodule',
+      'update',
+      '--remote',
+      '--merge',
+      './' + libdragonInfo.vendorDirectory,
+    ]);
   }
-
-  await runGitMaybeHost(newInfo, [
-    'submodule',
-    'update',
-    '--remote',
-    '--merge',
-    './' + LIBDRAGON_SUBMODULE,
-  ]);
 
   await install(newInfo);
 };
