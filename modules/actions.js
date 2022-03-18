@@ -1,4 +1,5 @@
 const fs = require('fs');
+const fsp = require('fs/promises');
 const path = require('path');
 const chalk = require('chalk');
 const _ = require('lodash');
@@ -26,6 +27,7 @@ const {
   dockerHostUserParams,
   dockerRelativeWorkdir,
   tryCacheContainerId,
+  fileExists,
 } = require('./helpers');
 
 const { printUsage } = require('./usage');
@@ -60,6 +62,7 @@ const initSubmodule = async (libdragonInfo) => {
     LIBDRAGON_GIT,
     libdragonInfo.vendorDirectory,
   ]);
+  return libdragonInfo;
 };
 
 /**
@@ -184,39 +187,46 @@ const initContainer = async (libdragonInfo) => {
 /**
  * Recursively copies directories and files
  */
-function copyDirContents(src, dst) {
+async function copyDirContents(src, dst) {
   log(`Copying from ${src} to ${dst}`, true);
 
-  if (fs.existsSync(dst) && !fs.statSync(dst).isDirectory()) {
+  const dstStat = await fsp.stat(dst).catch((e) => {
+    if (e.code !== 'ENOENT') throw e;
+    return null;
+  });
+
+  if (dstStat && !dstStat.isDirectory()) {
     log(`${dst} is not a directory, skipping.`);
     return;
   }
 
-  if (!fs.existsSync(dst)) {
+  if (!dstStat) {
     log(`Creating a directory at ${dst}.`, true);
-    fs.mkdirSync(dst);
+    await fsp.mkdir(dst);
   }
 
-  const files = fs.readdirSync(src);
-  files.forEach((name) => {
-    const source = path.join(src, name);
-    const dest = path.join(dst, name);
-    const stats = fs.statSync(source);
-    if (stats.isDirectory()) {
-      copyDirContents(source, dest);
-    } else if (stats.isFile()) {
-      const content = fs.readFileSync(source);
-      try {
-        log(`Writing to ${dest}`, true);
-        fs.writeFileSync(dest, content, {
-          flag: 'wx',
-        });
-      } catch (e) {
-        log(`${dest} already exists, skipping.`);
-        return;
+  const files = await fsp.readdir(src);
+  return Promise.all(
+    files.map(async (name) => {
+      const source = path.join(src, name);
+      const dest = path.join(dst, name);
+      const stats = await fsp.stat(source);
+      if (stats.isDirectory()) {
+        await copyDirContents(source, dest);
+      } else if (stats.isFile()) {
+        const content = await fsp.readFile(source);
+        try {
+          log(`Writing to ${dest}`, true);
+          await fsp.writeFile(dest, content, {
+            flag: 'wx',
+          });
+        } catch (e) {
+          log(`${dest} already exists, skipping.`);
+          return;
+        }
       }
-    }
-  });
+    })
+  );
 }
 
 /**
@@ -227,7 +237,7 @@ async function init(libdragonInfo) {
   log(`Initializing a libdragon project at ${libdragonInfo.root}`);
 
   // TODO: use exists instead & check if it is a directory
-  const files = fs.readdirSync(libdragonInfo.root);
+  const files = await fsp.readdir(libdragonInfo.root);
 
   const manifestFile = files.find(
     (name) => name === LIBDRAGON_PROJECT_MANIFEST
@@ -268,17 +278,13 @@ async function init(libdragonInfo) {
   }
 
   // Download image and start it
-  const newId = await start({
+  const containerReadyPromise = start({
     ...newInfo,
     imageName:
       (await updateImage(newInfo, newInfo.imageName)) || newInfo.imageName,
   });
 
-  newInfo = {
-    ...newInfo,
-    containerId: newId,
-  };
-
+  let vendorAndGitReadyPromise = containerReadyPromise;
   if (newInfo.vendorStrategy === 'submodule') {
     const relativePath = path.relative(newInfo.root, newInfo.vendorDirectory);
 
@@ -301,18 +307,24 @@ async function init(libdragonInfo) {
       );
     }
 
-    await initSubmodule(newInfo);
+    vendorAndGitReadyPromise = containerReadyPromise.then((newId) =>
+      initSubmodule({
+        ...newInfo,
+        containerId: newId,
+      })
+    );
   }
 
-  // We have created a new container, save the new info
-  tryCacheContainerId(newInfo);
-
-  await installDependencies(newInfo);
-
-  log(`Copying project files...`);
+  log(`Preparing project files...`);
   const skeletonFolder = path.join(__dirname, '../skeleton');
-  // node copy functions does not work with pkg
-  copyDirContents(skeletonFolder, newInfo.root);
+
+  await Promise.all([
+    // We have created a new container, save the new info
+    vendorAndGitReadyPromise.then(tryCacheContainerId),
+    vendorAndGitReadyPromise.then(installDependencies),
+    // node copy functions does not work with pkg
+    copyDirContents(skeletonFolder, newInfo.root),
+  ]);
 
   log(chalk.green(`libdragon ready at \`${newInfo.root}\`.`));
 }
@@ -418,10 +430,7 @@ const installDependencies = async (libdragonInfo) => {
     path.relative(libdragonInfo.root, libdragonInfo.vendorDirectory),
     'build.sh'
   );
-  if (
-    !fs.existsSync(buildScriptPath) ||
-    !fs.statSync(buildScriptPath).isFile()
-  ) {
+  if (!(await fileExists(buildScriptPath))) {
     throw new Error(
       `build.sh not found. Make sure you have a vendored libdragon copy at ${libdragonInfo.vendorDirectory}`
     );

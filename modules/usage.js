@@ -25,16 +25,18 @@ const printUsage = (_, actionArr) => {
     },
     {
       name: 'directory',
-      description: `Directory where libdragon files are expected. When using \`submodule\` strategy, it must be inside the project folder and the cli will create and manage a submodule at that location.\n`,
+      description: `Directory where libdragon files are expected. When using \`submodule\` strategy, it must be inside the project folder and the cli will create and manage a submodule at that location. Defaults to \`./libdragon\` if not provided.\n`,
       alias: 'd',
       typeLabel: '<path>',
       group: 'vendoring',
     },
     {
       name: 'strategy',
-      description: `libdragon Vendoring strategy. Defaults to \`submodule\`, which creates and manages a git repository and a submodule at \`directory\` to automatically update the vendored libdragon files. To disable auto-vendoring init with \`manual\`. When using \`manual\`, libdragon files are expected at the location provided by \`--directory\` flag and the user is responsible for vendoring and updating them. This will allow using a git subtree flow or another manual vendoring method.
+      description: `libdragon Vendoring strategy. Defaults to \`submodule\`, which creates and manages a git repository and a submodule at \`--directory\` to automatically update the vendored libdragon files. To disable auto-vendoring, init with \`manual\`. When using \`manual\`, libdragon files are expected at the location provided by \`--directory\` flag and the user is responsible for vendoring and updating them. This will allow using a git subtree flow or another manual vendoring method.
 
-        It is also possible to opt-out later on by running \`init\` with \`--strategy manual\`, though you will be responsible for managing the existing submodule. Only paths inside project folder are accepted in case of \`submodule\`.\n`,
+        With the \`manual\` strategy, it is still recommended to have a git repository at project root such that container actions can execute faster by caching the container id inside the \`.git\` folder.
+
+        It is also possible to opt-out later on by running \`init\` with \`--strategy manual\`, though you will be responsible for managing the existing submodule. \n`,
       alias: 'v',
       typeLabel: '<submodule|manual>',
       group: 'vendoring',
@@ -96,7 +98,7 @@ const printUsage = (_, actionArr) => {
       name: 'update',
       summary: 'Update libdragon and do an install.',
       description:
-        'This action will update the submodule from the remote branch (`trunk`) with a merge strategy and then perform a `libdragon install`. You can use the `install` action to only update all libdragon related artifacts in the container.',
+        'This action will update the submodule from the remote branch (`trunk`) with a merge strategy and then perform a `libdragon install`. This is the same as an `install` when the vendoring strategy is `manual`. You can just use the `install` action to only update all libdragon related artifacts in the container.',
       group: ['docker'],
     },
   };

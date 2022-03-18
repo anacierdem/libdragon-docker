@@ -1,5 +1,5 @@
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs/promises');
 const os = require('os');
 const chalk = require('chalk');
 const { spawn } = require('child_process');
@@ -26,6 +26,26 @@ class CommandError extends Error {
     this.out = out;
     this.userCommand = userCommand;
   }
+}
+
+async function fileExists(path) {
+  return fs
+    .stat(path)
+    .then((s) => s.isFile())
+    .catch((e) => {
+      if (e.code !== 'ENOENT') throw e;
+      return false;
+    });
+}
+
+async function dirExists(path) {
+  return fs
+    .stat(path)
+    .then((s) => s.isDirectory())
+    .catch((e) => {
+      if (e.code !== 'ENOENT') throw e;
+      return false;
+    });
 }
 
 // A simple Promise wrapper for child_process.spawn. If interactive is true,
@@ -174,9 +194,9 @@ function runNPM(params) {
   );
 }
 
-function findLibdragonRoot(start = '.') {
+async function findLibdragonRoot(start = '.') {
   const manifest = path.join(start, LIBDRAGON_PROJECT_MANIFEST);
-  if (fs.existsSync(manifest) && fs.statSync(manifest).isDirectory()) {
+  if (await dirExists(manifest)) {
     return path.resolve(start);
   } else {
     const parent = path.resolve(start, '..');
@@ -192,7 +212,7 @@ async function findNPMRoot() {
   try {
     const root = path.resolve((await runNPM(['root'])).trim(), '..');
     // Only report if package.json really exists. npm fallbacks to cwd
-    if (fs.existsSync(path.join(root, 'package.json'))) {
+    if (await fileExists(path.join(root, 'package.json'))) {
       return root;
     }
   } catch {
@@ -229,8 +249,8 @@ async function findGitRoot() {
 
 async function findContainerId(libdragonInfo) {
   const idFile = path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE);
-  if (fs.existsSync(idFile)) {
-    const id = fs.readFileSync(idFile, { encoding: 'utf8' }).trim();
+  if (await fileExists(idFile)) {
+    const id = (await fs.readFile(idFile, { encoding: 'utf8' })).trim();
     log(`Read containerId: ${id}`, true);
     return id;
   }
@@ -255,7 +275,11 @@ async function findContainerId(libdragonInfo) {
     const idIndex = str.indexOf(shortId);
     const longId = str.slice(idIndex, idIndex + 64);
     if (longId.length === 64) {
-      tryCacheContainerId({ ...libdragonInfo, containerId: longId });
+      // If ther is managed vendoring, make sure we have a git repo
+      if (libdragonInfo.vendorStrategy !== 'manual') {
+        await runGitMaybeHost(libdragonInfo, ['init']);
+      }
+      await tryCacheContainerId({ ...libdragonInfo, containerId: longId });
       return longId;
     }
   }
@@ -280,8 +304,8 @@ async function checkContainerAndClean(libdragonInfo) {
       '.git',
       CACHED_CONTAINER_FILE
     );
-    if (fs.existsSync(containerIdFile)) {
-      fs.rmSync(containerIdFile);
+    if (await fileExists(containerIdFile)) {
+      await fs.rm(containerIdFile);
     }
   }
   return id ? libdragonInfo.containerId : undefined;
@@ -317,7 +341,7 @@ async function writeProjectInfo(libdragonInfo = projectInfoToWrite) {
     libdragonInfo.root,
     LIBDRAGON_PROJECT_MANIFEST
   );
-  fs.writeFileSync(
+  await fs.writeFile(
     path.join(manifestPath, CONFIG_FILE),
     JSON.stringify(
       {
@@ -354,10 +378,10 @@ async function readProjectInfo() {
     CONFIG_FILE
   );
 
-  if (fs.existsSync(configFile) && fs.statSync(configFile).isFile()) {
+  if (await fileExists(configFile)) {
     info = {
       ...info,
-      ...JSON.parse(fs.readFileSync(configFile, { encoding: 'utf8' })),
+      ...JSON.parse(await fs.readFile(configFile, { encoding: 'utf8' })),
     };
   } else {
     // Cleanup old files and migrate to the new config file
@@ -366,11 +390,12 @@ async function readProjectInfo() {
       LIBDRAGON_PROJECT_MANIFEST,
       IMAGE_FILE
     );
-    if (fs.existsSync(imageFile) && fs.statSync(imageFile).isFile()) {
-      info.imageName = fs.readFileSync(imageFile, { encoding: 'utf8' }).trim();
+    if (await fileExists(imageFile)) {
+      info.imageName = (
+        await fs.readFile(imageFile, { encoding: 'utf8' })
+      ).trim();
       // Immediately update the config as this is the first migration
-      await writeProjectInfo(info);
-      fs.rmSync(imageFile);
+      await Promise.all([writeProjectInfo(info), fs.rm(imageFile)]);
     }
   }
 
@@ -418,25 +443,30 @@ async function createManifestIfNotExist(libdragonInfo) {
     libdragonInfo.root,
     LIBDRAGON_PROJECT_MANIFEST
   );
-  if (fs.existsSync(manifestPath) && !fs.statSync(manifestPath).isDirectory()) {
+  const manifestExists = await fs.stat(manifestPath).catch((e) => {
+    if (e.code !== 'ENOENT') throw e;
+    return false;
+  });
+
+  if (manifestExists && !manifestExists.isDirectory()) {
     throw new Error(
       'There is already a `.libdragon` file and it is not a directory.'
     );
   }
 
-  if (!fs.existsSync(manifestPath)) {
+  if (!manifestExists) {
     log(
       `Creating libdragon project configuration at \`${libdragonInfo.root}\`.`
     );
-    fs.mkdirSync(manifestPath);
+    await fs.mkdir(manifestPath);
   }
 }
 
-function tryCacheContainerId(libdragonInfo) {
+async function tryCacheContainerId(libdragonInfo) {
   const gitFolder = path.join(libdragonInfo.root, '.git');
-  if (fs.existsSync(gitFolder) && fs.statSync(gitFolder).isDirectory()) {
-    fs.writeFileSync(
-      path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE),
+  if (await dirExists(gitFolder)) {
+    await fs.writeFile(
+      path.join(gitFolder, CACHED_CONTAINER_FILE),
       libdragonInfo.containerId
     );
   }
@@ -483,6 +513,7 @@ module.exports = {
   dockerHostUserParams,
   dockerRelativeWorkdir,
   tryCacheContainerId,
+  fileExists,
   CommandError,
   globals,
 };

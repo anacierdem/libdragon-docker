@@ -22,6 +22,7 @@
 - Migrate to a json file for persistent project information.
 - Only save the configuration file on successful exit except for the initial
   migration.
+- Minor performance improvements.
 
 ## [10.3.1] - 2022-01-25
 
