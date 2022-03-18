@@ -1,18 +1,17 @@
 #!/usr/bin/env node
 
 const chalk = require('chalk');
-const {
-  readProjectInfo,
-  writeProjectInfo,
-  CommandError,
-  globals,
-} = require('./modules/helpers');
-const actions = require('./modules/actions');
-const { printUsage } = require('./modules/usage');
 
-const STATUS_OK = 0;
-const STATUS_ERROR = 1;
-const STATUS_BAD_PARAM = 2;
+const actions = require('./modules/actions');
+const { fn: printUsage } = require('./modules/actions/help');
+const {
+  STATUS_OK,
+  STATUS_BAD_PARAM,
+  STATUS_ERROR,
+} = require('./modules/constants');
+const { globals } = require('./modules/globals');
+const { CommandError } = require('./modules/helpers');
+const { readProjectInfo, writeProjectInfo } = require('./modules/project-info');
 
 let options = {},
   currentAction;

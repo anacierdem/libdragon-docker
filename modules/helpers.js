@@ -1,23 +1,9 @@
 const path = require('path');
 const fs = require('fs/promises');
-const os = require('os');
 const chalk = require('chalk');
 const { spawn } = require('child_process');
 
-const {
-  CACHED_CONTAINER_FILE,
-  LIBDRAGON_PROJECT_MANIFEST,
-  IMAGE_FILE,
-  DOCKER_HUB_IMAGE,
-  CONTAINER_TARGET_PATH,
-  CONFIG_FILE,
-  LIBDRAGON_SUBMODULE,
-  DEFAULT_STRATEGY,
-} = require('./constants');
-
-const globals = {
-  verbose: false,
-};
+const { globals } = require('./globals');
 
 class CommandError extends Error {
   constructor(message, { code, out, userCommand }) {
@@ -155,321 +141,48 @@ function dockerExec(
 }
 
 /**
- * Invokes host git with provided params. If host does not have git, falls back
- * to the docker git, with the nix user set to the user running libdragon.
+ * Recursively copies directories and files
  */
-async function runGitMaybeHost(libdragonInfo, params, interactive = 'full') {
-  assert(
-    libdragonInfo.vendorStrategy !== 'manual',
-    new Error('Should never run git if vendoring strategy is submodule.')
-  );
-  try {
-    return await spawnProcess(
-      'git',
-      params,
-      false,
-      // Windows git is breaking the TTY somehow - disable interactive for now
-      // We are not able to display progress for the initial clone b/c of this
-      /^win/.test(process.platform) ? false : interactive
-    );
-  } catch (e) {
-    if (!(e instanceof CommandError)) {
-      return await dockerExec(
-        libdragonInfo,
-        // Use the host user when initializing git as we will need access
-        [...dockerHostUserParams(libdragonInfo)],
-        ['git', ...params],
-        false,
-        interactive
-      );
-    }
-    throw e;
-  }
-}
+async function copyDirContents(src, dst) {
+  log(`Copying from ${src} to ${dst}`, true);
 
-function runNPM(params) {
-  return spawnProcess(
-    /^win/.test(process.platform) ? 'npm.cmd' : 'npm',
-    params
-  );
-}
-
-async function findLibdragonRoot(start = '.') {
-  const manifest = path.join(start, LIBDRAGON_PROJECT_MANIFEST);
-  if (await dirExists(manifest)) {
-    return path.resolve(start);
-  } else {
-    const parent = path.resolve(start, '..');
-    if (parent !== path.resolve(start)) {
-      return findLibdragonRoot(parent);
-    } else {
-      return;
-    }
-  }
-}
-
-async function findNPMRoot() {
-  try {
-    const root = path.resolve((await runNPM(['root'])).trim(), '..');
-    // Only report if package.json really exists. npm fallbacks to cwd
-    if (await fileExists(path.join(root, 'package.json'))) {
-      return root;
-    }
-  } catch {
-    // User does not have and does not care about NPM if it didn't work
-    return undefined;
-  }
-}
-
-function dockerRelativeWorkdir(libdragonInfo) {
-  return (
-    CONTAINER_TARGET_PATH +
-    '/' +
-    toPosixPath(path.relative(libdragonInfo.root, process.cwd()))
-  );
-}
-
-function dockerRelativeWorkdirParams(libdragonInfo) {
-  return ['--workdir', dockerRelativeWorkdir(libdragonInfo)];
-}
-
-function dockerHostUserParams(libdragonInfo) {
-  const { uid, gid } = libdragonInfo.userInfo;
-  return ['-u', `${uid >= 0 ? uid : ''}:${gid >= 0 ? gid : ''}`];
-}
-
-async function findGitRoot() {
-  try {
-    return (await spawnProcess('git', ['rev-parse', '--show-toplevel'])).trim();
-  } catch {
-    // No need to do anything if the user does not have git
-    return undefined;
-  }
-}
-
-async function findContainerId(libdragonInfo) {
-  const idFile = path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE);
-  if (await fileExists(idFile)) {
-    const id = (await fs.readFile(idFile, { encoding: 'utf8' })).trim();
-    log(`Read containerId: ${id}`, true);
-    return id;
-  }
-
-  const candidates = (
-    await spawnProcess('docker', [
-      'container',
-      'ls',
-      '-a',
-      '--format',
-      '{{.}}{{.ID}}',
-      '-f',
-      'volume=' + CONTAINER_TARGET_PATH,
-    ])
-  )
-    .split('\n')
-    .filter((s) => s.includes(`${libdragonInfo.root} `));
-
-  if (candidates.length > 0) {
-    const str = candidates[0];
-    const shortId = str.slice(-12);
-    const idIndex = str.indexOf(shortId);
-    const longId = str.slice(idIndex, idIndex + 64);
-    if (longId.length === 64) {
-      // If ther is managed vendoring, make sure we have a git repo
-      if (libdragonInfo.vendorStrategy !== 'manual') {
-        await runGitMaybeHost(libdragonInfo, ['init']);
-      }
-      await tryCacheContainerId({ ...libdragonInfo, containerId: longId });
-      return longId;
-    }
-  }
-}
-
-async function checkContainerAndClean(libdragonInfo) {
-  const id =
-    libdragonInfo.containerId &&
-    (
-      await spawnProcess('docker', [
-        'container',
-        'ls',
-        '-qa',
-        '-f id=' + libdragonInfo.containerId,
-      ])
-    ).trim();
-
-  // Container does not exist, clean the id up
-  if (!id) {
-    const containerIdFile = path.join(
-      libdragonInfo.root,
-      '.git',
-      CACHED_CONTAINER_FILE
-    );
-    if (await fileExists(containerIdFile)) {
-      await fs.rm(containerIdFile);
-    }
-  }
-  return id ? libdragonInfo.containerId : undefined;
-}
-
-async function checkContainerRunning(containerId) {
-  const running = (
-    await spawnProcess('docker', [
-      'container',
-      'ls',
-      '-q',
-      '-f id=' + containerId,
-    ])
-  ).trim();
-  return running ? containerId : undefined;
-}
-
-let projectInfoToWrite = {};
-/**
- * Updates project info to be written. The provided keys are overwritten without
- * changing the existing values. When the process exists successfully these will
- * get written to the configuration file. Echoes back the given info.
- * @param libdragonInfo
- */
-function setProjectInfoToSave(libdragonInfo) {
-  projectInfoToWrite = { ...projectInfoToWrite, ...libdragonInfo };
-  return libdragonInfo;
-}
-
-async function writeProjectInfo(libdragonInfo = projectInfoToWrite) {
-  await createManifestIfNotExist(libdragonInfo);
-  const manifestPath = path.join(
-    libdragonInfo.root,
-    LIBDRAGON_PROJECT_MANIFEST
-  );
-  await fs.writeFile(
-    path.join(manifestPath, CONFIG_FILE),
-    JSON.stringify(
-      {
-        imageName: libdragonInfo.imageName,
-        vendorDirectory: libdragonInfo.vendorDirectory,
-        vendorStrategy: libdragonInfo.vendorStrategy,
-      },
-      null,
-      '  '
-    )
-  );
-  log(`Configuration file updated`, true);
-}
-
-async function readProjectInfo() {
-  let info = {
-    root:
-      (await findLibdragonRoot()) ??
-      (await findNPMRoot()) ??
-      (await findGitRoot()),
-    userInfo: os.userInfo(),
-  };
-
-  if (!info.root) {
-    log('Could not find project root, set as cwd.', true);
-    info.root = process.cwd();
-  }
-
-  log(`Project root: ${info.root}`, true);
-
-  const configFile = path.join(
-    info.root,
-    LIBDRAGON_PROJECT_MANIFEST,
-    CONFIG_FILE
-  );
-
-  if (await fileExists(configFile)) {
-    info = {
-      ...info,
-      ...JSON.parse(await fs.readFile(configFile, { encoding: 'utf8' })),
-    };
-  } else {
-    // Cleanup old files and migrate to the new config file
-    const imageFile = path.join(
-      info.root,
-      LIBDRAGON_PROJECT_MANIFEST,
-      IMAGE_FILE
-    );
-    if (await fileExists(imageFile)) {
-      info.imageName = (
-        await fs.readFile(imageFile, { encoding: 'utf8' })
-      ).trim();
-      // Immediately update the config as this is the first migration
-      await Promise.all([writeProjectInfo(info), fs.rm(imageFile)]);
-    }
-  }
-
-  info.containerId = await findContainerId(info);
-  log(`Active container id: ${info.containerId}`, true);
-
-  // For imageName, flag has the highest priority followed by the one read from
-  // the file and then if there is any matching container, name is read from it.
-  // As last option fallback to default value.
-
-  // If still have the container, read the image name from it
-  if (!info.imageName && (await checkContainerAndClean(info))) {
-    info.imageName = (
-      await spawnProcess('docker', [
-        'container',
-        'inspect',
-        info.containerId,
-        '--format',
-        '{{.Config.Image}}',
-      ])
-    ).trim();
-  }
-
-  info.imageName = info.imageName ?? DOCKER_HUB_IMAGE;
-  log(`Active image name: ${info.imageName}`, true);
-
-  info.vendorDirectory =
-    info.vendorDirectory ?? path.join('.', LIBDRAGON_SUBMODULE);
-  log(`Active vendor directory: ${info.vendorDirectory}`, true);
-
-  info.vendorStrategy = info.vendorStrategy ?? DEFAULT_STRATEGY;
-  log(`Active vendor strategyy: ${info.vendorStrategy}`, true);
-
-  // Cache the latest image name
-  setProjectInfoToSave(info);
-  return info;
-}
-
-/**
- * Creates the manifest folder if it does not exist. Will return true if
- * created, false otherwise.
- */
-async function createManifestIfNotExist(libdragonInfo) {
-  const manifestPath = path.join(
-    libdragonInfo.root,
-    LIBDRAGON_PROJECT_MANIFEST
-  );
-  const manifestExists = await fs.stat(manifestPath).catch((e) => {
+  const dstStat = await fs.stat(dst).catch((e) => {
     if (e.code !== 'ENOENT') throw e;
-    return false;
+    return null;
   });
 
-  if (manifestExists && !manifestExists.isDirectory()) {
-    throw new Error(
-      'There is already a `.libdragon` file and it is not a directory.'
-    );
+  if (dstStat && !dstStat.isDirectory()) {
+    log(`${dst} is not a directory, skipping.`);
+    return;
   }
 
-  if (!manifestExists) {
-    log(
-      `Creating libdragon project configuration at \`${libdragonInfo.root}\`.`
-    );
-    await fs.mkdir(manifestPath);
+  if (!dstStat) {
+    log(`Creating a directory at ${dst}.`, true);
+    await fs.mkdir(dst);
   }
-}
 
-async function tryCacheContainerId(libdragonInfo) {
-  const gitFolder = path.join(libdragonInfo.root, '.git');
-  if (await dirExists(gitFolder)) {
-    await fs.writeFile(
-      path.join(gitFolder, CACHED_CONTAINER_FILE),
-      libdragonInfo.containerId
-    );
-  }
+  const files = await fs.readdir(src);
+  return Promise.all(
+    files.map(async (name) => {
+      const source = path.join(src, name);
+      const dest = path.join(dst, name);
+      const stats = await fs.stat(source);
+      if (stats.isDirectory()) {
+        await copyDirContents(source, dest);
+      } else if (stats.isFile()) {
+        const content = await fs.readFile(source);
+        try {
+          log(`Writing to ${dest}`, true);
+          await fs.writeFile(dest, content, {
+            flag: 'wx',
+          });
+        } catch (e) {
+          log(`${dest} already exists, skipping.`);
+          return;
+        }
+      }
+    })
+  );
 }
 
 function toPosixPath(p) {
@@ -498,22 +211,12 @@ function log(text, verboseOnly = false) {
 
 module.exports = {
   spawnProcess,
-  readProjectInfo,
-  checkContainerAndClean,
-  checkContainerRunning,
   toPosixPath,
-  writeProjectInfo,
-  setProjectInfoToSave,
-  runNPM,
-  findNPMRoot,
   log,
   dockerExec,
-  dockerRelativeWorkdirParams,
-  runGitMaybeHost,
-  dockerHostUserParams,
-  dockerRelativeWorkdir,
-  tryCacheContainerId,
+  assert,
   fileExists,
+  dirExists,
+  copyDirContents,
   CommandError,
-  globals,
 };

@@ -1,7 +1,7 @@
 const chalk = require('chalk');
 const commandLineUsage = require('command-line-usage');
 
-const { log } = require('./helpers');
+const { log } = require('../helpers');
 
 const printUsage = (_, actionArr) => {
   const globalOptionDefinitions = [
@@ -145,5 +145,8 @@ const printUsage = (_, actionArr) => {
 };
 
 module.exports = {
-  printUsage,
+  name: 'help',
+  fn: printUsage,
+  showStatus: true,
+  forwardsRestParams: true,
 };
