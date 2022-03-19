@@ -43,7 +43,8 @@ async function findNPMRoot() {
 
 const installDependencies = async (libdragonInfo) => {
   const buildScriptPath = path.join(
-    path.relative(libdragonInfo.root, libdragonInfo.vendorDirectory),
+    libdragonInfo.root,
+    libdragonInfo.vendorDirectory,
     'build.sh'
   );
   if (!(await fileExists(buildScriptPath))) {

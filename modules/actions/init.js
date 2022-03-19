@@ -10,11 +10,9 @@ const { initSubmodule, installDependencies } = require('./utils');
 
 const { log, copyDirContents } = require('../helpers');
 
-const {
-  setProjectInfoToSave,
-  tryCacheContainerId,
-  updateImage,
-} = require('./utils');
+const { tryCacheContainerId, updateImage } = require('./utils');
+
+const { setProjectInfoToSave } = require('../project-info');
 
 /**
  * Initialize a new libdragon project in current working directory
@@ -82,7 +80,7 @@ async function init(libdragonInfo) {
     }
 
     const libdragonFile = files.find((name) =>
-      name.match(new RegExp(`^${relativePath}.?`))
+      name.match(new RegExp(`^${relativePath}$`))
     );
 
     if (libdragonFile) {
@@ -90,7 +88,7 @@ async function init(libdragonInfo) {
         `${path.join(
           newInfo.root,
           libdragonFile
-        )} already exists. That is the libdragon vendoring target, please remove and retry. Move libdragon.exe to somewhere else if you are trying to use it inside your project folder.`
+        )} already exists. That is the libdragon vendoring target, please remove and retry.`
       );
     }
 

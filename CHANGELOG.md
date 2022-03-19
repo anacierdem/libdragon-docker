@@ -24,6 +24,9 @@
 - Only save the configuration file on successful exit except for the initial
   migration.
 - Minor performance improvements.
+- Do not prevent init if there is a file named libdragon in the target folder.
+  This used to cause problems on windows but I cannot reproduce it anymore
+  with `2.33.1.windows.1`
 
 ## [10.3.1] - 2022-01-25
 
