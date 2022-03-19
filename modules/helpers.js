@@ -166,7 +166,14 @@ async function copyDirContents(src, dst) {
     files.map(async (name) => {
       const source = path.join(src, name);
       const dest = path.join(dst, name);
-      const stats = await fs.stat(source);
+      // promise version does not work on snapshot filesystem
+      // Also see https://github.com/vercel/pkg/issues/1561
+      const stats = await new Promise((res, rej) =>
+        fs.stat(source, (err, stats) => {
+          if (err) return rej(err);
+          res(stats);
+        })
+      );
       if (stats.isDirectory()) {
         await copyDirContents(source, dest);
       } else if (stats.isFile()) {

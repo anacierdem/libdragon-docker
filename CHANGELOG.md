@@ -1,6 +1,6 @@
 # Change Log
 
-## [10.4.0] - 2022-03-18
+## [10.4.0] - 2022-03-19
 
 ### Fixed
 
@@ -9,6 +9,7 @@
   able to map container files to local files properly with a generic regex in the
   problem matcher. This fixes #13 and does not change any behaviour.
 - Add missing examples to the vscode run configurations.
+- Update vulnerable dependencies.
 
 ### Added
 

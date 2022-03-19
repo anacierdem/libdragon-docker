@@ -103,7 +103,7 @@ async function init(libdragonInfo) {
   }
 
   log(`Preparing project files...`);
-  const skeletonFolder = path.join(__dirname, '../skeleton');
+  const skeletonFolder = path.join(__dirname, '../../skeleton');
 
   await Promise.all([
     // We have created a new container, save the new info

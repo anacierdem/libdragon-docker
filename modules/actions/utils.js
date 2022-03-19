@@ -222,7 +222,7 @@ const destroyContainer = async (libdragonInfo) => {
 async function runGitMaybeHost(libdragonInfo, params, interactive = 'full') {
   assert(
     libdragonInfo.vendorStrategy !== 'manual',
-    new Error('Should never run git if vendoring strategy is submodule.')
+    new Error('Should never run git if vendoring strategy is manual.')
   );
   try {
     return await spawnProcess(
