@@ -1,5 +1,5 @@
 const path = require('path');
-const fsSync = require('fs');
+const fsClassic = require('fs');
 const fs = require('fs/promises');
 
 const _ = require('lodash');
@@ -94,9 +94,9 @@ const installDependencies = async (libdragonInfo) => {
     await Promise.all(
       deps.map(({ name, paths }) => {
         return new Promise((resolve, reject) => {
-          fsSync.access(
+          fsClassic.access(
             path.join(paths[0], 'Makefile'),
-            fsSync.F_OK,
+            fsClassic.F_OK,
             async (e) => {
               if (e) {
                 // File does not exist - skip

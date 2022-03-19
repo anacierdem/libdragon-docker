@@ -1,4 +1,4 @@
-const fsp = require('fs/promises');
+const fs = require('fs/promises');
 const path = require('path');
 
 const chalk = require('chalk');
@@ -22,7 +22,7 @@ async function init(libdragonInfo) {
   log(`Initializing a libdragon project at ${libdragonInfo.root}`);
 
   // TODO: use exists instead & check if it is a directory
-  const files = await fsp.readdir(libdragonInfo.root);
+  const files = await fs.readdir(libdragonInfo.root);
 
   const manifestFile = files.find(
     (name) => name === LIBDRAGON_PROJECT_MANIFEST
@@ -62,12 +62,13 @@ async function init(libdragonInfo) {
     return;
   }
 
+  newInfo.imageName =
+    (await updateImage(newInfo, newInfo.imageName)) || newInfo.imageName;
   // Download image and start it
-  const containerReadyPromise = start({
+  const containerReadyPromise = start(newInfo).then((newId) => ({
     ...newInfo,
-    imageName:
-      (await updateImage(newInfo, newInfo.imageName)) || newInfo.imageName,
-  });
+    containerId: newId,
+  }));
 
   let vendorAndGitReadyPromise = containerReadyPromise;
   if (newInfo.vendorStrategy === 'submodule') {
@@ -92,12 +93,7 @@ async function init(libdragonInfo) {
       );
     }
 
-    vendorAndGitReadyPromise = containerReadyPromise.then((newId) =>
-      initSubmodule({
-        ...newInfo,
-        containerId: newId,
-      })
-    );
+    vendorAndGitReadyPromise = containerReadyPromise.then(initSubmodule);
   }
 
   log(`Preparing project files...`);

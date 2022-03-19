@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs/promises');
+const fsClassic = require('fs');
 const chalk = require('chalk');
 const { spawn } = require('child_process');
 
@@ -169,7 +170,7 @@ async function copyDirContents(src, dst) {
       // promise version does not work on snapshot filesystem
       // Also see https://github.com/vercel/pkg/issues/1561
       const stats = await new Promise((res, rej) =>
-        fs.stat(source, (err, stats) => {
+        fsClassic.stat(source, (err, stats) => {
           if (err) return rej(err);
           res(stats);
         })
