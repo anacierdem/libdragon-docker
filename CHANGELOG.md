@@ -15,8 +15,9 @@
 
 - `--directory` option to customize vendoring location.
 - `--strategy` option to select a vendoring strategy. Currently supported options
-  are `submodule` and `manual`, which can be used to opt-out of auto vendoring
-  via submodule. Useful if the user wants to utilize a different vendoring strategy.
+  are `submodule`, `subtree` and `manual`. The default is `submodule` and `manual`
+  can be used to opt-out of auto vendoring. Useful if the user wants to utilize
+  a different vendoring strategy and opt-out of the auto-managed git flows.
 
 ### Changed
 
@@ -26,7 +27,7 @@
 - Minor performance improvements.
 - Do not prevent init if there is a file named libdragon in the target folder.
   This used to cause problems on windows but I cannot reproduce it anymore
-  with `2.33.1.windows.1`
+  with `2.33.1.windows.1`. It may be something caused by my old configuration.
 
 ## [10.3.1] - 2022-01-25
 

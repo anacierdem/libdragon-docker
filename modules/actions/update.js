@@ -1,7 +1,6 @@
-const path = require('path');
-
 const { log } = require('../helpers');
-const { initSubmodule, runGitMaybeHost } = require('./utils');
+const { LIBDRAGON_GIT, LIBDRAGON_BRANCH } = require('../constants');
+const { runGitMaybeHost } = require('./utils');
 const { fn: start } = require('./start');
 const { fn: install } = require('./install');
 
@@ -13,28 +12,27 @@ const update = async (libdragonInfo) => {
     containerId,
   };
 
-  // Only do auto-update if there is no manual vendoring set-up
-  if (libdragonInfo.vendorStrategy === 'submodule') {
-    // Update submodule
-    log('Updating submodule...');
+  if (newInfo.vendorStrategy !== 'manual') {
+    log(`Updating ${newInfo.vendorStrategy}...`);
+  }
 
-    try {
-      await initSubmodule(newInfo);
-    } catch {
-      throw new Error(
-        `Unable to re-initialize vendored libdragon. Probably git does not know the vendoring target (${path.join(
-          libdragonInfo.root,
-          libdragonInfo.vendorDirectory
-        )}) Removing it might resolve this issue.`
-      );
-    }
-
+  if (newInfo.vendorStrategy === 'submodule') {
     await runGitMaybeHost(newInfo, [
       'submodule',
       'update',
       '--remote',
       '--merge',
-      './' + libdragonInfo.vendorDirectory,
+      newInfo.vendorDirectory,
+    ]);
+  } else if (newInfo.vendorStrategy === 'subtree') {
+    await runGitMaybeHost(newInfo, [
+      'subtree',
+      'pull',
+      '--prefix',
+      newInfo.vendorDirectory,
+      LIBDRAGON_GIT,
+      LIBDRAGON_BRANCH,
+      '--squash',
     ]);
   }
 

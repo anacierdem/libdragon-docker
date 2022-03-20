@@ -3,16 +3,73 @@ const path = require('path');
 
 const chalk = require('chalk');
 
-const { LIBDRAGON_PROJECT_MANIFEST } = require('../constants');
 const { fn: install } = require('./install');
 const { fn: start } = require('./start');
-const { initSubmodule, installDependencies } = require('./utils');
+const {
+  installDependencies,
+  tryCacheContainerId,
+  updateImage,
+  runGitMaybeHost,
+} = require('./utils');
 
-const { log, copyDirContents } = require('../helpers');
-
-const { tryCacheContainerId, updateImage } = require('./utils');
-
+const {
+  LIBDRAGON_PROJECT_MANIFEST,
+  LIBDRAGON_SUBMODULE,
+  LIBDRAGON_BRANCH,
+  LIBDRAGON_GIT,
+} = require('../constants');
+const { log, copyDirContents, CommandError } = require('../helpers');
 const { setProjectInfoToSave } = require('../project-info');
+
+const autoVendor = async (libdragonInfo) => {
+  await runGitMaybeHost(libdragonInfo, ['init']);
+
+  if (libdragonInfo.vendorStrategy === 'submodule') {
+    await runGitMaybeHost(libdragonInfo, [
+      'submodule',
+      'add',
+      '--force',
+      '--name',
+      LIBDRAGON_SUBMODULE,
+      '--branch',
+      LIBDRAGON_BRANCH,
+      LIBDRAGON_GIT,
+      libdragonInfo.vendorDirectory,
+    ]);
+  } else if (libdragonInfo.vendorStrategy === 'subtree') {
+    // Create a commit if it does not exist. This is required for subtree.
+    try {
+      await runGitMaybeHost(libdragonInfo, ['rev-parse', 'HEAD']);
+    } catch (e) {
+      if (!(e instanceof CommandError)) throw e;
+
+      // This will throw if git user name/email is not set up. Let's not assume
+      // anything for now. This means subtree is not supported for someone without
+      // git on the host machine.
+      await runGitMaybeHost(libdragonInfo, [
+        'commit',
+        '--allow-empty',
+        '-n',
+        '-m',
+        'Initial commit.',
+      ]);
+    }
+
+    await runGitMaybeHost(libdragonInfo, [
+      '-C',
+      libdragonInfo.root,
+      'subtree',
+      'add',
+      '--prefix',
+      libdragonInfo.vendorDirectory,
+      LIBDRAGON_GIT,
+      LIBDRAGON_BRANCH,
+      '--squash',
+    ]);
+  }
+
+  return libdragonInfo;
+};
 
 /**
  * Initialize a new libdragon project in current working directory
@@ -30,20 +87,46 @@ async function init(libdragonInfo) {
 
   let newInfo = libdragonInfo;
 
-  // Update the directory information for the project if the flag is provided
-  if (libdragonInfo.options.VENDOR_DIR) {
-    newInfo = setProjectInfoToSave({
-      ...newInfo,
-      vendorDirectory: libdragonInfo.options.VENDOR_DIR,
-    });
+  // Validate vendoring strategy. Do not allow a switch after successful initialization
+  if (
+    manifestFile &&
+    newInfo.options.VENDOR_STRAT &&
+    newInfo.options.VENDOR_STRAT !== 'manual' &&
+    newInfo.vendorStrategy !== newInfo.options.VENDOR_STRAT
+  ) {
+    throw new Error(
+      `Requested strategy switch: ${newInfo.vendorStrategy} -> ${newInfo.options.VENDOR_STRAT} It is not possible to switch vendoring strategy after initializing a project. You can always switch to manual and handle libdragon yourself.`
+    );
   }
 
   // Update the strategy information for the project if the flag is provided
-  if (libdragonInfo.options.VENDOR_STRAT) {
+  if (newInfo.options.VENDOR_STRAT) {
     newInfo = setProjectInfoToSave({
       ...newInfo,
-      vendorStrategy: libdragonInfo.options.VENDOR_STRAT,
+      vendorStrategy: newInfo.options.VENDOR_STRAT,
     });
+  }
+
+  // Update the directory information for the project if the flag is provided
+  if (newInfo.options.VENDOR_DIR) {
+    newInfo = setProjectInfoToSave({
+      ...newInfo,
+      vendorDirectory: newInfo.options.VENDOR_DIR,
+    });
+  }
+
+  // Validate vendoring path
+  const relativeVendorPath = path.relative(
+    newInfo.root,
+    newInfo.vendorDirectory
+  );
+  if (
+    newInfo.vendorStrategy !== 'manual' &&
+    relativeVendorPath.startsWith('..')
+  ) {
+    throw new Error(
+      'When using a non-manual strategy, `--directory` must be inside the project folder.'
+    );
   }
 
   if (manifestFile) {
@@ -71,17 +154,9 @@ async function init(libdragonInfo) {
   }));
 
   let vendorAndGitReadyPromise = containerReadyPromise;
-  if (newInfo.vendorStrategy === 'submodule') {
-    const relativePath = path.relative(newInfo.root, newInfo.vendorDirectory);
-
-    if (relativePath.startsWith('..')) {
-      throw new Error(
-        'When using `submodule` strategy, `--directory` must be inside the project folder.'
-      );
-    }
-
+  if (newInfo.vendorStrategy !== 'manual') {
     const libdragonFile = files.find((name) =>
-      name.match(new RegExp(`^${relativePath}$`))
+      name.match(new RegExp(`^${relativeVendorPath}$`))
     );
 
     if (libdragonFile) {
@@ -93,7 +168,7 @@ async function init(libdragonInfo) {
       );
     }
 
-    vendorAndGitReadyPromise = containerReadyPromise.then(initSubmodule);
+    vendorAndGitReadyPromise = containerReadyPromise.then(autoVendor);
   }
 
   log(`Preparing project files...`);

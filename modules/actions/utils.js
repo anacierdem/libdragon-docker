@@ -7,9 +7,6 @@ const _ = require('lodash');
 const {
   CONTAINER_TARGET_PATH,
   CACHED_CONTAINER_FILE,
-  LIBDRAGON_SUBMODULE,
-  LIBDRAGON_BRANCH,
-  LIBDRAGON_GIT,
 } = require('../constants');
 
 const {
@@ -42,11 +39,16 @@ async function findNPMRoot() {
 }
 
 const installDependencies = async (libdragonInfo) => {
-  const buildScriptPath = path.join(
-    libdragonInfo.root,
-    libdragonInfo.vendorDirectory,
-    'build.sh'
-  );
+  let buildScriptPath;
+  if (path.isAbsolute(libdragonInfo.vendorDirectory)) {
+    buildScriptPath = path.join(libdragonInfo.vendorDirectory, 'build.sh');
+  } else {
+    buildScriptPath = path.join(
+      libdragonInfo.root,
+      libdragonInfo.vendorDirectory,
+      'build.sh'
+    );
+  }
   if (!(await fileExists(buildScriptPath))) {
     throw new Error(
       `build.sh not found. Make sure you have a vendored libdragon copy at ${libdragonInfo.vendorDirectory}`
@@ -304,29 +306,11 @@ async function tryCacheContainerId(libdragonInfo) {
   }
 }
 
-const initSubmodule = async (libdragonInfo) => {
-  await runGitMaybeHost(libdragonInfo, ['init']);
-
-  await runGitMaybeHost(libdragonInfo, [
-    'submodule',
-    'add',
-    '--force',
-    '--name',
-    LIBDRAGON_SUBMODULE,
-    '--branch',
-    LIBDRAGON_BRANCH,
-    LIBDRAGON_GIT,
-    libdragonInfo.vendorDirectory,
-  ]);
-  return libdragonInfo;
-};
-
 module.exports = {
   installDependencies,
   updateImage,
   destroyContainer,
   checkContainerRunning,
-  initSubmodule,
   checkContainerAndClean,
   dockerHostUserParams,
   tryCacheContainerId,

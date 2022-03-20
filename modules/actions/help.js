@@ -8,7 +8,7 @@ const printUsage = (_, actionArr) => {
     {
       name: 'verbose',
       description:
-        'Be verbose. This will print all commands dispatched and their outputs as well.',
+        'Be verbose. This will print all commands dispatched and their outputs as well. Will also start printing error stack traces.',
       alias: 'v',
       group: 'global',
     },
@@ -25,20 +25,24 @@ const printUsage = (_, actionArr) => {
     },
     {
       name: 'directory',
-      description: `Directory where libdragon files are expected. When using \`submodule\` strategy, it must be inside the project folder and the cli will create and manage a submodule at that location. Defaults to \`./libdragon\` if not provided.\n`,
+      description: `Directory where libdragon files are expected. When using \`submodule\` or \`subtree\` strategy, it must be inside the project folder and the cli will create and manage the vendoring at that location. Defaults to \`./libdragon\` if not provided.\n`,
       alias: 'd',
       typeLabel: '<path>',
       group: 'vendoring',
     },
     {
       name: 'strategy',
-      description: `libdragon Vendoring strategy. Defaults to \`submodule\`, which creates and manages a git repository and a submodule at \`--directory\` to automatically update the vendored libdragon files. To disable auto-vendoring, init with \`manual\`. When using \`manual\`, libdragon files are expected at the location provided by \`--directory\` flag and the user is responsible for vendoring and updating them. This will allow using a git subtree flow or another manual vendoring method.
+      description: `libdragon Vendoring strategy. Defaults to \`submodule\`, which creates and manages a git repository and a submodule at \`--directory\` to automatically update the vendored libdragon files.
+
+        When using \`subtree\`, the cli will create a subtree  at \`--directory\` instead. Keep in mind that git user name and email must be set up for this to work. Do not use if you are not using git yourself.
+
+        To disable auto-vendoring, init with \`manual\`. When using \`manual\`, libdragon files are expected at the location provided by \`--directory\` flag and the user is responsible for vendoring and updating them. This will allow using any other manual vendoring method.
 
         With the \`manual\` strategy, it is still recommended to have a git repository at project root such that container actions can execute faster by caching the container id inside the \`.git\` folder.
 
-        It is also possible to opt-out later on by running \`init\` with \`--strategy manual\`, though you will be responsible for managing the existing submodule. \n`,
+        It is also possible to opt-out later on by running \`init\` with \`--strategy manual\`, though you will be responsible for managing the existing submodule/subtree. \n`,
       alias: 'v',
-      typeLabel: '<submodule|manual>',
+      typeLabel: '<submodule|subtree|manual>',
       group: 'vendoring',
     },
   ];
@@ -51,9 +55,9 @@ const printUsage = (_, actionArr) => {
     init: {
       name: 'init',
       summary: 'Create a libdragon project in the current directory.',
-      description: `Creates a libdragon project in the current directory. Every libdragon project will have its own docker container instance. If you are in a git repository or an NPM project, libdragon will be initialized at their root also marking there with a \`.libdragon\` folder. Do not remove the \`.libdragon\` folder and commit its contents if you are using git, as it keeps persistent libdragon project information.
+      description: `Creates a libdragon project in the current directory. Every libdragon project will have its own docker container instance. If you are in a git repository or an NPM project, libdragon will be initialized at their root also marking there with a \`.libdragon\` folder. Do not remove the \`.libdragon\` folder and commit its contents if you are using source control, as it keeps persistent libdragon project information.
 
-      By default, a git repository and a submodule at \`./libdragon\` will be created to automatically update the vendored libdragon files on subsequent updates. If you intend to opt-out from this feature, see the \`--strategy manual\` flag to provide your self-managed libdragon copy. The default behaviour is intended for users who just want to consume libdragon.
+      By default, a git repository and a submodule at \`./libdragon\` will be created to automatically update the vendored libdragon files on subsequent \`update\`s. If you intend to opt-out from this feature, see the \`--strategy manual\` flag to provide your self-managed libdragon copy. The default behaviour is intended for users who primarily want to consume libdragon as is.
 
       If this is the first time you are creating a libdragon project at that location, this action will also create skeleton project files to kickstart things with the given image, if provided. For subsequent runs, it will act like \`start\` thus can be used to revive an existing project without modifying it.`,
       group: ['docker', 'vendoring'],
@@ -90,7 +94,7 @@ const printUsage = (_, actionArr) => {
       name: 'install',
       summary: 'Vendor libdragon as is.',
       group: ['docker'],
-      description: `Attempts to build and install everything libdragon related into the container. This includes all the tools and third parties used by libdragon except for the toolchain. If you have made changes to libdragon, you can execute this action to build everything based on your changes. Requires you to have an intact \`libdragon\` at the root of the project. If you are not working on libdragon, you can just use the \`update\` action instead.
+      description: `Attempts to build and install everything libdragon related into the container. This includes all the tools and third parties used by libdragon except for the toolchain. If you have made changes to libdragon, you can execute this action to build everything based on your changes. Requires you to have an intact vendoring target (also see the \`--directory\` flag). If you are not working on libdragon itself, you can just use the \`update\` action instead.
 
         This can be useful to recover from a half-baked container.`,
     },
@@ -98,7 +102,7 @@ const printUsage = (_, actionArr) => {
       name: 'update',
       summary: 'Update libdragon and do an install.',
       description:
-        'This action will update the submodule from the remote branch (`trunk`) with a merge strategy and then perform a `libdragon install`. This is the same as an `install` when the vendoring strategy is `manual`. You can just use the `install` action to only update all libdragon related artifacts in the container.',
+        'If you are using auto-vendoring (see `--strategy`), this action will update the submodule/subtree from the remote branch (`trunk`) with a merge/squash strategy and then perform a `libdragon install`. This is the same as an `install` when the vendoring strategy is `manual`. You can use the `install` action to only update all libdragon related artifacts in the container.',
       group: ['docker'],
     },
   };

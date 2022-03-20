@@ -22,7 +22,7 @@ To update the library and rebuild/install all the artifacts;
 
     libdragon update
 
-See [next section](#overall-usage) for more details.
+`git` is not strictly required to use this tool as docker's git will be used instead. Still, it is highly recommended to have git on your host machine.
 
 ## Overall usage
 

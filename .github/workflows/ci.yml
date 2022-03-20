@@ -100,6 +100,37 @@ jobs:
           npm run libdragon -- --verbose update
           npm run libdragon -- --verbose install
 
+  ci-subtree:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install
+        run: |
+          npm ci
+          rm -rf libdragon
+          rm -rf .libdragon
+          rm -rf .git
+          git config --global user.name "libdragon-cli"
+          git config --global user.email "cli@libdragon.dev"
+
+      - name: Test
+        run: |
+          npm run libdragon -- --verbose init -s subtree
+          npm run libdragon -- --verbose make
+          npm run libdragon -- --verbose help
+          npm run libdragon -- --verbose exec ls
+          npm run libdragon -- --verbose stop
+          npm run libdragon -- --verbose start
+          npm run libdragon -- --verbose update
+          npm run libdragon -- --verbose install
+
   ci-pack:
     runs-on: ubuntu-latest
     steps:

@@ -50,7 +50,7 @@ async function findContainerId(libdragonInfo) {
     const idIndex = str.indexOf(shortId);
     const longId = str.slice(idIndex, idIndex + 64);
     if (longId.length === 64) {
-      // If ther is managed vendoring, make sure we have a git repo
+      // If there is managed vendoring, make sure we have a git repo
       if (libdragonInfo.vendorStrategy !== 'manual') {
         await runGitMaybeHost(libdragonInfo, ['init']);
       }
@@ -182,7 +182,7 @@ async function readProjectInfo() {
   log(`Active vendor directory: ${info.vendorDirectory}`, true);
 
   info.vendorStrategy = info.vendorStrategy ?? DEFAULT_STRATEGY;
-  log(`Active vendor strategyy: ${info.vendorStrategy}`, true);
+  log(`Active vendor strategy: ${info.vendorStrategy}`, true);
 
   // Cache the latest image name
   setProjectInfoToSave(info);

@@ -103,7 +103,7 @@ if (
 
 if (
   options.VENDOR_STRAT &&
-  !['submodule', 'manual'].includes(options.VENDOR_STRAT)
+  !['submodule', 'subtree', 'manual'].includes(options.VENDOR_STRAT)
 ) {
   console.error(chalk.red(`Invalid strategy \`${options.VENDOR_STRAT}\``));
   printUsage();
