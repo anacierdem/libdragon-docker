@@ -10,6 +10,11 @@
   problem matcher. This fixes #13 and does not change any behaviour.
 - Add missing examples to the vscode run configurations.
 - Update vulnerable dependencies.
+- Install and build libdragon related things in the container when `exec` and
+  `make` causes a new container run. This was previously prevented on `v10.3.1`
+  because it was unnecessarily delaying all exec operations when the container
+  is started. Refactoring things caused me to realize this can be improved
+  instead of forcing the user to do a manual `install`.
 
 ### Added
 

@@ -4,7 +4,7 @@ const { CONTAINER_TARGET_PATH } = require('../constants');
 const { log, dockerExec, toPosixPath } = require('../helpers');
 
 const { fn: start } = require('./start');
-const { dockerHostUserParams } = require('./utils');
+const { dockerHostUserParams, installDependencies } = require('./utils');
 
 function dockerRelativeWorkdir(libdragonInfo) {
   return (
@@ -44,6 +44,17 @@ const exec = async (libdragonInfo, commandAndParams) => {
     if (!started) {
       const newId = await start(libdragonInfo);
       started = true;
+
+      // Re-install vendors on new container if one was created upon start
+      // Ideally we would want the consumer to handle dependencies and rebuild
+      // libdragon if necessary. Currently this saves the day with a little bit
+      // extra waiting when the container is deleted.
+      if (libdragonInfo.containerId !== newId) {
+        await installDependencies({
+          ...libdragonInfo,
+          containerId: newId,
+        });
+      }
       await tryCmd({
         ...libdragonInfo,
         containerId: newId,
