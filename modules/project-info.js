@@ -20,7 +20,13 @@ const {
   CONTAINER_TARGET_PATH,
 } = require('./constants');
 
-const { fileExists, log, spawnProcess, dirExists } = require('./helpers');
+const {
+  fileExists,
+  log,
+  spawnProcess,
+  dirExists,
+  toPosixPath,
+} = require('./helpers');
 
 async function findContainerId(libdragonInfo) {
   const idFile = path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE);
@@ -212,7 +218,8 @@ async function writeProjectInfo(libdragonInfo = projectInfoToWrite) {
     JSON.stringify(
       {
         imageName: libdragonInfo.imageName,
-        vendorDirectory: libdragonInfo.vendorDirectory,
+        // Always save this in posix format
+        vendorDirectory: toPosixPath(libdragonInfo.vendorDirectory),
         vendorStrategy: libdragonInfo.vendorStrategy,
       },
       null,

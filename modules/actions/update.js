@@ -1,3 +1,5 @@
+const path = require('path');
+
 const { log } = require('../helpers');
 const { LIBDRAGON_GIT, LIBDRAGON_BRANCH } = require('../constants');
 const { runGitMaybeHost } = require('./utils');
@@ -29,7 +31,7 @@ const update = async (libdragonInfo) => {
       'subtree',
       'pull',
       '--prefix',
-      newInfo.vendorDirectory,
+      path.relative(libdragonInfo.root, libdragonInfo.vendorDirectory),
       LIBDRAGON_GIT,
       LIBDRAGON_BRANCH,
       '--squash',

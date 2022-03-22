@@ -15,6 +15,12 @@ class CommandError extends Error {
   }
 }
 
+class ParameterError extends Error {
+  constructor(message) {
+    super(message);
+  }
+}
+
 async function fileExists(path) {
   return fs
     .stat(path)
@@ -227,4 +233,5 @@ module.exports = {
   dirExists,
   copyDirContents,
   CommandError,
+  ParameterError,
 };

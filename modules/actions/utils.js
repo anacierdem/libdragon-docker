@@ -39,16 +39,11 @@ async function findNPMRoot() {
 }
 
 const installDependencies = async (libdragonInfo) => {
-  let buildScriptPath;
-  if (path.isAbsolute(libdragonInfo.vendorDirectory)) {
-    buildScriptPath = path.join(libdragonInfo.vendorDirectory, 'build.sh');
-  } else {
-    buildScriptPath = path.join(
-      libdragonInfo.root,
-      libdragonInfo.vendorDirectory,
-      'build.sh'
-    );
-  }
+  const buildScriptPath = path.join(
+    libdragonInfo.root,
+    libdragonInfo.vendorDirectory,
+    'build.sh'
+  );
   if (!(await fileExists(buildScriptPath))) {
     throw new Error(
       `build.sh not found. Make sure you have a vendored libdragon copy at ${libdragonInfo.vendorDirectory}`
@@ -230,7 +225,7 @@ async function runGitMaybeHost(libdragonInfo, params, interactive = 'full') {
   try {
     return await spawnProcess(
       'git',
-      params,
+      ['-C', libdragonInfo.root, ...params],
       false,
       // Windows git is breaking the TTY somehow - disable interactive for now
       // We are not able to display progress for the initial clone b/c of this

@@ -25,7 +25,7 @@ const printUsage = (_, actionArr) => {
     },
     {
       name: 'directory',
-      description: `Directory where libdragon files are expected. When using \`submodule\` or \`subtree\` strategy, it must be inside the project folder and the cli will create and manage the vendoring at that location. Defaults to \`./libdragon\` if not provided.\n`,
+      description: `Directory where libdragon files are expected. It must be a project relative path as it will be mounted on the docker container. The cli will create and manage the vendoring at that location when using a non-manual strategy. Defaults to \`./libdragon\` if not provided.\n`,
       alias: 'd',
       typeLabel: '<path>',
       group: 'vendoring',

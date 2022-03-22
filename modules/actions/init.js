@@ -18,7 +18,12 @@ const {
   LIBDRAGON_BRANCH,
   LIBDRAGON_GIT,
 } = require('../constants');
-const { log, copyDirContents, CommandError } = require('../helpers');
+const {
+  log,
+  copyDirContents,
+  CommandError,
+  ParameterError,
+} = require('../helpers');
 const { setProjectInfoToSave } = require('../project-info');
 
 const autoVendor = async (libdragonInfo) => {
@@ -56,12 +61,10 @@ const autoVendor = async (libdragonInfo) => {
     }
 
     await runGitMaybeHost(libdragonInfo, [
-      '-C',
-      libdragonInfo.root,
       'subtree',
       'add',
       '--prefix',
-      libdragonInfo.vendorDirectory,
+      path.relative(libdragonInfo.root, libdragonInfo.vendorDirectory),
       LIBDRAGON_GIT,
       LIBDRAGON_BRANCH,
       '--squash',
@@ -109,24 +112,17 @@ async function init(libdragonInfo) {
 
   // Update the directory information for the project if the flag is provided
   if (newInfo.options.VENDOR_DIR) {
+    // Validate vendoring path
+    if (path.isAbsolute(newInfo.options.VENDOR_DIR)) {
+      throw new ParameterError(
+        '`--directory` must be project-relative as it will be mounted to the docker container.'
+      );
+    }
+
     newInfo = setProjectInfoToSave({
       ...newInfo,
       vendorDirectory: newInfo.options.VENDOR_DIR,
     });
-  }
-
-  // Validate vendoring path
-  const relativeVendorPath = path.relative(
-    newInfo.root,
-    newInfo.vendorDirectory
-  );
-  if (
-    newInfo.vendorStrategy !== 'manual' &&
-    relativeVendorPath.startsWith('..')
-  ) {
-    throw new Error(
-      'When using a non-manual strategy, `--directory` must be inside the project folder.'
-    );
   }
 
   if (manifestFile) {
@@ -156,7 +152,9 @@ async function init(libdragonInfo) {
   let vendorAndGitReadyPromise = containerReadyPromise;
   if (newInfo.vendorStrategy !== 'manual') {
     const libdragonFile = files.find((name) =>
-      name.match(new RegExp(`^${relativeVendorPath}$`))
+      name.match(
+        new RegExp(`^${path.relative(newInfo.root, newInfo.vendorDirectory)}$`)
+      )
     );
 
     if (libdragonFile) {

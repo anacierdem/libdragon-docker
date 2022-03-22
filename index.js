@@ -10,7 +10,7 @@ const {
   STATUS_ERROR,
 } = require('./modules/constants');
 const { globals } = require('./modules/globals');
-const { CommandError } = require('./modules/helpers');
+const { CommandError, ParameterError } = require('./modules/helpers');
 const { readProjectInfo, writeProjectInfo } = require('./modules/project-info');
 
 let options = {},
@@ -122,6 +122,11 @@ readProjectInfo()
     )
   )
   .catch((e) => {
+    if (e instanceof ParameterError) {
+      console.error(chalk.red(e.message));
+      printUsage(undefined, [currentAction.name]);
+      process.exit(STATUS_BAD_PARAM);
+    }
     const userTargetedError = e instanceof CommandError && e.userCommand;
 
     // Show additional information to user if verbose or we did a mistake
