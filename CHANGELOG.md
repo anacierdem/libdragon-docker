@@ -1,20 +1,22 @@
 # Change Log
 
-## [10.4.0] - 2022-03-19
+## [10.4.0] - 2022-03-23
 
 ### Fixed
 
-- Attach the error handler once for spawnProcess.
 - Update the root makefile to utilize `SOURCE_DIR` for example builds. Then we are
   able to map container files to local files properly with a generic regex in the
   problem matcher. This fixes #13 and does not change any behaviour.
 - Add missing examples to the vscode run configurations.
-- Update vulnerable dependencies.
 - Install and build libdragon related things in the container when `exec` and
   `make` causes a new container run. This was previously prevented on `v10.3.1`
   because it was unnecessarily delaying all exec operations when the container
-  is started. Refactoring things caused me to realize this can be improved
+  is started. Refactoring things allowed me to realize this can be improved
   instead of forcing the user to do a manual `install`.
+- Fix a potential issue that may cause the git commands to run in current folder
+  instead of the project root.
+- Attach the error handler once for spawnProcess.
+- Update vulnerable dependencies.
 
 ### Added
 
@@ -29,10 +31,10 @@
 - Migrate to a json file for persistent project information.
 - Only save the configuration file on successful exit except for the initial
   migration.
-- Minor performance improvements.
 - Do not prevent init if there is a file named libdragon in the target folder.
   This used to cause problems on windows but I cannot reproduce it anymore
   with `2.33.1.windows.1`. It may be something caused by my old configuration.
+- Minor performance improvements.
 
 ## [10.3.1] - 2022-01-25
 
@@ -53,7 +55,7 @@
 
 ### Changed
 
-- Only accept he image flag for init, install, and update actions as documented.
+- Only accept the image flag for init, install, and update actions as documented.
 - Improve documentation for the `init` and `install` actions.
 - Do not attempt an `install` when running `exec`, just start the container. If
   there is a half-baked container, a manual `install` will potentially restore it.
