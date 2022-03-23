@@ -124,6 +124,12 @@ async function readProjectInfo() {
       (await findNPMRoot()) ??
       (await findGitRoot()),
     userInfo: os.userInfo(),
+
+    // Set the defaults immediately, these should be present at all times even
+    // if we are migrating from the old config because they did not exist before
+    imageName: DOCKER_HUB_IMAGE,
+    vendorDirectory: path.join('.', LIBDRAGON_SUBMODULE),
+    vendorStrategy: DEFAULT_STRATEGY,
   };
 
   if (!info.root) {
@@ -180,14 +186,8 @@ async function readProjectInfo() {
     ).trim();
   }
 
-  info.imageName = info.imageName ?? DOCKER_HUB_IMAGE;
   log(`Active image name: ${info.imageName}`, true);
-
-  info.vendorDirectory =
-    info.vendorDirectory ?? path.join('.', LIBDRAGON_SUBMODULE);
   log(`Active vendor directory: ${info.vendorDirectory}`, true);
-
-  info.vendorStrategy = info.vendorStrategy ?? DEFAULT_STRATEGY;
   log(`Active vendor strategy: ${info.vendorStrategy}`, true);
 
   // Cache the latest image name
