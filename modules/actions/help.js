@@ -10,6 +10,7 @@ const printUsage = (_, actionArr) => {
       description:
         'Be verbose. This will print all commands dispatched and their outputs as well. Will also start printing error stack traces.',
       alias: 'v',
+      typeLabel: ' ',
       group: 'global',
     },
   ];
@@ -18,31 +19,31 @@ const printUsage = (_, actionArr) => {
     {
       name: 'image',
       description:
-        'Use this flag to provide a custom image to use instead of the default. It should include the toolchain at `/n64_toolchain`. It will cause a re-initialization of the container if an image different from what was written to project configuration is provided.\n',
+        'Use this flag to provide a custom image to use instead of the default. It should include the toolchain at `/n64_toolchain`. It will cause a re-initialization of the container if a different image is provided.\n',
       alias: 'i',
       typeLabel: '<docker-image>',
       group: 'docker',
     },
     {
       name: 'directory',
-      description: `Directory where libdragon files are expected. It must be a project relative path as it will be mounted on the docker container. The cli will create and manage the vendoring at that location when using a non-manual strategy. Defaults to \`./libdragon\` if not provided.\n`,
+      description: `Directory where libdragon files are expected. It must be a project relative path as it will be mounted on the docker container. The cli will create and manage it when using a non-manual strategy. Defaults to \`./libdragon\` if not provided.\n`,
       alias: 'd',
       typeLabel: '<path>',
       group: 'vendoring',
     },
     {
       name: 'strategy',
-      description: `libdragon Vendoring strategy. Defaults to \`submodule\`, which creates and manages a git repository and a submodule at \`--directory\` to automatically update the vendored libdragon files.
+      description: `libdragon Vendoring strategy. Defaults to \`submodule\`, which safely creates a git repository at project root and a submodule at \`--directory\` to automatically update the vendored libdragon files.
 
-        When using \`subtree\`, the cli will create a subtree  at \`--directory\` instead. Keep in mind that git user name and email must be set up for this to work. Do not use if you are not using git yourself.
+        With \`subtree\`, the cli will create a subtree at \`--directory\` instead. Keep in mind that git user name and email must be set up for this to work. Do not use if you are not using git yourself.
 
-        To disable auto-vendoring, init with \`manual\`. When using \`manual\`, libdragon files are expected at the location provided by \`--directory\` flag and the user is responsible for vendoring and updating them. This will allow using any other manual vendoring method.
+        To disable auto-vendoring, init with \`manual\`. With \`manual\`, libdragon files are expected at the location provided by \`--directory\` flag and the user is responsible for vendoring and updating them. This will allow using any other manual vendoring method.
 
         With the \`manual\` strategy, it is still recommended to have a git repository at project root such that container actions can execute faster by caching the container id inside the \`.git\` folder.
 
-        It is also possible to opt-out later on by running \`init\` with \`--strategy manual\`, though you will be responsible for managing the existing submodule/subtree. \n`,
+        It is also possible to opt-out later on by running \`init\` with \`--strategy manual\`, though you will be responsible for managing the existing submodule/subtree.\n`,
       alias: 'v',
-      typeLabel: '<submodule|subtree|manual>',
+      typeLabel: '<strategy>',
       group: 'vendoring',
     },
   ];
