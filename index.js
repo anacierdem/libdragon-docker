@@ -8,9 +8,14 @@ const {
   STATUS_OK,
   STATUS_BAD_PARAM,
   STATUS_ERROR,
+  STATUS_VALIDATION_ERROR,
 } = require('./modules/constants');
 const { globals } = require('./modules/globals');
-const { CommandError, ParameterError } = require('./modules/helpers');
+const {
+  CommandError,
+  ParameterError,
+  ValidationError,
+} = require('./modules/helpers');
 const { readProjectInfo, writeProjectInfo } = require('./modules/project-info');
 
 let options = {},
@@ -127,6 +132,12 @@ readProjectInfo()
       printUsage(undefined, [currentAction.name]);
       process.exit(STATUS_BAD_PARAM);
     }
+
+    if (e instanceof ValidationError) {
+      console.error(chalk.red(e.message));
+      process.exit(STATUS_VALIDATION_ERROR);
+    }
+
     const userTargetedError = e instanceof CommandError && e.userCommand;
 
     // Show additional information to user if verbose or we did a mistake

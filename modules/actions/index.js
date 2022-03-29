@@ -1,18 +1,4 @@
-const { spawnProcess } = require('../helpers');
-const { checkContainerRunning } = require('./utils');
-
 const { fn: exec } = require('./exec');
-
-const stop = async (libdragonInfo) => {
-  const running =
-    libdragonInfo.containerId &&
-    (await checkContainerRunning(libdragonInfo.containerId));
-  if (!running) {
-    return;
-  }
-
-  await spawnProcess('docker', ['container', 'stop', running]);
-};
 
 const make = async (libdragonInfo, params) => {
   await exec(libdragonInfo, ['make', ...params]);
@@ -21,11 +7,7 @@ const make = async (libdragonInfo, params) => {
 // TODO: separate into files
 module.exports = {
   start: require('./start'),
-  stop: {
-    name: 'stop',
-    fn: stop,
-    showStatus: false, // This will only print out the id
-  },
+  stop: require('./stop'),
   init: require('./init'),
 
   exec: require('./exec'),

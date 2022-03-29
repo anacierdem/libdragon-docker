@@ -13,6 +13,7 @@ module.exports = {
   STATUS_OK: 0,
   STATUS_ERROR: 1,
   STATUS_BAD_PARAM: 2,
+  STATUS_VALIDATION_ERROR: 4,
 
   IMAGE_FILE: 'docker-image', // deprecated
 };

@@ -1,5 +1,26 @@
 # Change Log
 
+## [10.4.2] - 2022-03-29
+
+### Fixed
+
+- Make sure actions depending on an `init` fail in a non-project directory to
+keep the project state consistent. This fixes #51.
+- `start` action was printing stuff other than the container id. It doesn't
+anymore.
+- Correct some errors' exit codes.
+- Fix a potential race condition that might cause unexpected failures.
+
+### Added
+
+- A new exit code (`4`) to represent unexpected conditions.
+
+### Changed
+
+- Update documentation to warn against changing strategy is a one way operation.
+- Minor refactors.
+- Update submodule for local environment.
+
 ## [10.4.1] - 2022-03-23
 
 ### Fixed

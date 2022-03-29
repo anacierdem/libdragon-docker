@@ -65,13 +65,10 @@ jobs:
       - name: Test
         run: |
           npm run libdragon -- --verbose init
-          rm -rf .libdragon
           rm .git/libdragon-docker-container
           npm run libdragon -- --verbose make
-          rm -rf .libdragon
           rm .git/libdragon-docker-container
           npm run libdragon -- --verbose update
-          rm -rf .libdragon
           rm .git/libdragon-docker-container
           npm run libdragon -- --verbose install
 

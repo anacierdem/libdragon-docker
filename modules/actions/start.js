@@ -8,6 +8,7 @@ const {
   checkContainerAndClean,
   checkContainerRunning,
   destroyContainer,
+  mustHaveProject,
 } = require('./utils');
 
 /**
@@ -80,7 +81,8 @@ const initContainer = async (libdragonInfo) => {
   return newId;
 };
 
-const start = async (libdragonInfo) => {
+const start = async (libdragonInfo, skipProjectCheck) => {
+  !skipProjectCheck && (await mustHaveProject(libdragonInfo));
   const running =
     libdragonInfo.containerId &&
     (await checkContainerRunning(libdragonInfo.containerId));

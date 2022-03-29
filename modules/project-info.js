@@ -20,13 +20,7 @@ const {
   CONTAINER_TARGET_PATH,
 } = require('./constants');
 
-const {
-  fileExists,
-  log,
-  spawnProcess,
-  dirExists,
-  toPosixPath,
-} = require('./helpers');
+const { fileExists, log, spawnProcess, toPosixPath } = require('./helpers');
 
 async function findContainerId(libdragonInfo) {
   const idFile = path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE);
@@ -67,8 +61,8 @@ async function findContainerId(libdragonInfo) {
 }
 
 async function findLibdragonRoot(start = '.') {
-  const manifest = path.join(start, LIBDRAGON_PROJECT_MANIFEST);
-  if (await dirExists(manifest)) {
+  const manifest = path.join(start, LIBDRAGON_PROJECT_MANIFEST, CONFIG_FILE);
+  if (await fileExists(manifest)) {
     return path.resolve(start);
   } else {
     const parent = path.resolve(start, '..');
@@ -89,41 +83,15 @@ async function findGitRoot() {
   }
 }
 
-/**
- * Creates the manifest folder if it does not exist. Will return true if
- * created, false otherwise.
- */
-async function createManifestIfNotExist(libdragonInfo) {
-  const manifestPath = path.join(
-    libdragonInfo.root,
-    LIBDRAGON_PROJECT_MANIFEST
-  );
-  const manifestExists = await fs.stat(manifestPath).catch((e) => {
-    if (e.code !== 'ENOENT') throw e;
-    return false;
-  });
-
-  if (manifestExists && !manifestExists.isDirectory()) {
-    throw new Error(
-      'There is already a `.libdragon` file and it is not a directory.'
-    );
-  }
-
-  if (!manifestExists) {
-    log(
-      `Creating libdragon project configuration at \`${libdragonInfo.root}\`.`
-    );
-    await fs.mkdir(manifestPath);
-  }
-}
-
 async function readProjectInfo() {
+  const projectRoot = await findLibdragonRoot();
+
   let info = {
-    root:
-      (await findLibdragonRoot()) ??
-      (await findNPMRoot()) ??
-      (await findGitRoot()),
+    root: projectRoot ?? (await findNPMRoot()) ?? (await findGitRoot()),
     userInfo: os.userInfo(),
+
+    // Use this to discriminate if there is a project when the command is run
+    haveProjectConfig: !!projectRoot,
 
     // Set the defaults immediately, these should be present at all times even
     // if we are migrating from the old config because they did not exist before
@@ -200,27 +168,41 @@ let projectInfoToWrite = {};
  * Updates project info to be written. The provided keys are overwritten without
  * changing the existing values. When the process exists successfully these will
  * get written to the configuration file. Echoes back the given info.
- * @param libdragonInfo
+ * @param info This is only the base info without action properties like showStatus
+ * fn and command line options
  */
-function setProjectInfoToSave(libdragonInfo) {
-  projectInfoToWrite = { ...projectInfoToWrite, ...libdragonInfo };
-  return libdragonInfo;
+function setProjectInfoToSave(info) {
+  projectInfoToWrite = { ...projectInfoToWrite, ...info };
+  return info;
 }
 
-async function writeProjectInfo(libdragonInfo = projectInfoToWrite) {
-  await createManifestIfNotExist(libdragonInfo);
-  const manifestPath = path.join(
-    libdragonInfo.root,
-    LIBDRAGON_PROJECT_MANIFEST
-  );
+/**
+ * @param info This is only the base info without action properties like showStatus
+ * fn and command line options
+ */
+async function writeProjectInfo(info = projectInfoToWrite) {
+  // Do not log anything here as it may litter the output being always run on exit
+
+  const projectPath = path.join(info.root, LIBDRAGON_PROJECT_MANIFEST);
+
+  const pathExists = await fs.stat(projectPath).catch((e) => {
+    if (e.code !== 'ENOENT') throw e;
+    return false;
+  });
+
+  if (!pathExists) {
+    log(`Creating libdragon project configuration at \`${info.root}\`.`, true);
+    await fs.mkdir(projectPath);
+  }
+
   await fs.writeFile(
-    path.join(manifestPath, CONFIG_FILE),
+    path.join(projectPath, CONFIG_FILE),
     JSON.stringify(
       {
-        imageName: libdragonInfo.imageName,
+        imageName: info.imageName,
         // Always save this in posix format
-        vendorDirectory: toPosixPath(libdragonInfo.vendorDirectory),
-        vendorStrategy: libdragonInfo.vendorStrategy,
+        vendorDirectory: toPosixPath(info.vendorDirectory),
+        vendorStrategy: info.vendorStrategy,
       },
       null,
       '  '

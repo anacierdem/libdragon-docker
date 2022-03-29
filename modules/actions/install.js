@@ -3,6 +3,7 @@ const {
   destroyContainer,
   installDependencies,
   updateImage,
+  mustHaveProject,
 } = require('./utils');
 const { fn: start } = require('./start');
 
@@ -14,6 +15,7 @@ const { fn: start } = require('./start');
  * @param libdragonInfo
  */
 const install = async (libdragonInfo) => {
+  await mustHaveProject(libdragonInfo);
   let containerId;
   const oldImageName = libdragonInfo.imageName;
   const imageName = libdragonInfo.options.DOCKER_IMAGE;

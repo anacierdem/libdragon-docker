@@ -4,7 +4,11 @@ const { CONTAINER_TARGET_PATH } = require('../constants');
 const { log, dockerExec, toPosixPath } = require('../helpers');
 
 const { fn: start } = require('./start');
-const { dockerHostUserParams, installDependencies } = require('./utils');
+const {
+  dockerHostUserParams,
+  installDependencies,
+  mustHaveProject,
+} = require('./utils');
 
 function dockerRelativeWorkdir(libdragonInfo) {
   return (
@@ -19,6 +23,8 @@ function dockerRelativeWorkdirParams(libdragonInfo) {
 }
 
 const exec = async (libdragonInfo, commandAndParams) => {
+  await mustHaveProject(libdragonInfo);
+
   log(
     `Running ${commandAndParams[0]} at ${dockerRelativeWorkdir(
       libdragonInfo

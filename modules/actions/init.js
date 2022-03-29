@@ -23,6 +23,7 @@ const {
   copyDirContents,
   CommandError,
   ParameterError,
+  ValidationError,
 } = require('../helpers');
 const { setProjectInfoToSave } = require('../project-info');
 
@@ -81,23 +82,29 @@ const autoVendor = async (libdragonInfo) => {
 async function init(libdragonInfo) {
   log(`Initializing a libdragon project at ${libdragonInfo.root}`);
 
-  // TODO: use exists instead & check if it is a directory
-  const files = await fs.readdir(libdragonInfo.root);
-
-  const manifestFile = files.find(
-    (name) => name === LIBDRAGON_PROJECT_MANIFEST
-  );
-
   let newInfo = libdragonInfo;
+
+  // Validate manifest
+  const manifestPath = path.join(newInfo.root, LIBDRAGON_PROJECT_MANIFEST);
+  const manifestStats = await fs.stat(manifestPath).catch((e) => {
+    if (e.code !== 'ENOENT') throw e;
+    return false;
+  });
+
+  if (manifestStats && !manifestStats.isDirectory()) {
+    throw new ValidationError(
+      'There is already a `.libdragon` file and it is not a directory.'
+    );
+  }
 
   // Validate vendoring strategy. Do not allow a switch after successful initialization
   if (
-    manifestFile &&
+    newInfo.haveProjectConfig &&
     newInfo.options.VENDOR_STRAT &&
     newInfo.options.VENDOR_STRAT !== 'manual' &&
     newInfo.vendorStrategy !== newInfo.options.VENDOR_STRAT
   ) {
-    throw new Error(
+    throw new ParameterError(
       `Requested strategy switch: ${newInfo.vendorStrategy} -> ${newInfo.options.VENDOR_STRAT} It is not possible to switch vendoring strategy after initializing a project. You can always switch to manual and handle libdragon yourself.`
     );
   }
@@ -125,11 +132,11 @@ async function init(libdragonInfo) {
     });
   }
 
-  if (manifestFile) {
+  if (newInfo.haveProjectConfig) {
     log(
       `${path.join(
         newInfo.root,
-        manifestFile
+        LIBDRAGON_PROJECT_MANIFEST
       )} exists. This is already a libdragon project, starting it...`
     );
     if (newInfo.options.DOCKER_IMAGE) {
@@ -137,6 +144,7 @@ async function init(libdragonInfo) {
         `Not changing docker image. Use the install action if you want to override the image.`
       );
     }
+    // TODO: we may make sure git and submodule is initialized here
     await install(newInfo);
     return;
   }
@@ -144,24 +152,27 @@ async function init(libdragonInfo) {
   newInfo.imageName =
     (await updateImage(newInfo, newInfo.imageName)) || newInfo.imageName;
   // Download image and start it
-  const containerReadyPromise = start(newInfo).then((newId) => ({
+  const containerReadyPromise = start(newInfo, true).then((newId) => ({
     ...newInfo,
     containerId: newId,
   }));
 
   let vendorAndGitReadyPromise = containerReadyPromise;
   if (newInfo.vendorStrategy !== 'manual') {
-    const libdragonFile = files.find((name) =>
-      name.match(
-        new RegExp(`^${path.relative(newInfo.root, newInfo.vendorDirectory)}$`)
-      )
-    );
+    const vendorTarget = path.relative(newInfo.root, newInfo.vendorDirectory);
+    const [vendorTargetExists] = await Promise.all([
+      fs.stat(vendorTarget).catch((e) => {
+        if (e.code !== 'ENOENT') throw e;
+        return false;
+      }),
+      containerReadyPromise,
+    ]);
 
-    if (libdragonFile) {
-      throw new Error(
-        `${path.join(
+    if (vendorTargetExists) {
+      throw new ValidationError(
+        `${path.resolve(
           newInfo.root,
-          libdragonFile
+          newInfo.vendorDirectory
         )} already exists. That is the libdragon vendoring target, please remove and retry.`
       );
     }

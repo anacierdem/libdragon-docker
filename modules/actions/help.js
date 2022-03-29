@@ -39,14 +39,16 @@ const printUsage = (_, actionArr) => {
 
         To disable auto-vendoring, init with \`manual\`. With \`manual\`, libdragon files are expected at the location provided by \`--directory\` flag and the user is responsible for vendoring and updating them. This will allow using any other manual vendoring method.
 
-        With the \`manual\` strategy, it is still recommended to have a git repository at project root such that container actions can execute faster by caching the container id inside the \`.git\` folder.
+        You can always switch to manual by re-running \`init\` with \`--strategy manual\`, though you will be responsible for managing the existing submodule/subtree. Also it is not possible to automatically switch back.
 
-        It is also possible to opt-out later on by running \`init\` with \`--strategy manual\`, though you will be responsible for managing the existing submodule/subtree.\n`,
+        With the \`manual\` strategy, it is still recommended to have a git repository at project root such that container actions can execute faster by caching the container id inside the \`.git\` folder.\n`,
       alias: 'v',
       typeLabel: '<strategy>',
       group: 'vendoring',
     },
   ];
+
+  // TODO: move these to respective actions
 
   const actions = {
     help: {

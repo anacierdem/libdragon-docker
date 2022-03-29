@@ -18,6 +18,8 @@ const {
   dirExists,
   assert,
   CommandError,
+  ValidationError,
+  ParameterError,
 } = require('../helpers');
 
 function dockerHostUserParams(libdragonInfo) {
@@ -45,7 +47,7 @@ const installDependencies = async (libdragonInfo) => {
     'build.sh'
   );
   if (!(await fileExists(buildScriptPath))) {
-    throw new Error(
+    throw new ValidationError(
       `build.sh not found. Make sure you have a vendored libdragon copy at ${libdragonInfo.vendorDirectory}`
     );
   }
@@ -103,7 +105,7 @@ const installDependencies = async (libdragonInfo) => {
 
               if (paths.length > 1) {
                 reject(
-                  new Error(
+                  new ValidationError(
                     `Using same dependency with different versions is not supported! ${name}`
                   )
                 );
@@ -301,6 +303,15 @@ async function tryCacheContainerId(libdragonInfo) {
   }
 }
 
+// Throws if the project was not initialized for the current libdragonInfo
+async function mustHaveProject(libdragonInfo) {
+  if (!libdragonInfo.haveProjectConfig) {
+    throw new ParameterError(
+      'This is not a libdragon project. Initialize with `libdragon init` first.'
+    );
+  }
+}
+
 module.exports = {
   installDependencies,
   updateImage,
@@ -311,4 +322,5 @@ module.exports = {
   tryCacheContainerId,
   runGitMaybeHost,
   findNPMRoot,
+  mustHaveProject,
 };

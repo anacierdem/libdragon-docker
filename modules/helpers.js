@@ -6,6 +6,7 @@ const { spawn } = require('child_process');
 
 const { globals } = require('./globals');
 
+// An error caused by a command explicitly run by the user
 class CommandError extends Error {
   constructor(message, { code, out, userCommand }) {
     super(message);
@@ -15,7 +16,15 @@ class CommandError extends Error {
   }
 }
 
+// The user provided an unexpected input
 class ParameterError extends Error {
+  constructor(message) {
+    super(message);
+  }
+}
+
+// Something was not as expected to continue the operation
+class ValidationError extends Error {
   constructor(message) {
     super(message);
   }
@@ -210,6 +219,7 @@ function assert(condition, error) {
   }
 }
 
+// TODO: we can handle showStatus here
 function log(text, verboseOnly = false) {
   if (!verboseOnly) {
     // eslint-disable-next-line no-console
@@ -234,4 +244,5 @@ module.exports = {
   copyDirContents,
   CommandError,
   ParameterError,
+  ValidationError,
 };

@@ -2,11 +2,12 @@ const path = require('path');
 
 const { log } = require('../helpers');
 const { LIBDRAGON_GIT, LIBDRAGON_BRANCH } = require('../constants');
-const { runGitMaybeHost } = require('./utils');
+const { runGitMaybeHost, mustHaveProject } = require('./utils');
 const { fn: start } = require('./start');
 const { fn: install } = require('./install');
 
 const update = async (libdragonInfo) => {
+  await mustHaveProject(libdragonInfo);
   const containerId = await start(libdragonInfo);
 
   const newInfo = {
