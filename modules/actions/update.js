@@ -3,17 +3,12 @@ const path = require('path');
 const { log } = require('../helpers');
 const { LIBDRAGON_GIT, LIBDRAGON_BRANCH } = require('../constants');
 const { runGitMaybeHost, mustHaveProject } = require('./utils');
-const { fn: start } = require('./start');
 const { fn: install } = require('./install');
+const { updateAndStart } = require('./update-and-start');
 
 const update = async (libdragonInfo) => {
   await mustHaveProject(libdragonInfo);
-  const containerId = await start(libdragonInfo);
-
-  const newInfo = {
-    ...libdragonInfo,
-    containerId,
-  };
+  const newInfo = await updateAndStart(libdragonInfo);
 
   if (newInfo.vendorStrategy !== 'manual') {
     log(`Updating ${newInfo.vendorStrategy}...`);
@@ -39,7 +34,9 @@ const update = async (libdragonInfo) => {
     ]);
   }
 
-  await install(newInfo);
+  // The second parameter forces it to skip the image update step as we already
+  // do that above.
+  await install(newInfo, true);
 };
 
 module.exports = {

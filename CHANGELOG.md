@@ -6,18 +6,26 @@
 
 - Make sure actions depending on an `init` fail in a non-project directory to
 keep the project state consistent. This fixes #51.
+- `update` action now tries to update the toolchain image as well. Previously
+this was not the case contrary to what someone would expect. Considering it won't
+change the behaviour for non-latest images and the toolchain did not have any
+breaking changes for a long time, this is not considered a breaking change either.
 - `start` action was printing stuff other than the container id. It doesn't
 anymore.
-- Correct some errors' exit codes.
 - Fix a potential race condition that might cause unexpected failures.
-
+- Correct some errors' exit codes.
 ### Added
 
 - A new exit code (`4`) to represent unexpected conditions.
 
 ### Changed
 
+- Deprecated providing the image flag for `install` action by displaying a
+warning and removing it from documentation, without changing behaviour even
+though it is higly unlikely this feature was ever used. It mainly exists for
+historical reasons and it wil be removed in next major release.
 - Update documentation to warn against changing strategy is a one way operation.
+- Update documentation to reflect `update` action changes.
 - Minor refactors.
 - Update submodule for local environment.
 

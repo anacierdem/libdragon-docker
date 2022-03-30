@@ -96,7 +96,6 @@ const printUsage = (_, actionArr) => {
     install: {
       name: 'install',
       summary: 'Vendor libdragon as is.',
-      group: ['docker'],
       description: `Attempts to build and install everything libdragon related into the container. This includes all the tools and third parties used by libdragon except for the toolchain. If you have made changes to libdragon, you can execute this action to build everything based on your changes. Requires you to have an intact vendoring target (also see the \`--directory\` flag). If you are not working on libdragon itself, you can just use the \`update\` action instead.
 
         This can be useful to recover from a half-baked container.`,
@@ -105,7 +104,7 @@ const printUsage = (_, actionArr) => {
       name: 'update',
       summary: 'Update libdragon and do an install.',
       description:
-        'If you are using auto-vendoring (see `--strategy`), this action will update the submodule/subtree from the remote branch (`trunk`) with a merge/squash strategy and then perform a `libdragon install`. This is the same as an `install` when the vendoring strategy is `manual`. You can use the `install` action to only update all libdragon related artifacts in the container.',
+        'Will update the docker image and if you are using auto-vendoring (see `--strategy`), will also update the submodule/subtree from the remote branch (`trunk`) with a merge/squash strategy and then perform a `libdragon install`. You can use the `install` action to only update all libdragon related artifacts in the container.',
       group: ['docker'],
     },
   };
