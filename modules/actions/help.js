@@ -70,7 +70,7 @@ const printUsage = (_, actionArr) => {
       summary: 'Run the libdragon build system in the current directory.',
       description: `Runs the libdragon build system in the current directory. It will mirror your current working directory to the container.
 
-      This action is a shortcut to the \`exec\` action under the hood.`,
+      Must be run in an initialized libdragon project. This action is a shortcut to the \`exec\` action under the hood.`,
     },
     exec: {
       name: 'exec <command>',
@@ -79,32 +79,37 @@ const printUsage = (_, actionArr) => {
 
       This action will first try to execute the command in the container and if the container is not accessible, it will attempt a complete \`start\` cycle.
 
-      This will properly passthrough your TTY if you have one. So by running \`libdragon exec bash\` you can start an interactive bash session with full TTY support.`,
+      This will properly passthrough your TTY if you have one. So by running \`libdragon exec bash\` you can start an interactive bash session with full TTY support.
+      
+      Must be run in an initialized libdragon project.`,
     },
     start: {
       name: 'start',
       summary: 'Start the container for current project.',
-      description:
-        'Start the container assigned to the current libdragon project. Will first attempt to start an existing container if found, followed by a new container run and installation similar to the `install` action. Will always print out the container id on success.',
+      description: `Start the container assigned to the current libdragon project. Will first attempt to start an existing container if found, followed by a new container run and installation similar to the \`install\` action. Will always print out the container id on success.
+
+        Must be run in an initialized libdragon project.`,
     },
     name: {
       name: 'stop',
       summary: 'Stop the container for current project.',
-      description:
-        'Stop the container assigned to the current libdragon project.',
+      description: `Stop the container assigned to the current libdragon project.
+
+        Must be run in an initialized libdragon project.`,
     },
     install: {
       name: 'install',
       summary: 'Vendor libdragon as is.',
       description: `Attempts to build and install everything libdragon related into the container. This includes all the tools and third parties used by libdragon except for the toolchain. If you have made changes to libdragon, you can execute this action to build everything based on your changes. Requires you to have an intact vendoring target (also see the \`--directory\` flag). If you are not working on libdragon itself, you can just use the \`update\` action instead.
 
-        This can be useful to recover from a half-baked container.`,
+      Must be run in an initialized libdragon project. This can be useful to recover from a half-baked container.`,
     },
     update: {
       name: 'update',
       summary: 'Update libdragon and do an install.',
-      description:
-        'Will update the docker image and if you are using auto-vendoring (see `--strategy`), will also update the submodule/subtree from the remote branch (`trunk`) with a merge/squash strategy and then perform a `libdragon install`. You can use the `install` action to only update all libdragon related artifacts in the container.',
+      description: `Will update the docker image and if you are using auto-vendoring (see \`--strategy\`), will also update the submodule/subtree from the remote branch (\`trunk\`) with a merge/squash strategy and then perform a \`libdragon install\`. You can use the \`install\` action to only update all libdragon related artifacts in the container.
+
+        Must be run in an initialized libdragon project.`,
       group: ['docker'],
     },
   };

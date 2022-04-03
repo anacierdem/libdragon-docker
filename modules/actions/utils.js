@@ -175,7 +175,7 @@ const updateImage = async (libdragonInfo, newImageName) => {
       'docker',
       ['images', '-q', '--no-trunc', newImageName],
       false,
-      libdragonInfo.showStatus
+      false
     );
 
   // Attempt to compare digests if the new image name is the same
@@ -188,14 +188,15 @@ const updateImage = async (libdragonInfo, newImageName) => {
     const newDigest = await getDigest();
 
     if (existingDigest === newDigest) {
-      libdragonInfo.showStatus && log(`Image is the same: ${newImageName}`);
+      libdragonInfo.showStatus &&
+        log(`Image is the same: ${newImageName}`, true);
       return false;
     }
   } else {
     await download();
   }
 
-  libdragonInfo.showStatus && log(`Image is different: ${newImageName}`);
+  libdragonInfo.showStatus && log(`Image is different: ${newImageName}`, true);
   return newImageName;
 };
 

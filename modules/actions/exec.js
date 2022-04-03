@@ -3,7 +3,7 @@ const path = require('path');
 const { CONTAINER_TARGET_PATH } = require('../constants');
 const { log, dockerExec, toPosixPath } = require('../helpers');
 
-const { fn: start } = require('./start');
+const { start } = require('./start');
 const {
   dockerHostUserParams,
   installDependencies,

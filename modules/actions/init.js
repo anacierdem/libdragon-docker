@@ -4,7 +4,7 @@ const path = require('path');
 const chalk = require('chalk');
 
 const { fn: install } = require('./install');
-const { fn: start } = require('./start');
+const { start } = require('./start');
 const {
   installDependencies,
   tryCacheContainerId,

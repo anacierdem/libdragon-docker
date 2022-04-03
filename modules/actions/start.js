@@ -89,7 +89,6 @@ const start = async (libdragonInfo, skipProjectCheck) => {
 
   if (running) {
     log(`Container ${running} already running.`, true);
-    log(libdragonInfo.containerId);
     return running;
   }
 
@@ -98,19 +97,18 @@ const start = async (libdragonInfo, skipProjectCheck) => {
   if (!id) {
     log(`Container does not exist, re-initializing...`, true);
     id = await initContainer(libdragonInfo);
-    log(id);
     return id;
   }
 
   log(`Starting container: ${id}`, true);
   await spawnProcess('docker', ['container', 'start', id]);
 
-  log(id);
   return id;
 };
 
 module.exports = {
   name: 'start',
-  fn: start,
+  fn: async (libdragonInfo) => log(await start(libdragonInfo)),
+  start,
   showStatus: false, // This will only print out the id
 };

@@ -1,7 +1,7 @@
 const chalk = require('chalk');
 
 const { installDependencies, mustHaveProject } = require('./utils');
-const { fn: start } = require('./start');
+const { start } = require('./start');
 const { updateAndStart } = require('./update-and-start');
 const { log } = require('../helpers');
 

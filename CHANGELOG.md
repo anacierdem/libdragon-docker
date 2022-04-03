@@ -12,6 +12,7 @@ change the behaviour for non-latest images and the toolchain did not have any
 breaking changes for a long time, this is not considered a breaking change either.
 - `start` action was printing stuff other than the container id. It doesn't
 anymore.
+- Stop unnecessarily printing container id and a few messages related to updates.
 - Fix a potential race condition that might cause unexpected failures.
 - Correct some errors' exit codes.
 ### Added
