@@ -12,4 +12,5 @@ module.exports = {
   update: require('./update'),
 
   help: require('./help'),
+  version: require('./version'),
 };
