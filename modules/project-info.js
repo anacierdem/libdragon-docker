@@ -4,10 +4,11 @@ const fs = require('fs/promises');
 
 const {
   checkContainerAndClean,
-  findNPMRoot,
   runGitMaybeHost,
   tryCacheContainerId,
 } = require('./actions/utils');
+
+const { findNPMRoot } = require('./actions/npm-utils');
 
 const {
   LIBDRAGON_PROJECT_MANIFEST,

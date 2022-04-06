@@ -4,6 +4,15 @@
 
 ### Fixed
 
+### Added
+
+### Changed
+
+- Refactored out NPM related functions.
+## [10.4.2] - 2022-04-03
+
+### Fixed
+
 - Make sure actions depending on an `init` fail in a non-project directory to
 keep the project state consistent. This fixes #51.
 - `update` action now tries to update the toolchain image as well. Previously
