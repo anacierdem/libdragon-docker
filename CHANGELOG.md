@@ -1,6 +1,6 @@
 # Change Log
 
-## [10.5.0] - 2022-04-
+## [10.5.0] - 2022-04-09
 ### Fixed
 
 - Fix a path bug that would cause incorrect behaviour when the command is run
