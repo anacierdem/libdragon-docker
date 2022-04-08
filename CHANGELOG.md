@@ -9,6 +9,7 @@
 ### Changed
 
 - Refactored out NPM related functions.
+- Moved usage parameters to respective actions files as a refactor.
 ## [10.4.2] - 2022-04-03
 
 ### Fixed

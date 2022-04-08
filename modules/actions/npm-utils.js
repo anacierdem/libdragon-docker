@@ -3,10 +3,7 @@ const fsClassic = require('fs');
 
 const _ = require('lodash');
 
-function dockerHostUserParams(libdragonInfo) {
-  const { uid, gid } = libdragonInfo.userInfo;
-  return ['-u', `${uid >= 0 ? uid : ''}:${gid >= 0 ? gid : ''}`];
-}
+const { dockerHostUserParams } = require('./docker-utils');
 
 const { CONTAINER_TARGET_PATH } = require('../constants');
 const {

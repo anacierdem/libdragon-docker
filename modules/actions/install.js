@@ -45,4 +45,11 @@ module.exports = {
   name: 'install',
   fn: install,
   showStatus: true,
+  usage: {
+    name: 'install',
+    summary: 'Vendor libdragon as is.',
+    description: `Attempts to build and install everything libdragon related into the container. This includes all the tools and third parties used by libdragon except for the toolchain. If you have made changes to libdragon, you can execute this action to build everything based on your changes. Requires you to have an intact vendoring target (also see the \`--directory\` flag). If you are not working on libdragon itself, you can just use the \`update\` action instead.
+
+    Must be run in an initialized libdragon project. This can be useful to recover from a half-baked container.`,
+  },
 };

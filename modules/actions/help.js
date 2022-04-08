@@ -4,6 +4,7 @@ const commandLineUsage = require('command-line-usage');
 const { log } = require('../helpers');
 
 const printUsage = (_, actionArr) => {
+  const actions = require('./');
   const globalOptionDefinitions = [
     {
       name: 'verbose',
@@ -48,72 +49,6 @@ const printUsage = (_, actionArr) => {
     },
   ];
 
-  // TODO: move these to respective actions
-
-  const actions = {
-    help: {
-      name: 'help [action]',
-      summary: 'Display this help information or details for the given action.',
-    },
-    init: {
-      name: 'init',
-      summary: 'Create a libdragon project in the current directory.',
-      description: `Creates a libdragon project in the current directory. Every libdragon project will have its own docker container instance. If you are in a git repository or an NPM project, libdragon will be initialized at their root also marking there with a \`.libdragon\` folder. Do not remove the \`.libdragon\` folder and commit its contents if you are using source control, as it keeps persistent libdragon project information.
-
-      By default, a git repository and a submodule at \`./libdragon\` will be created to automatically update the vendored libdragon files on subsequent \`update\`s. If you intend to opt-out from this feature, see the \`--strategy manual\` flag to provide your self-managed libdragon copy. The default behaviour is intended for users who primarily want to consume libdragon as is.
-
-      If this is the first time you are creating a libdragon project at that location, this action will also create skeleton project files to kickstart things with the given image, if provided. For subsequent runs, it will act like \`start\` thus can be used to revive an existing project without modifying it.`,
-      group: ['docker', 'vendoring'],
-    },
-    make: {
-      name: 'make [params]',
-      summary: 'Run the libdragon build system in the current directory.',
-      description: `Runs the libdragon build system in the current directory. It will mirror your current working directory to the container.
-
-      Must be run in an initialized libdragon project. This action is a shortcut to the \`exec\` action under the hood.`,
-    },
-    exec: {
-      name: 'exec <command>',
-      summary: 'Execute given command in the current directory.',
-      description: `Executes the given command in the container passing down any arguments provided. If you change your host working directory, the command will be executed in the corresponding folder in the container as well.
-
-      This action will first try to execute the command in the container and if the container is not accessible, it will attempt a complete \`start\` cycle.
-
-      This will properly passthrough your TTY if you have one. So by running \`libdragon exec bash\` you can start an interactive bash session with full TTY support.
-      
-      Must be run in an initialized libdragon project.`,
-    },
-    start: {
-      name: 'start',
-      summary: 'Start the container for current project.',
-      description: `Start the container assigned to the current libdragon project. Will first attempt to start an existing container if found, followed by a new container run and installation similar to the \`install\` action. Will always print out the container id on success.
-
-        Must be run in an initialized libdragon project.`,
-    },
-    name: {
-      name: 'stop',
-      summary: 'Stop the container for current project.',
-      description: `Stop the container assigned to the current libdragon project.
-
-        Must be run in an initialized libdragon project.`,
-    },
-    install: {
-      name: 'install',
-      summary: 'Vendor libdragon as is.',
-      description: `Attempts to build and install everything libdragon related into the container. This includes all the tools and third parties used by libdragon except for the toolchain. If you have made changes to libdragon, you can execute this action to build everything based on your changes. Requires you to have an intact vendoring target (also see the \`--directory\` flag). If you are not working on libdragon itself, you can just use the \`update\` action instead.
-
-      Must be run in an initialized libdragon project. This can be useful to recover from a half-baked container.`,
-    },
-    update: {
-      name: 'update',
-      summary: 'Update libdragon and do an install.',
-      description: `Will update the docker image and if you are using auto-vendoring (see \`--strategy\`), will also update the submodule/subtree from the remote branch (\`trunk\`) with a merge/squash strategy and then perform a \`libdragon install\`. You can use the \`install\` action to only update all libdragon related artifacts in the container.
-
-        Must be run in an initialized libdragon project.`,
-      group: ['docker'],
-    },
-  };
-
   const actionsToShow = actionArr
     ?.filter((action) => Object.keys(actions).includes(action))
     .filter((action) => !['help'].includes(action));
@@ -127,22 +62,22 @@ const printUsage = (_, actionArr) => {
       ? actionsToShow.flatMap((action) => [
           {
             header: chalk.green(`${action} action:`),
-            content: actions[action].description,
+            content: actions[action].usage.description,
           },
-          actions[action].group
+          actions[action].usage.group
             ? {
                 header: `accepted flags:`,
                 optionList: optionDefinitions,
-                group: actions[action].group,
+                group: actions[action].usage.group,
               }
             : {},
         ])
       : [
           {
             header: chalk.green('Available Commands:'),
-            content: Object.values(actions).map((action) => ({
-              name: action.name,
-              summary: action.summary,
+            content: Object.values(actions).map(({ usage }) => ({
+              name: usage.name,
+              summary: usage.summary,
             })),
           },
         ]),
@@ -160,4 +95,8 @@ module.exports = {
   fn: printUsage,
   showStatus: true,
   forwardsRestParams: true,
+  usage: {
+    name: 'help [action]',
+    summary: 'Display this help information or details for the given action.',
+  },
 };

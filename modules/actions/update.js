@@ -43,4 +43,12 @@ module.exports = {
   name: 'update',
   fn: update,
   showStatus: true,
+  usage: {
+    name: 'update',
+    summary: 'Update libdragon and do an install.',
+    description: `Will update the docker image and if you are using auto-vendoring (see \`--strategy\`), will also update the submodule/subtree from the remote branch (\`trunk\`) with a merge/squash strategy and then perform a \`libdragon install\`. You can use the \`install\` action to only update all libdragon related artifacts in the container.
+
+      Must be run in an initialized libdragon project.`,
+    group: ['docker'],
+  },
 };

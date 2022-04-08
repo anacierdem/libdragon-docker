@@ -111,4 +111,11 @@ module.exports = {
   fn: async (libdragonInfo) => log(await start(libdragonInfo)),
   start,
   showStatus: false, // This will only print out the id
+  usage: {
+    name: 'start',
+    summary: 'Start the container for current project.',
+    description: `Start the container assigned to the current libdragon project. Will first attempt to start an existing container if found, followed by a new container run and installation similar to the \`install\` action. Will always print out the container id on success.
+
+      Must be run in an initialized libdragon project.`,
+  },
 };

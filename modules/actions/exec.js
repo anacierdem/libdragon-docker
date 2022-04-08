@@ -4,11 +4,8 @@ const { CONTAINER_TARGET_PATH } = require('../constants');
 const { log, dockerExec, toPosixPath } = require('../helpers');
 
 const { start } = require('./start');
-const {
-  dockerHostUserParams,
-  installDependencies,
-  mustHaveProject,
-} = require('./utils');
+const { dockerHostUserParams } = require('./docker-utils');
+const { installDependencies, mustHaveProject } = require('./utils');
 
 function dockerRelativeWorkdir(libdragonInfo) {
   return (
@@ -94,4 +91,15 @@ module.exports = {
   fn: exec,
   forwardsRestParams: true,
   showStatus: true,
+  usage: {
+    name: 'exec <command>',
+    summary: 'Execute given command in the current directory.',
+    description: `Executes the given command in the container passing down any arguments provided. If you change your host working directory, the command will be executed in the corresponding folder in the container as well.
+
+    This action will first try to execute the command in the container and if the container is not accessible, it will attempt a complete \`start\` cycle.
+
+    This will properly passthrough your TTY if you have one. So by running \`libdragon exec bash\` you can start an interactive bash session with full TTY support.
+    
+    Must be run in an initialized libdragon project.`,
+  },
 };
