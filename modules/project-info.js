@@ -165,21 +165,6 @@ async function readProjectInfo() {
   log(`Active vendor directory: ${info.vendorDirectory}`, true);
   log(`Active vendor strategy: ${info.vendorStrategy}`, true);
 
-  // Cache the latest image name
-  setProjectInfoToSave(info);
-  return info;
-}
-
-let projectInfoToWrite = {};
-/**
- * Updates project info to be written. The provided keys are overwritten without
- * changing the existing values. When the process exists successfully these will
- * get written to the configuration file. Echoes back the given info.
- * @param info This is only the base info without action properties like showStatus
- * fn and command line options
- */
-function setProjectInfoToSave(info) {
-  projectInfoToWrite = { ...projectInfoToWrite, ...info };
   return info;
 }
 
@@ -187,8 +172,9 @@ function setProjectInfoToSave(info) {
  * @param info This is only the base info without action properties like showStatus
  * fn and command line options
  */
-async function writeProjectInfo(info = projectInfoToWrite) {
+async function writeProjectInfo(info) {
   // Do not log anything here as it may litter the output being always run on exit
+  if (!info) return;
 
   const projectPath = path.join(info.root, LIBDRAGON_PROJECT_MANIFEST);
 
@@ -222,4 +208,4 @@ async function writeProjectInfo(info = projectInfoToWrite) {
   log(`Configuration file updated`, true);
 }
 
-module.exports = { readProjectInfo, writeProjectInfo, setProjectInfoToSave };
+module.exports = { readProjectInfo, writeProjectInfo };

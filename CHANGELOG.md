@@ -7,6 +7,8 @@
 deeper than a single level in the project folder.
 - Fix a potential issue where `build.sh`might be incorrectly found inexistant
 if the OS is picky about the paths to have native separators.
+- Only save project information when necessary. Previously actions like `help`
+were saving project info mistakenly.
 
 ### Added
 
@@ -21,6 +23,8 @@ if the OS is picky about the paths to have native separators.
 - It is possible to provide an absolute path to init `--directory` as long as it
 is inside the project directory. Previously it was possible to provide somewhere
 outside the project, but it would fail with an unexpected error.
+- Simplify saving mechanism. Each action now internally resolves into the data
+to save if any.
 
 ## [10.4.2] - 2022-04-03
 

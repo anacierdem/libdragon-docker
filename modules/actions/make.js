@@ -1,7 +1,7 @@
 const { fn: exec } = require('./exec');
 
 const make = async (libdragonInfo, params) => {
-  await exec(libdragonInfo, ['make', ...params]);
+  return await exec(libdragonInfo, ['make', ...params]);
 };
 
 module.exports = {

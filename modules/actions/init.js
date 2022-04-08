@@ -27,7 +27,6 @@ const {
   toPosixPath,
   toNativePath,
 } = require('../helpers');
-const { setProjectInfoToSave } = require('../project-info');
 
 const autoVendor = async (libdragonInfo) => {
   await runGitMaybeHost(libdragonInfo, ['init']);
@@ -113,10 +112,7 @@ async function init(libdragonInfo) {
 
   // Update the strategy information for the project if the flag is provided
   if (newInfo.options.VENDOR_STRAT) {
-    newInfo = setProjectInfoToSave({
-      ...newInfo,
-      vendorStrategy: newInfo.options.VENDOR_STRAT,
-    });
+    newInfo.vendorStrategy = newInfo.options.VENDOR_STRAT;
   }
 
   // Update the directory information for the project if the flag is provided
@@ -132,11 +128,8 @@ async function init(libdragonInfo) {
       );
     }
 
-    newInfo = setProjectInfoToSave({
-      ...newInfo,
-      // Immeditately convert it to a posix and relative path
-      vendorDirectory: toPosixPath(relativeVendorDir),
-    });
+    // Immeditately convert it to a posix and relative path
+    newInfo.vendorDirectory = toPosixPath(relativeVendorDir);
   }
 
   if (newInfo.haveProjectConfig) {
@@ -152,12 +145,11 @@ async function init(libdragonInfo) {
       );
     }
     // TODO: we may make sure git and submodule is initialized here
-    await install(newInfo);
-    return;
+    return await install(newInfo);
   }
 
-  newInfo.imageName =
-    (await updateImage(newInfo, newInfo.imageName)) || newInfo.imageName;
+  await updateImage(newInfo, newInfo.imageName);
+
   // Download image and start it
   const containerReadyPromise = start(newInfo, true).then((newId) => ({
     ...newInfo,
@@ -201,6 +193,7 @@ async function init(libdragonInfo) {
   ]);
 
   log(chalk.green(`libdragon ready at \`${newInfo.root}\`.`));
+  return newInfo;
 }
 
 module.exports = {

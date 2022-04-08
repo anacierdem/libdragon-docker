@@ -39,6 +39,7 @@ const install = async (libdragonInfo, skipUpdate) => {
   // Re-install vendors on new image
   // TODO: skip this if unnecessary
   await installDependencies(updatedInfo);
+  return updatedInfo;
 };
 
 module.exports = {

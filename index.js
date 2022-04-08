@@ -175,10 +175,8 @@ readProjectInfo()
     // We don't have a user targeted error anymore, we did a mistake for sure
     process.exit(STATUS_ERROR);
   })
-  .then(() => {
-    // Everything was done, update the configuration file if not exiting early
-    return writeProjectInfo();
-  })
+  // Everything was done, update the configuration file if not exiting early
+  .then(writeProjectInfo)
   .finally(() => {
     process.exit(STATUS_OK);
   });

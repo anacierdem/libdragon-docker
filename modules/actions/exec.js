@@ -69,7 +69,7 @@ const exec = async (libdragonInfo, commandAndParams) => {
   if (!libdragonInfo.containerId) {
     log(`Container does not exist for sure, restart`, true);
     await startOnceAndCmd();
-    return;
+    return libdragonInfo;
   }
 
   try {
@@ -84,6 +84,7 @@ const exec = async (libdragonInfo, commandAndParams) => {
     }
     await startOnceAndCmd();
   }
+  return libdragonInfo;
 };
 
 module.exports = {

@@ -12,6 +12,7 @@ const stop = async (libdragonInfo) => {
   }
 
   await spawnProcess('docker', ['container', 'stop', running]);
+  return libdragonInfo;
 };
 
 module.exports = {

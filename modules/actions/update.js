@@ -34,7 +34,7 @@ const update = async (libdragonInfo) => {
 
   // The second parameter forces it to skip the image update step as we already
   // do that above.
-  await install(newInfo, true);
+  return await install(newInfo, true);
 };
 
 module.exports = {

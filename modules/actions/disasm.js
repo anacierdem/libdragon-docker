@@ -75,7 +75,7 @@ const disasm = async (libdragonInfo, extraArgs) => {
   const intermixSourceParams =
     extraArgs.length === 0 || haveSymbol ? ['-S'] : [];
 
-  await exec(libdragonInfo, [
+  return await exec(libdragonInfo, [
     'mips64-elf-objdump',
     ...finalArgs,
     ...intermixSourceParams,

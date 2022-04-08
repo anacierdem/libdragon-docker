@@ -2,7 +2,6 @@ const chalk = require('chalk');
 
 const { CONTAINER_TARGET_PATH } = require('../constants');
 const { spawnProcess, log, dockerExec } = require('../helpers');
-const { setProjectInfoToSave } = require('../project-info');
 
 const {
   checkContainerAndClean,
@@ -76,8 +75,6 @@ const initContainer = async (libdragonInfo) => {
       chalk.green(`Successfully initialized docker container: ${name.trim()}`)
     );
 
-  // Schedule an update to write image name
-  setProjectInfoToSave(libdragonInfo);
   return newId;
 };
 
@@ -108,7 +105,11 @@ const start = async (libdragonInfo, skipProjectCheck) => {
 
 module.exports = {
   name: 'start',
-  fn: async (libdragonInfo) => log(await start(libdragonInfo)),
+  fn: async (libdragonInfo) => {
+    const containerId = await start(libdragonInfo);
+    log(containerId);
+    return { ...libdragonInfo, containerId };
+  },
   start,
   showStatus: false, // This will only print out the id
   usage: {
