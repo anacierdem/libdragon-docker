@@ -6,6 +6,8 @@ module.exports = {
   exec: require('./exec'),
   make: require('./make'),
 
+  disasm: require('./disasm'),
+
   install: require('./install'),
   update: require('./update'),
 

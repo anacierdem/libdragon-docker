@@ -90,7 +90,7 @@ libdragon-install: libdragon
 
 # TODO: libdragon does not support cutom SOURCE_DIR
 libdragon:
-	$(MAKE) -C ./libdragon
+	$(MAKE) -C ./libdragon BUILD_DIR=$(CURDIR)/libdragon/build
 
 clean: clean-bench
 	$(MAKE) -C ./libdragon clean

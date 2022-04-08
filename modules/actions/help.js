@@ -64,10 +64,13 @@ const printUsage = (_, actionArr) => {
             header: chalk.green(`${action} action:`),
             content: actions[action].usage.description,
           },
-          actions[action].usage.group
+          actions[action].usage.group || actions[action].usage.optionList
             ? {
                 header: `accepted flags:`,
-                optionList: optionDefinitions,
+                optionList: [
+                  ...(actions[action].usage.group ? optionDefinitions : []),
+                  ...(actions[action].usage.optionList ?? []),
+                ],
                 group: actions[action].usage.group,
               }
             : {},

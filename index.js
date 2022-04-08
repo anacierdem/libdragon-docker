@@ -33,6 +33,7 @@ for (let i = 2; i < process.argv.length; i++) {
     continue;
   }
 
+  // TODO: we might move these to actions as well.
   if (['--image', '-i'].includes(val)) {
     options.DOCKER_IMAGE = process.argv[++i];
     continue;
@@ -54,6 +55,14 @@ for (let i = 2; i < process.argv.length; i++) {
     continue;
   } else if (val.indexOf('--strategy=') === 0) {
     options.VENDOR_STRAT = val.split('=')[1];
+    continue;
+  }
+
+  if (['--file', '-f'].includes(val)) {
+    options.FILE = process.argv[++i];
+    continue;
+  } else if (val.indexOf('--file=') === 0) {
+    options.FILE = val.split('=')[1];
     continue;
   }
 
@@ -112,6 +121,12 @@ if (
 ) {
   console.error(chalk.red(`Invalid strategy \`${options.VENDOR_STRAT}\``));
   printUsage();
+  process.exit(STATUS_BAD_PARAM);
+}
+
+if (![actions.disasm].includes(currentAction) && options.FILE) {
+  console.error(chalk.red('Invalid flag: file'));
+  printUsage(undefined, [currentAction.name]);
   process.exit(STATUS_BAD_PARAM);
 }
 
