@@ -5,6 +5,12 @@ const chalk = require('chalk');
 const { spawn } = require('child_process');
 
 const { globals } = require('./globals');
+const {
+  LIBDRAGON_PROJECT_MANIFEST,
+  CONTAINER_TARGET_PATH,
+  DOCKER_SERVICE_NAME,
+  LIBDRAGON_COMPOSE_FILE,
+} = require('./constants');
 
 // An error caused by a command explicitly run by the user
 class CommandError extends Error {
@@ -55,7 +61,15 @@ async function dirExists(path) {
 // command anymore. If interactive is "full", the error stream is also piped to
 // the main process as TTY, so it is not readable anymore as well. For the
 // commands using stderr as TTY it should be set to "full"
-function spawnProcess(cmd, params = [], userCommand, interactive = false) {
+function spawnProcess(
+  cmd,
+  params = [],
+  { userCommand = false, interactive = false, env = {} } = {
+    userCommand: false,
+    interactive: false,
+    env: {},
+  }
+) {
   return new Promise((resolve, reject) => {
     let stdout = [];
     let stderr = [];
@@ -77,6 +91,10 @@ function spawnProcess(cmd, params = [], userCommand, interactive = false) {
         enableTTY ? 'inherit' : 'pipe',
         enableErrorTTY ? 'inherit' : 'pipe',
       ],
+      env: {
+        ...process.env,
+        ...env,
+      },
     });
 
     if (!enableTTY && (globals.verbose || userCommand)) {
@@ -127,6 +145,31 @@ function spawnProcess(cmd, params = [], userCommand, interactive = false) {
   });
 }
 
+function dockerCompose(libdragonInfo, cmdWithParams, options = {}) {
+  return spawnProcess(
+    'docker',
+    [
+      'compose',
+      '-f',
+      path.join(
+        libdragonInfo.root,
+        LIBDRAGON_PROJECT_MANIFEST,
+        LIBDRAGON_COMPOSE_FILE
+      ),
+      `--project-directory=${libdragonInfo.root}`,
+      ...cmdWithParams,
+    ],
+    {
+      ...options,
+      env: {
+        ...options.env,
+        CONTAINER_TARGET_PATH,
+        IMAGE_NAME: libdragonInfo.imageName,
+      },
+    }
+  );
+}
+
 function dockerExec(
   libdragonInfo,
   dockerParams,
@@ -141,18 +184,21 @@ function dockerExec(
   // interactive and TTY?
   const additionalParams =
     isTTY && (haveDockerParams ? interactive : userCommand) ? ['-it'] : [];
-  return spawnProcess(
-    'docker',
+
+  return dockerCompose(
+    libdragonInfo,
     [
       'exec',
       ...(haveDockerParams
         ? [...dockerParams, ...additionalParams]
         : additionalParams),
-      libdragonInfo.containerId,
+      DOCKER_SERVICE_NAME,
       ...(haveDockerParams ? cmdWithParams : dockerParams),
     ],
-    haveDockerParams ? userCommand : cmdWithParams,
-    haveDockerParams ? interactive : userCommand
+    {
+      userCommand: haveDockerParams ? userCommand : cmdWithParams,
+      interactive: haveDockerParams ? interactive : userCommand,
+    }
   );
 }
 
@@ -247,6 +293,7 @@ module.exports = {
   fileExists,
   dirExists,
   copyDirContents,
+  dockerCompose,
   CommandError,
   ParameterError,
   ValidationError,

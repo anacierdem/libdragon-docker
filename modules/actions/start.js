@@ -1,14 +1,14 @@
 const chalk = require('chalk');
 
-const { CONTAINER_TARGET_PATH } = require('../constants');
-const { spawnProcess, log, dockerExec } = require('../helpers');
+const { log, spawnProcess, dockerExec, dockerCompose } = require('../helpers');
 
-const {
-  checkContainerAndClean,
-  checkContainerRunning,
-  destroyContainer,
-  mustHaveProject,
-} = require('./utils');
+const { checkContainerExists, mustHaveProject } = require('./utils');
+
+async function checkContainerRunning(libdragonInfo) {
+  return (
+    await dockerCompose(libdragonInfo, ['ps', '-q', '--status=running'])
+  ).trim();
+}
 
 /**
  * Create a new container
@@ -16,29 +16,13 @@ const {
 const initContainer = async (libdragonInfo) => {
   let newId;
   try {
-    // Create a new container
     libdragonInfo.showStatus && log('Creating new container...');
-    newId = (
-      await spawnProcess('docker', [
-        'run',
-        '-d', // Detached
-        '--mount',
-        'type=bind,source=' +
-          libdragonInfo.root +
-          ',target=' +
-          CONTAINER_TARGET_PATH, // Mount files
-        '-w=' + CONTAINER_TARGET_PATH, // Set working directory
-        libdragonInfo.imageName,
-        'tail',
-        '-f',
-        '/dev/null',
-      ])
-    ).trim();
+    await dockerCompose(libdragonInfo, [
+      'up',
+      '-d', // Detached
+    ]);
 
-    const newInfo = {
-      ...libdragonInfo,
-      containerId: newId,
-    };
+    const newInfo = libdragonInfo;
 
     // chown the installation folder once on init
     const { uid, gid } = libdragonInfo.userInfo;
@@ -50,10 +34,8 @@ const initContainer = async (libdragonInfo) => {
     ]);
   } catch (e) {
     // Dispose the invalid container, clean and exit
-    await destroyContainer({
-      ...libdragonInfo,
-      containerId: newId,
-    });
+    await dockerCompose(libdragonInfo, ['down']);
+    await dockerCompose(libdragonInfo, ['rm', '-f']);
     log(
       chalk.red(
         'We were unable to initialize libdragon. Done cleanup. Check following logs for the actual error.'
@@ -65,7 +47,7 @@ const initContainer = async (libdragonInfo) => {
   const name = await spawnProcess('docker', [
     'container',
     'inspect',
-    newId,
+    await checkContainerRunning(libdragonInfo),
     '--format',
     '{{.Name}}',
   ]);
@@ -80,16 +62,14 @@ const initContainer = async (libdragonInfo) => {
 
 const start = async (libdragonInfo, skipProjectCheck) => {
   !skipProjectCheck && (await mustHaveProject(libdragonInfo));
-  const running =
-    libdragonInfo.containerId &&
-    (await checkContainerRunning(libdragonInfo.containerId));
+  const running = await checkContainerRunning(libdragonInfo);
 
   if (running) {
     log(`Container ${running} already running.`, true);
     return running;
   }
 
-  let id = await checkContainerAndClean(libdragonInfo);
+  let id = await checkContainerExists(libdragonInfo);
 
   if (!id) {
     log(`Container does not exist, re-initializing...`, true);
@@ -98,7 +78,7 @@ const start = async (libdragonInfo, skipProjectCheck) => {
   }
 
   log(`Starting container: ${id}`, true);
-  await spawnProcess('docker', ['container', 'start', id]);
+  await dockerCompose(libdragonInfo, ['up', '-d']);
 
   return id;
 };

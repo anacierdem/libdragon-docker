@@ -30,10 +30,7 @@ const install = async (libdragonInfo, skipUpdate) => {
     updatedInfo = await updateAndStart(libdragonInfo);
   } else {
     // Make sure existing one is running
-    updatedInfo = {
-      ...updatedInfo,
-      containerId: await start(libdragonInfo),
-    };
+    await start(libdragonInfo);
   }
 
   // Re-install vendors on new image

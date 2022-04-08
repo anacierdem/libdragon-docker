@@ -1,17 +1,8 @@
-const { spawnProcess } = require('../helpers');
-
-const { checkContainerRunning, mustHaveProject } = require('./utils');
+const { dockerCompose } = require('../helpers');
+const { DOCKER_SERVICE_NAME } = require('../constants');
 
 const stop = async (libdragonInfo) => {
-  await mustHaveProject(libdragonInfo);
-  const running =
-    libdragonInfo.containerId &&
-    (await checkContainerRunning(libdragonInfo.containerId));
-  if (!running) {
-    return;
-  }
-
-  await spawnProcess('docker', ['container', 'stop', running]);
+  await dockerCompose(libdragonInfo, ['stop', DOCKER_SERVICE_NAME]);
   return libdragonInfo;
 };
 

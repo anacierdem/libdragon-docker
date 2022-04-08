@@ -4,13 +4,7 @@ const path = require('path');
 const chalk = require('chalk');
 
 const { fn: install } = require('./install');
-const { start } = require('./start');
-const {
-  installDependencies,
-  tryCacheContainerId,
-  updateImage,
-  runGitMaybeHost,
-} = require('./utils');
+const { installDependencies, runGitMaybeHost } = require('./utils');
 
 const {
   LIBDRAGON_PROJECT_MANIFEST,
@@ -27,6 +21,7 @@ const {
   toPosixPath,
   toNativePath,
 } = require('../helpers');
+const { updateAndStart } = require('./update-and-start');
 
 const autoVendor = async (libdragonInfo) => {
   await runGitMaybeHost(libdragonInfo, ['init']);
@@ -148,13 +143,7 @@ async function init(libdragonInfo) {
     return await install(newInfo);
   }
 
-  await updateImage(newInfo, newInfo.imageName);
-
-  // Download image and start it
-  const containerReadyPromise = start(newInfo, true).then((newId) => ({
-    ...newInfo,
-    containerId: newId,
-  }));
+  const containerReadyPromise = updateAndStart(newInfo);
 
   let vendorAndGitReadyPromise = containerReadyPromise;
   if (newInfo.vendorStrategy !== 'manual') {
@@ -178,16 +167,16 @@ async function init(libdragonInfo) {
       );
     }
 
-    vendorAndGitReadyPromise = containerReadyPromise.then(autoVendor);
+    vendorAndGitReadyPromise = containerReadyPromise.then(() =>
+      autoVendor(newInfo)
+    );
   }
 
   log(`Preparing project files...`);
   const skeletonFolder = path.join(__dirname, '../../skeleton');
 
   await Promise.all([
-    // We have created a new container, save the new info
-    vendorAndGitReadyPromise.then(tryCacheContainerId),
-    vendorAndGitReadyPromise.then(installDependencies),
+    vendorAndGitReadyPromise.then(() => installDependencies(newInfo)),
     // node copy functions does not work with pkg
     copyDirContents(skeletonFolder, newInfo.root),
   ]);

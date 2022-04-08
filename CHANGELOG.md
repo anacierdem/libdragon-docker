@@ -1,6 +1,6 @@
 # Change Log
 
-## [10.5.0] - 2022-04-
+## [10.6.0] - 2022-04-
 ### Fixed
 
 - Fix a path bug that would cause incorrect behaviour when the command is run
@@ -27,6 +27,8 @@ is inside the project directory. Previously it was possible to provide somewhere
 outside the project, but it would fail with an unexpected error.
 - Simplify saving mechanism. Each action now internally resolves into the data
 to save if any.
+- Start using docker compose. This significantly simplifies code even though it
+may have a little bit of runtime overhead. Closes #50.
 
 ## [10.4.2] - 2022-04-03
 

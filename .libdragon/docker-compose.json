@@ -1,0 +1,17 @@
+{
+  "version": "3.5",
+  "services": {
+    "toolchain": {
+      "image": "${IMAGE_NAME}",
+      "working_dir": "${CONTAINER_TARGET_PATH}",
+      "volumes": [
+        ".:${CONTAINER_TARGET_PATH}"
+      ],
+      "entrypoint": [
+        "tail",
+        "-f",
+        "/dev/null"
+      ]
+    }
+  }
+}

@@ -1,6 +1,4 @@
-const { log } = require('../helpers');
-const { updateImage, destroyContainer } = require('./utils');
-const { start } = require('./start');
+const { log, dockerCompose } = require('../helpers');
 
 async function updateAndStart(libdragonInfo) {
   const oldImageName = libdragonInfo.imageName;
@@ -13,18 +11,12 @@ async function updateAndStart(libdragonInfo) {
     log(`Updating image \`${oldImageName}\``);
   }
 
-  // Download the new image and if it is different, re-create the container
-  if (await updateImage(libdragonInfo, imageName)) {
-    await destroyContainer(libdragonInfo);
-  }
+  await dockerCompose(libdragonInfo, ['pull']);
+  await dockerCompose(libdragonInfo, ['up', '-d']);
 
   return {
     ...libdragonInfo,
     imageName,
-    containerId: await start({
-      ...libdragonInfo,
-      imageName,
-    }),
   };
 }
 

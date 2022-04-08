@@ -2,11 +2,7 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs/promises');
 
-const {
-  checkContainerAndClean,
-  runGitMaybeHost,
-  tryCacheContainerId,
-} = require('./actions/utils');
+const { checkContainerExists } = require('./actions/utils');
 
 const { findNPMRoot } = require('./actions/npm-utils');
 
@@ -18,6 +14,7 @@ const {
   IMAGE_FILE,
   LIBDRAGON_SUBMODULE,
   CACHED_CONTAINER_FILE,
+  LIBDRAGON_COMPOSE_FILE,
   CONTAINER_TARGET_PATH,
 } = require('./constants');
 
@@ -28,44 +25,6 @@ const {
   toPosixPath,
   assert,
 } = require('./helpers');
-
-async function findContainerId(libdragonInfo) {
-  const idFile = path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE);
-  if (await fileExists(idFile)) {
-    const id = (await fs.readFile(idFile, { encoding: 'utf8' })).trim();
-    log(`Read containerId: ${id}`, true);
-    return id;
-  }
-
-  const candidates = (
-    await spawnProcess('docker', [
-      'container',
-      'ls',
-      '-a',
-      '--format',
-      '{{.}}{{.ID}}',
-      '-f',
-      'volume=' + CONTAINER_TARGET_PATH,
-    ])
-  )
-    .split('\n')
-    .filter((s) => s.includes(`${libdragonInfo.root} `));
-
-  if (candidates.length > 0) {
-    const str = candidates[0];
-    const shortId = str.slice(-12);
-    const idIndex = str.indexOf(shortId);
-    const longId = str.slice(idIndex, idIndex + 64);
-    if (longId.length === 64) {
-      // If there is managed vendoring, make sure we have a git repo
-      if (libdragonInfo.vendorStrategy !== 'manual') {
-        await runGitMaybeHost(libdragonInfo, ['init']);
-      }
-      await tryCacheContainerId({ ...libdragonInfo, containerId: longId });
-      return longId;
-    }
-  }
-}
 
 async function findLibdragonRoot(start = '.') {
   const manifest = path.join(start, LIBDRAGON_PROJECT_MANIFEST, CONFIG_FILE);
@@ -141,24 +100,65 @@ async function readProjectInfo() {
     }
   }
 
-  info.containerId = await findContainerId(info);
-  log(`Active container id: ${info.containerId}`, true);
+  // New migration
+  const containerIdFile = path.join(info.root, '.git', CACHED_CONTAINER_FILE);
+  if (await fileExists(containerIdFile)) {
+    const containerId = (
+      await fs.readFile(containerIdFile, { encoding: 'utf8' })
+    ).trim();
+
+    if (containerId) {
+      log(`Removing container id: ${containerId}`, true);
+      await spawnProcess('docker', ['container', 'rm', containerId, '--force']);
+    }
+    await fs.rm(containerIdFile);
+  }
+
+  const composeFile = path.join(
+    info.root,
+    LIBDRAGON_PROJECT_MANIFEST,
+    LIBDRAGON_COMPOSE_FILE
+  );
+  if (!(await fileExists(composeFile))) {
+    // Create the docker compose file
+    fs.writeFile(
+      composeFile,
+      JSON.stringify(
+        {
+          version: '3.5',
+          services: {
+            toolchain: {
+              image: '${IMAGE_NAME}',
+
+              working_dir: '${CONTAINER_TARGET_PATH}',
+              volumes: ['.:${CONTAINER_TARGET_PATH}'],
+              entrypoint: ['tail', '-f', '/dev/null'],
+            },
+          },
+        },
+        null,
+        '  '
+      )
+    );
+  }
 
   // For imageName, flag has the highest priority followed by the one read from
   // the file and then if there is any matching container, name is read from it.
   // As last option fallback to default value.
 
-  // If still have the container, read the image name from it
-  if (!info.imageName && (await checkContainerAndClean(info))) {
-    info.imageName = (
-      await spawnProcess('docker', [
-        'container',
-        'inspect',
-        info.containerId,
-        '--format',
-        '{{.Config.Image}}',
-      ])
-    ).trim();
+  // If still have the container, read the image name from it as a last resort
+  if (!info.imageName) {
+    const containerId = await checkContainerExists(info);
+    containerId &&
+      (info.imageName = (
+        await spawnProcess('docker', [
+          'container',
+          'inspect',
+          containerId,
+          '--format',
+          '{{.Config.Image}}',
+        ])
+      ).trim());
   }
 
   log(`Active image name: ${info.imageName}`, true);
