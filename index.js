@@ -15,6 +15,7 @@ const {
   CommandError,
   ParameterError,
   ValidationError,
+  log,
 } = require('./modules/helpers');
 const { readProjectInfo, writeProjectInfo } = require('./modules/project-info');
 
@@ -178,5 +179,6 @@ readProjectInfo()
   // Everything was done, update the configuration file if not exiting early
   .then(writeProjectInfo)
   .finally(() => {
+    log(`Took: ${process.uptime()}s`, true);
     process.exit(STATUS_OK);
   });
