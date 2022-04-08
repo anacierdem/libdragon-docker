@@ -24,6 +24,8 @@ const {
   CommandError,
   ParameterError,
   ValidationError,
+  toPosixPath,
+  toNativePath,
 } = require('../helpers');
 const { setProjectInfoToSave } = require('../project-info');
 
@@ -119,16 +121,21 @@ async function init(libdragonInfo) {
 
   // Update the directory information for the project if the flag is provided
   if (newInfo.options.VENDOR_DIR) {
+    const relativeVendorDir = path.relative(
+      libdragonInfo.root,
+      libdragonInfo.options.VENDOR_DIR
+    );
     // Validate vendoring path
-    if (path.isAbsolute(newInfo.options.VENDOR_DIR)) {
+    if (relativeVendorDir.startsWith('..')) {
       throw new ParameterError(
-        '`--directory` must be project-relative as it will be mounted to the docker container.'
+        `\`--directory=${libdragonInfo.options.VENDOR_DIR}\` is outside the project directory.`
       );
     }
 
     newInfo = setProjectInfoToSave({
       ...newInfo,
-      vendorDirectory: newInfo.options.VENDOR_DIR,
+      // Immeditately convert it to a posix and relative path
+      vendorDirectory: toPosixPath(relativeVendorDir),
     });
   }
 
@@ -159,7 +166,10 @@ async function init(libdragonInfo) {
 
   let vendorAndGitReadyPromise = containerReadyPromise;
   if (newInfo.vendorStrategy !== 'manual') {
-    const vendorTarget = path.relative(newInfo.root, newInfo.vendorDirectory);
+    const vendorTarget = path.relative(
+      newInfo.root,
+      toNativePath(newInfo.vendorDirectory)
+    );
     const [vendorTargetExists] = await Promise.all([
       fs.stat(vendorTarget).catch((e) => {
         if (e.code !== 'ENOENT') throw e;
@@ -171,8 +181,7 @@ async function init(libdragonInfo) {
     if (vendorTargetExists) {
       throw new ValidationError(
         `${path.resolve(
-          newInfo.root,
-          newInfo.vendorDirectory
+          vendorTarget
         )} already exists. That is the libdragon vendoring target, please remove and retry.`
       );
     }

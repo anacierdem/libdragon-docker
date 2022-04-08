@@ -21,7 +21,13 @@ const {
   CONTAINER_TARGET_PATH,
 } = require('./constants');
 
-const { fileExists, log, spawnProcess, toPosixPath } = require('./helpers');
+const {
+  fileExists,
+  log,
+  spawnProcess,
+  toPosixPath,
+  assert,
+} = require('./helpers');
 
 async function findContainerId(libdragonInfo) {
   const idFile = path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE);
@@ -97,7 +103,7 @@ async function readProjectInfo() {
     // Set the defaults immediately, these should be present at all times even
     // if we are migrating from the old config because they did not exist before
     imageName: DOCKER_HUB_IMAGE,
-    vendorDirectory: path.join('.', LIBDRAGON_SUBMODULE),
+    vendorDirectory: toPosixPath(path.join('.', LIBDRAGON_SUBMODULE)),
     vendorStrategy: DEFAULT_STRATEGY,
   };
 
@@ -196,13 +202,17 @@ async function writeProjectInfo(info = projectInfoToWrite) {
     await fs.mkdir(projectPath);
   }
 
+  assert(
+    toPosixPath(info.vendorDirectory) === info.vendorDirectory,
+    new Error('vendorDirectory should always be in posix format')
+  );
+
   await fs.writeFile(
     path.join(projectPath, CONFIG_FILE),
     JSON.stringify(
       {
         imageName: info.imageName,
-        // Always save this in posix format
-        vendorDirectory: toPosixPath(info.vendorDirectory),
+        vendorDirectory: info.vendorDirectory,
         vendorStrategy: info.vendorStrategy,
       },
       null,

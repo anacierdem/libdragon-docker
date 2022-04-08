@@ -209,7 +209,11 @@ async function copyDirContents(src, dst) {
 }
 
 function toPosixPath(p) {
-  return p.replace(new RegExp('\\' + path.sep), path.posix.sep);
+  return p.replace(new RegExp('\\' + path.sep, 'g'), path.posix.sep);
+}
+
+function toNativePath(p) {
+  return p.replace(new RegExp('\\' + path.posix.sep, 'g'), path.sep);
 }
 
 function assert(condition, error) {
@@ -236,6 +240,7 @@ function log(text, verboseOnly = false) {
 module.exports = {
   spawnProcess,
   toPosixPath,
+  toNativePath,
   log,
   dockerExec,
   assert,

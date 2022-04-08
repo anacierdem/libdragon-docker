@@ -12,7 +12,6 @@ const printUsage = (_, actionArr) => {
         'Be verbose. This will print all commands dispatched and their outputs as well. Will also start printing error stack traces.',
       alias: 'v',
       typeLabel: ' ',
-      group: 'global',
     },
   ];
 
@@ -27,7 +26,7 @@ const printUsage = (_, actionArr) => {
     },
     {
       name: 'directory',
-      description: `Directory where libdragon files are expected. It must be a project relative path as it will be mounted on the docker container. The cli will create and manage it when using a non-manual strategy. Defaults to \`./libdragon\` if not provided.\n`,
+      description: `Directory where libdragon files are expected. It must be inside the libdragon project as it will be mounted on the docker container. The cli will create and manage it when using a non-manual strategy. Defaults to \`./libdragon\` if not provided.\n`,
       alias: 'd',
       typeLabel: '<path>',
       group: 'vendoring',
@@ -56,7 +55,9 @@ const printUsage = (_, actionArr) => {
   const sections = [
     {
       header: chalk.green('Usage:'),
-      content: 'libdragon [flags] <action>',
+      content: `libdragon [flags] <action>
+
+      For string flags valid syntax are: \`-i <value>\` or \`--image=<value>\``,
     },
     ...(actionsToShow?.length
       ? actionsToShow.flatMap((action) => [

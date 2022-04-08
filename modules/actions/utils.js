@@ -9,7 +9,6 @@ const {
 const {
   fileExists,
   log,
-  toPosixPath,
   spawnProcess,
   dockerExec,
   dirExists,
@@ -17,6 +16,7 @@ const {
   CommandError,
   ValidationError,
   ParameterError,
+  toNativePath,
 } = require('../helpers');
 
 const { dockerHostUserParams } = require('./docker-utils');
@@ -25,7 +25,7 @@ const { installNPMDependencies } = require('./npm-utils');
 const installDependencies = async (libdragonInfo) => {
   const buildScriptPath = path.join(
     libdragonInfo.root,
-    libdragonInfo.vendorDirectory,
+    toNativePath(libdragonInfo.vendorDirectory),
     'build.sh'
   );
   if (!(await fileExists(buildScriptPath))) {
@@ -40,11 +40,7 @@ const installDependencies = async (libdragonInfo) => {
     libdragonInfo,
     [
       '--workdir',
-      CONTAINER_TARGET_PATH +
-        '/' +
-        toPosixPath(
-          path.relative(libdragonInfo.root, libdragonInfo.vendorDirectory)
-        ),
+      CONTAINER_TARGET_PATH + '/' + libdragonInfo.vendorDirectory,
       ...dockerHostUserParams(libdragonInfo),
     ],
     ['/bin/bash', './build.sh']
