@@ -47,7 +47,7 @@ jobs:
           npm run libdragon -- --verbose update
           npm run libdragon -- --verbose install
           npm run libdragon -- --verbose --file=./src/build/test_bench.elf disasm main
-          npm run libdragon -- --verbose clean
+          npm run libdragon -- --verbose destroy
 
   ci-clean-files:
     runs-on: ubuntu-latest
@@ -77,7 +77,7 @@ jobs:
           rm .git/libdragon-docker-container
           npm run libdragon -- --verbose --file=./src/build/test_bench.elf disasm main
           rm .git/libdragon-docker-container
-          npm run libdragon -- --verbose clean
+          npm run libdragon -- --verbose destroy
 
   ci-manual:
     runs-on: ubuntu-latest
@@ -105,7 +105,7 @@ jobs:
           npm run libdragon -- --verbose start
           npm run libdragon -- --verbose update
           npm run libdragon -- --verbose install
-          npm run libdragon -- --verbose clean
+          npm run libdragon -- --verbose destroy
 
   ci-subtree:
     runs-on: ubuntu-latest
@@ -137,7 +137,7 @@ jobs:
           npm run libdragon -- --verbose update
           npm run libdragon -- --verbose install
           npm run libdragon -- --verbose --file=./src/build/test_bench.elf disasm main
-          npm run libdragon -- --verbose clean
+          npm run libdragon -- --verbose destroy
 
   ci-pack:
     runs-on: ubuntu-latest
