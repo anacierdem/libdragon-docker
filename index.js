@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const chalk = require('chalk');
+const chalk = require('chalk').stderr;
 
 const actions = require('./modules/actions');
 const { fn: printUsage } = require('./modules/actions/help');
@@ -22,6 +22,7 @@ const { readProjectInfo, writeProjectInfo } = require('./modules/project-info');
 let options = {},
   currentAction;
 
+// TODO: Separate this into a parser function
 for (let i = 2; i < process.argv.length; i++) {
   const val = process.argv[i];
 
@@ -131,13 +132,12 @@ if (![actions.disasm].includes(currentAction) && options.FILE) {
   process.exit(STATUS_BAD_PARAM);
 }
 
-readProjectInfo()
+readProjectInfo(currentAction)
   .then((info) =>
     currentAction.fn(
       {
         ...info,
         options,
-        ...currentAction,
       },
       options.PARAMS ?? []
     )

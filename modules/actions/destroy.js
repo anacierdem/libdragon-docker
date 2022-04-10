@@ -1,13 +1,11 @@
 const fs = require('fs/promises');
 const path = require('path');
 
-const { mustHaveProject, destroyContainer } = require('./utils');
+const { destroyContainer } = require('./utils');
 const { CONFIG_FILE, LIBDRAGON_PROJECT_MANIFEST } = require('../constants');
 const { fileExists, dirExists } = require('../helpers');
 
 const destroy = async (libdragonInfo) => {
-  await mustHaveProject(libdragonInfo);
-
   await destroyContainer(libdragonInfo);
 
   const projectPath = path.join(libdragonInfo.root, LIBDRAGON_PROJECT_MANIFEST);
@@ -24,7 +22,6 @@ const destroy = async (libdragonInfo) => {
 module.exports = {
   name: 'destroy',
   fn: destroy,
-  showStatus: true,
   usage: {
     name: 'destroy',
     summary: 'Do clean-up for current project.',

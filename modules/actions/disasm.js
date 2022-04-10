@@ -1,7 +1,6 @@
 const path = require('path');
 const fs = require('fs/promises');
 
-const { mustHaveProject } = require('./utils');
 const { fn: exec } = require('./exec');
 const {
   ValidationError,
@@ -45,8 +44,6 @@ const findElf = async (stop, start = '.') => {
 };
 
 const disasm = async (libdragonInfo, extraArgs) => {
-  await mustHaveProject(libdragonInfo);
-
   let elfPath;
   if (libdragonInfo.options.FILE) {
     if (
@@ -86,7 +83,6 @@ const disasm = async (libdragonInfo, extraArgs) => {
 module.exports = {
   name: 'disasm',
   fn: disasm,
-  showStatus: true,
   forwardsRestParams: true,
   usage: {
     name: 'disasm [symbol|flags]',

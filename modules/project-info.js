@@ -4,8 +4,8 @@ const fs = require('fs/promises');
 
 const {
   checkContainerAndClean,
-  runGitMaybeHost,
   tryCacheContainerId,
+  runGitMaybeHost,
 } = require('./actions/utils');
 
 const { findNPMRoot } = require('./actions/npm-utils');
@@ -27,7 +27,10 @@ const {
   spawnProcess,
   toPosixPath,
   assert,
+  ParameterError,
 } = require('./helpers');
+
+const initAction = require('./actions/init');
 
 async function findContainerId(libdragonInfo) {
   const idFile = path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE);
@@ -49,7 +52,13 @@ async function findContainerId(libdragonInfo) {
     ])
   )
     .split('\n')
-    .filter((s) => s.includes(`${libdragonInfo.root} `));
+    // docker seem to save paths with posix separators but make sure we look for
+    // both, just in case
+    .filter(
+      (s) =>
+        s.includes(`${toPosixPath(libdragonInfo.root)} `) ||
+        s.includes(`${libdragonInfo.root} `)
+    );
 
   if (candidates.length > 0) {
     const str = candidates[0];
@@ -57,7 +66,9 @@ async function findContainerId(libdragonInfo) {
     const idIndex = str.indexOf(shortId);
     const longId = str.slice(idIndex, idIndex + 64);
     if (longId.length === 64) {
-      // If there is managed vendoring, make sure we have a git repo
+      // If there is managed vendoring, make sure we have a git repo. This shouldn't
+      // happen but if the user somehow deleted the .git folder (we don't have
+      // the container id file at this point) we can recover the project.
       if (libdragonInfo.vendorStrategy !== 'manual') {
         await runGitMaybeHost(libdragonInfo, ['init']);
       }
@@ -90,14 +101,28 @@ async function findGitRoot() {
   }
 }
 
-async function readProjectInfo() {
+async function readProjectInfo(currentAction) {
+  // No need to do anything here if the action does not depend on the project
+  // The only exception is the init action, which does not need an existing
+  // project but readProjectInfo must always run to analyze the situation
+  if (currentAction.mustHaveProject === false && currentAction !== initAction) {
+    return;
+  }
+
   const projectRoot = await findLibdragonRoot();
+
+  if (!projectRoot && currentAction !== initAction) {
+    throw new ParameterError(
+      'This is not a libdragon project. Initialize with `libdragon init` first.'
+    );
+  }
 
   let info = {
     root: projectRoot ?? (await findNPMRoot()) ?? (await findGitRoot()),
     userInfo: os.userInfo(),
 
     // Use this to discriminate if there is a project when the command is run
+    // Only used for the init action ATM, and it is not ideal to have this here
     haveProjectConfig: !!projectRoot,
 
     // Set the defaults immediately, these should be present at all times even
@@ -169,7 +194,7 @@ async function readProjectInfo() {
 }
 
 /**
- * @param info This is only the base info without action properties like showStatus
+ * @param info This is only the base info without options
  * fn and command line options
  */
 async function writeProjectInfo(info) {

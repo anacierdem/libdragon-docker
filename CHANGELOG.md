@@ -1,5 +1,25 @@
 # Change Log
 
+## [10.6.1] - 2022-04-10
+
+### Fixed
+
+- Logs properly goes to stderr now. Previously they were written to stdout. This
+means the id output of the `start` action is now written to stdout while we can
+also display other information on the terminal. This allowed enabling the docker
+logs for a more responsive experience. The output of `help` still goes to stdout.
+- Skip reading the project information for `version` and `help` commands. This
+was breaking things when these were run with a stopped docker service.
+- Resolved a potential failure case where the host mount path is not reported
+as a native path. That would prevent proper container discovery. This was not
+being an issue previously but I realized it was not working for Windows now.
+
+### Changed
+
+- Refactored process spawns.
+- Reorder actions in the help output.
+- Setting `--verbose` for `start` does not guarantee the only-id output anymore.
+
 ## [10.6.0] - 2022-04-09
 ### Fixed
 

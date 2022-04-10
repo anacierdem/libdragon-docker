@@ -1,11 +1,10 @@
 const { log } = require('../helpers');
 const { LIBDRAGON_GIT, LIBDRAGON_BRANCH } = require('../constants');
-const { runGitMaybeHost, mustHaveProject } = require('./utils');
+const { runGitMaybeHost } = require('./utils');
 const { fn: install } = require('./install');
 const { updateAndStart } = require('./update-and-start');
 
 const update = async (libdragonInfo) => {
-  await mustHaveProject(libdragonInfo);
   const newInfo = await updateAndStart(libdragonInfo);
 
   if (newInfo.vendorStrategy !== 'manual') {
@@ -40,7 +39,6 @@ const update = async (libdragonInfo) => {
 module.exports = {
   name: 'update',
   fn: update,
-  showStatus: true,
   usage: {
     name: 'update',
     summary: 'Update libdragon and do an install.',

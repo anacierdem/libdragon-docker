@@ -1,7 +1,7 @@
 const fs = require('fs/promises');
 const path = require('path');
 
-const chalk = require('chalk');
+const chalk = require('chalk').stderr;
 
 const { fn: install } = require('./install');
 const { start } = require('./start');
@@ -151,7 +151,7 @@ async function init(libdragonInfo) {
   await updateImage(newInfo, newInfo.imageName);
 
   // Download image and start it
-  const containerReadyPromise = start(newInfo, true).then((newId) => ({
+  const containerReadyPromise = start(newInfo).then((newId) => ({
     ...newInfo,
     containerId: newId,
   }));
@@ -199,7 +199,7 @@ async function init(libdragonInfo) {
 module.exports = {
   name: 'init',
   fn: init,
-  showStatus: true,
+  mustHaveProject: false,
   usage: {
     name: 'init',
     summary: 'Create a libdragon project in the current directory.',

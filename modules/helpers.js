@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs/promises');
 const fsClassic = require('fs');
-const chalk = require('chalk');
+const chalk = require('chalk').stderr;
 const { spawn } = require('child_process');
 
 const { globals } = require('./globals');
@@ -55,14 +55,39 @@ async function dirExists(path) {
 // command anymore. If interactive is "full", the error stream is also piped to
 // the main process as TTY, so it is not readable anymore as well. For the
 // commands using stderr as TTY it should be set to "full"
-function spawnProcess(cmd, params = [], userCommand, interactive = false) {
+function spawnProcess(
+  cmd,
+  params = [],
+  {
+    userCommand = false,
+    interactive = false,
+    readStdout,
+    spawnOptions = {},
+    pipeOutputs,
+  } = {
+    userCommand: false,
+    interactive: false,
+    spawnOptions: {},
+  }
+) {
+  // We won't need to collect the data if it is a user command in general
+  readStdout =
+    typeof readStdout === 'undefined'
+      ? !userCommand && !interactive
+      : readStdout;
+
+  // By default we want the outputs to get piped if it is user initiated
+  pipeOutputs = typeof pipeOutputs === 'undefined' ? userCommand : pipeOutputs;
+
+  assert(
+    !interactive || !readStdout,
+    new Error('Cannot enable TTY and read data at the same time for now.')
+  );
   return new Promise((resolve, reject) => {
     let stdout = [];
     let stderr = [];
 
-    if (globals.verbose) {
-      log(chalk.grey(`Spawning: ${cmd} ${params.join(' ')}`), true);
-    }
+    log(chalk.grey(`Spawning: ${cmd} ${params.join(' ')}`), true);
 
     const isTTY =
       process.stdin.isTTY && process.stdout.isTTY && process.stderr.isTTY;
@@ -77,18 +102,18 @@ function spawnProcess(cmd, params = [], userCommand, interactive = false) {
         enableTTY ? 'inherit' : 'pipe',
         enableErrorTTY ? 'inherit' : 'pipe',
       ],
+      ...spawnOptions,
     });
 
-    if (!enableTTY && (globals.verbose || userCommand)) {
+    if (!enableTTY && (globals.verbose || pipeOutputs)) {
       command.stdout.pipe(process.stdout);
     }
 
-    if (!enableErrorTTY && (globals.verbose || userCommand)) {
+    if (!enableErrorTTY && (globals.verbose || pipeOutputs)) {
       command.stderr.pipe(process.stderr);
     }
 
-    // We shouldn't need to collect the data if it is a user command.
-    if (!enableTTY && !userCommand) {
+    if (!enableTTY && readStdout) {
       command.stdout.on('data', function (data) {
         stdout.push(Buffer.from(data));
       });
@@ -127,20 +152,17 @@ function spawnProcess(cmd, params = [], userCommand, interactive = false) {
   });
 }
 
-function dockerExec(
-  libdragonInfo,
-  dockerParams,
-  cmdWithParams,
-  userCommand,
-  interactive
-) {
+function dockerExec(libdragonInfo, dockerParams, cmdWithParams, options) {
   // TODO: assert for invalid args
   const haveDockerParams =
     Array.isArray(dockerParams) && Array.isArray(cmdWithParams);
   const isTTY = process.stdin.isTTY && process.stdout.isTTY;
   // interactive and TTY?
   const additionalParams =
-    isTTY && (haveDockerParams ? interactive : userCommand) ? ['-it'] : [];
+    isTTY &&
+    (haveDockerParams ? options?.interactive : cmdWithParams?.interactive)
+      ? ['-it']
+      : [];
   return spawnProcess(
     'docker',
     [
@@ -151,8 +173,7 @@ function dockerExec(
       libdragonInfo.containerId,
       ...(haveDockerParams ? cmdWithParams : dockerParams),
     ],
-    haveDockerParams ? userCommand : cmdWithParams,
-    haveDockerParams ? interactive : userCommand
+    haveDockerParams ? options : cmdWithParams
   );
 }
 
@@ -223,16 +244,21 @@ function assert(condition, error) {
   }
 }
 
-// TODO: we can handle showStatus here
+function print(text) {
+  // eslint-disable-next-line no-console
+  console.log(text);
+  return;
+}
+
 function log(text, verboseOnly = false) {
   if (!verboseOnly) {
     // eslint-disable-next-line no-console
-    console.log(text);
+    console.error(text);
     return;
   }
   if (globals.verbose) {
     // eslint-disable-next-line no-console
-    console.log(chalk.gray(text));
+    console.error(chalk.gray(text));
     return;
   }
 }
@@ -241,6 +267,7 @@ module.exports = {
   spawnProcess,
   toPosixPath,
   toNativePath,
+  print,
   log,
   dockerExec,
   assert,

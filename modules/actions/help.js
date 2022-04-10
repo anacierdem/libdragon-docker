@@ -1,7 +1,7 @@
 const chalk = require('chalk');
 const commandLineUsage = require('command-line-usage');
 
-const { log } = require('../helpers');
+const { print } = require('../helpers');
 
 const printUsage = (_, actionArr) => {
   const actions = require('./');
@@ -91,14 +91,14 @@ const printUsage = (_, actionArr) => {
     },
   ];
   const usage = commandLineUsage(sections);
-  log(usage);
+  print(usage);
 };
 
 module.exports = {
   name: 'help',
   fn: printUsage,
-  showStatus: true,
   forwardsRestParams: true,
+  mustHaveProject: false,
   usage: {
     name: 'help [action]',
     summary: 'Display this help information or details for the given action.',

@@ -15,7 +15,6 @@ const {
   assert,
   CommandError,
   ValidationError,
-  ParameterError,
   toNativePath,
 } = require('../helpers');
 
@@ -34,7 +33,7 @@ const installDependencies = async (libdragonInfo) => {
     );
   }
 
-  libdragonInfo.showStatus && log('Installing libdragon to the container...');
+  log('Installing libdragon to the container...');
 
   await dockerExec(
     libdragonInfo,
@@ -59,23 +58,14 @@ const installDependencies = async (libdragonInfo) => {
 const updateImage = async (libdragonInfo, newImageName) => {
   // Will not take too much time if already have the same
   const download = async () => {
-    libdragonInfo.showStatus &&
-      log(`Downloading docker image: ${newImageName}`);
-    await spawnProcess(
-      'docker',
-      ['pull', newImageName],
-      false,
-      libdragonInfo.showStatus
-    );
+    log(`Downloading docker image: ${newImageName}`);
+    await spawnProcess('docker', ['pull', newImageName], {
+      interactive: true,
+    });
   };
 
   const getDigest = async () =>
-    await spawnProcess(
-      'docker',
-      ['images', '-q', '--no-trunc', newImageName],
-      false,
-      false
-    );
+    await spawnProcess('docker', ['images', '-q', '--no-trunc', newImageName]);
 
   // Attempt to compare digests if the new image name is the same
   // Even if they are not the same tag, it is possible to have a different
@@ -87,15 +77,14 @@ const updateImage = async (libdragonInfo, newImageName) => {
     const newDigest = await getDigest();
 
     if (existingDigest === newDigest) {
-      libdragonInfo.showStatus &&
-        log(`Image is the same: ${newImageName}`, true);
+      log(`Image is the same: ${newImageName}`, true);
       return false;
     }
   } else {
     await download();
   }
 
-  libdragonInfo.showStatus && log(`Image is different: ${newImageName}`, true);
+  log(`Image is different: ${newImageName}`, true);
   return newImageName;
 };
 
@@ -119,20 +108,17 @@ const destroyContainer = async (libdragonInfo) => {
  * Invokes host git with provided params. If host does not have git, falls back
  * to the docker git, with the nix user set to the user running libdragon.
  */
-async function runGitMaybeHost(libdragonInfo, params, interactive = 'full') {
+async function runGitMaybeHost(libdragonInfo, params) {
   assert(
     libdragonInfo.vendorStrategy !== 'manual',
     new Error('Should never run git if vendoring strategy is manual.')
   );
   try {
-    return await spawnProcess(
-      'git',
-      ['-C', libdragonInfo.root, ...params],
-      false,
+    return await spawnProcess('git', ['-C', libdragonInfo.root, ...params], {
       // Windows git is breaking the TTY somehow - disable interactive for now
       // We are not able to display progress for the initial clone b/c of this
-      /^win/.test(process.platform) ? false : interactive
-    );
+      interactive: /^win/.test(process.platform) ? false : 'full',
+    });
   } catch (e) {
     if (!(e instanceof CommandError)) {
       return await dockerExec(
@@ -140,8 +126,7 @@ async function runGitMaybeHost(libdragonInfo, params, interactive = 'full') {
         // Use the host user when initializing git as we will need access
         [...dockerHostUserParams(libdragonInfo)],
         ['git', ...params],
-        false,
-        interactive
+        { interactive: 'full' }
       );
     }
     throw e;
@@ -196,15 +181,6 @@ async function tryCacheContainerId(libdragonInfo) {
   }
 }
 
-// Throws if the project was not initialized for the current libdragonInfo
-async function mustHaveProject(libdragonInfo) {
-  if (!libdragonInfo.haveProjectConfig) {
-    throw new ParameterError(
-      'This is not a libdragon project. Initialize with `libdragon init` first.'
-    );
-  }
-}
-
 module.exports = {
   installDependencies,
   updateImage,
@@ -213,5 +189,4 @@ module.exports = {
   checkContainerAndClean,
   tryCacheContainerId,
   runGitMaybeHost,
-  mustHaveProject,
 };
