@@ -8,7 +8,6 @@ module.exports = {
   name: 'make',
   fn: make,
   forwardsRestParams: true,
-  showStatus: true,
   usage: {
     name: 'make [params]',
     summary: 'Run the libdragon build system in the current directory.',

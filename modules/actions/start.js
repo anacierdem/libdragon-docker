@@ -1,13 +1,12 @@
-const chalk = require('chalk');
+const chalk = require('chalk').stderr;
 
 const { CONTAINER_TARGET_PATH } = require('../constants');
-const { spawnProcess, log, dockerExec } = require('../helpers');
+const { spawnProcess, log, print, dockerExec } = require('../helpers');
 
 const {
   checkContainerAndClean,
   checkContainerRunning,
   destroyContainer,
-  mustHaveProject,
 } = require('./utils');
 
 /**
@@ -17,7 +16,7 @@ const initContainer = async (libdragonInfo) => {
   let newId;
   try {
     // Create a new container
-    libdragonInfo.showStatus && log('Creating new container...');
+    log('Creating new container...');
     newId = (
       await spawnProcess('docker', [
         'run',
@@ -70,16 +69,12 @@ const initContainer = async (libdragonInfo) => {
     '{{.Name}}',
   ]);
 
-  libdragonInfo.showStatus &&
-    log(
-      chalk.green(`Successfully initialized docker container: ${name.trim()}`)
-    );
+  log(chalk.green(`Successfully initialized docker container: ${name.trim()}`));
 
   return newId;
 };
 
-const start = async (libdragonInfo, skipProjectCheck) => {
-  !skipProjectCheck && (await mustHaveProject(libdragonInfo));
+const start = async (libdragonInfo) => {
   const running =
     libdragonInfo.containerId &&
     (await checkContainerRunning(libdragonInfo.containerId));
@@ -107,15 +102,14 @@ module.exports = {
   name: 'start',
   fn: async (libdragonInfo) => {
     const containerId = await start(libdragonInfo);
-    log(containerId);
+    print(containerId);
     return { ...libdragonInfo, containerId };
   },
   start,
-  showStatus: false, // This will only print out the id
   usage: {
     name: 'start',
     summary: 'Start the container for current project.',
-    description: `Start the container assigned to the current libdragon project. Will first attempt to start an existing container if found, followed by a new container run and installation similar to the \`install\` action. Will always print out the container id on success.
+    description: `Start the container assigned to the current libdragon project. Will first attempt to start an existing container if found, followed by a new container run and installation similar to the \`install\` action. Will always print out the container id to stdout on success.
 
       Must be run in an initialized libdragon project.`,
   },

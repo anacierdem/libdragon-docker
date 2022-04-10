@@ -8,7 +8,7 @@ const printVersion = async () => {
 module.exports = {
   name: 'version',
   fn: printVersion,
-  showStatus: false,
+  mustHaveProject: false,
   usage: {
     name: 'version',
     summary: 'Display cli version.',

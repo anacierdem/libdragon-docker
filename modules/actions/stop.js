@@ -1,9 +1,8 @@
 const { spawnProcess } = require('../helpers');
 
-const { checkContainerRunning, mustHaveProject } = require('./utils');
+const { checkContainerRunning } = require('./utils');
 
 const stop = async (libdragonInfo) => {
-  await mustHaveProject(libdragonInfo);
   const running =
     libdragonInfo.containerId &&
     (await checkContainerRunning(libdragonInfo.containerId));
@@ -18,7 +17,6 @@ const stop = async (libdragonInfo) => {
 module.exports = {
   name: 'stop',
   fn: stop,
-  showStatus: false, // This will only print out the id
   usage: {
     name: 'stop',
     summary: 'Stop the container for current project.',

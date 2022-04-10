@@ -5,7 +5,7 @@ const { log, dockerExec, toPosixPath } = require('../helpers');
 
 const { start } = require('./start');
 const { dockerHostUserParams } = require('./docker-utils');
-const { installDependencies, mustHaveProject } = require('./utils');
+const { installDependencies } = require('./utils');
 
 function dockerRelativeWorkdir(libdragonInfo) {
   return (
@@ -20,8 +20,6 @@ function dockerRelativeWorkdirParams(libdragonInfo) {
 }
 
 const exec = async (libdragonInfo, commandAndParams) => {
-  await mustHaveProject(libdragonInfo);
-
   log(
     `Running ${commandAndParams[0]} at ${dockerRelativeWorkdir(
       libdragonInfo
@@ -38,8 +36,11 @@ const exec = async (libdragonInfo, commandAndParams) => {
         ...dockerHostUserParams(libdragonInfo),
       ],
       commandAndParams,
-      true,
-      true // Cannot use "full" here, we need to know if the container is alive
+      {
+        userCommand: true,
+        // Cannot use "full" here, we need to know if the container is alive
+        interactive: true,
+      }
     );
 
   let started = false;

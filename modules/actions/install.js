@@ -1,6 +1,6 @@
-const chalk = require('chalk');
+const chalk = require('chalk').stderr;
 
-const { installDependencies, mustHaveProject } = require('./utils');
+const { installDependencies } = require('./utils');
 const { start } = require('./start');
 const { updateAndStart } = require('./update-and-start');
 const { log } = require('../helpers');
@@ -17,7 +17,6 @@ const { log } = require('../helpers');
  * we still keep that logic but with a deprecation warning.
  */
 const install = async (libdragonInfo, skipUpdate) => {
-  await mustHaveProject(libdragonInfo);
   let updatedInfo = libdragonInfo;
   const imageName = libdragonInfo.options.DOCKER_IMAGE;
   // If an image is provided, attempt to install
@@ -45,7 +44,6 @@ const install = async (libdragonInfo, skipUpdate) => {
 module.exports = {
   name: 'install',
   fn: install,
-  showStatus: true,
   usage: {
     name: 'install',
     summary: 'Vendor libdragon as is.',

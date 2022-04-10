@@ -39,8 +39,6 @@ jobs:
         run: |
           npm run libdragon -- --verbose init
           npm run libdragon -- --verbose make
-          npm run libdragon -- --verbose help
-          npm run libdragon -- --verbose version
           npm run libdragon -- --verbose exec ls
           npm run libdragon -- --verbose stop
           npm run libdragon -- --verbose start
@@ -48,6 +46,8 @@ jobs:
           npm run libdragon -- --verbose install
           npm run libdragon -- --verbose --file=./src/build/test_bench.elf disasm main
           npm run libdragon -- --verbose destroy
+          npm run libdragon -- --verbose help
+          npm run libdragon -- --verbose version
 
   ci-clean-files:
     runs-on: ubuntu-latest
@@ -98,14 +98,14 @@ jobs:
       - name: Test
         run: |
           npm run libdragon -- --verbose init -s manual -d ./libdragon_test
-          npm run libdragon -- --verbose help
-          npm run libdragon -- --verbose version
           npm run libdragon -- --verbose exec ls
           npm run libdragon -- --verbose stop
           npm run libdragon -- --verbose start
           npm run libdragon -- --verbose update
           npm run libdragon -- --verbose install
           npm run libdragon -- --verbose destroy
+          npm run libdragon -- --verbose help
+          npm run libdragon -- --verbose version
 
   ci-subtree:
     runs-on: ubuntu-latest
@@ -129,8 +129,6 @@ jobs:
         run: |
           npm run libdragon -- --verbose init -s subtree -d ./libdragon
           npm run libdragon -- --verbose make
-          npm run libdragon -- --verbose help
-          npm run libdragon -- --verbose version
           npm run libdragon -- --verbose exec ls
           npm run libdragon -- --verbose stop
           npm run libdragon -- --verbose start
@@ -138,6 +136,8 @@ jobs:
           npm run libdragon -- --verbose install
           npm run libdragon -- --verbose --file=./src/build/test_bench.elf disasm main
           npm run libdragon -- --verbose destroy
+          npm run libdragon -- --verbose help
+          npm run libdragon -- --verbose version
 
   ci-pack:
     runs-on: ubuntu-latest
