@@ -105,8 +105,24 @@ function spawnProcess(
       ...spawnOptions,
     });
 
+    // See a very old related issue: https://github.com/nodejs/node/issues/947
+    // When the stream is not fully consumed by the pipe target and it exits,
+    // an EPIPE or EOF is thrown. We don't care about those.
+    const eatEpipe = (err) => {
+      if (err.code !== 'EPIPE' && err.code !== 'EOF') {
+        throw err;
+      }
+      // No need to listen for close anymore
+      command.off('close', closeHandler);
+
+      // It was not fully consumed, just resolve into an empty string
+      // No one should be using this anyways. Ideally we could clean a few
+      // last bytes from the buffers to create a correct utf-8 string.
+      resolve('');
+    };
     if (!enableTTY && (globals.verbose || pipeOutputs)) {
       command.stdout.pipe(process.stdout);
+      process.stdout.once('error', eatEpipe);
     }
 
     if (!enableErrorTTY && (globals.verbose || pipeOutputs)) {
@@ -131,6 +147,9 @@ function spawnProcess(
     };
 
     const closeHandler = function (code) {
+      // The stream was fully consumed, if there is this an additional error on
+      // stdout, it must be a legitimate error
+      process.stdout.off('error', eatEpipe);
       command.off('error', errorHandler);
       if (code === 0) {
         resolve(Buffer.concat(stdout).toString());
