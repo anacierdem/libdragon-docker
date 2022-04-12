@@ -68,7 +68,7 @@ for (let i = 2; i < process.argv.length; i++) {
     continue;
   }
 
-  if (val.indexOf('--') >= 0) {
+  if (val.indexOf('-') == 0) {
     console.error(chalk.red(`Invalid flag \`${val}\``));
     printUsage();
     process.exit(STATUS_BAD_PARAM);

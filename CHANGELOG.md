@@ -15,6 +15,7 @@ as a native path. That would prevent proper container discovery. This was not
 being an issue previously but I realized it was not working for Windows now.
 - Do not throw if the output stream is not finalized. This was previously causing
 issues when the long output of a command is piped to another process like `less`.
+- Produce a correct error if an invalid flag with a singe `-` is provided.
 
 ### Changed
 
