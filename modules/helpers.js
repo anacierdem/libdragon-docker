@@ -50,8 +50,8 @@ async function dirExists(path) {
     });
 }
 
-// A simple Promise wrapper for child_process.spawn. For the
-// commands using stderr as TTY it should be set to "full"
+// A simple Promise wrapper for child_process.spawn. Return the err/out streams
+// from the process bu default. Specify readStderr / readStdout to disable.
 function spawnProcess(
   cmd,
   params = [],
@@ -59,12 +59,21 @@ function spawnProcess(
     // Used to decorate the potential CommandError with a prop such that we can
     // report this error back to the user.
     userCommand = false,
-    disableTTY = true,
-    spawnOptions = {},
+    // This is the stream where we the process will receive its input.
     stdin = process.stdin,
+    // Used to notify the error stream is required by the caller. If this is
+    // true, stderr cannot be a tty anymore.
+    readStderr = true,
+    // Used to notify the out stream is required by the caller. If this is true,
+    // stdout cannot be a tty anymore. We won't need to collect the data if it
+    // is a user command in general
+    readStdout = true,
+    // Passthrough to spawn
+    spawnOptions = {},
   } = {
     userCommand: false,
-    disableTTY: true,
+    readStderr: true,
+    readStdout: true,
     spawnOptions: {},
     stdin: process.stdin,
   }
@@ -75,9 +84,9 @@ function spawnProcess(
 
     log(chalk.grey(`Spawning: ${cmd} ${params.join(' ')}`), true);
 
-    const enableInTTY = process.stdin.isTTY && disableTTY !== true;
-    const enableOutTTY = process.stdout.isTTY && disableTTY !== true;
-    const enableErrorTTY = process.stderr.isTTY && !disableTTY;
+    const enableInTTY = stdin.isTTY;
+    const enableOutTTY = process.stdout.isTTY && !readStdout;
+    const enableErrorTTY = process.stderr.isTTY && !readStderr;
 
     const command = spawn(cmd, params, {
       stdio: [
@@ -104,7 +113,7 @@ function spawnProcess(
       resolve('');
     };
 
-    if (!enableInTTY) {
+    if (!enableInTTY && stdin) {
       stdin.pipe(command.stdin);
     }
 
@@ -113,19 +122,17 @@ function spawnProcess(
       process.stdout.once('error', eatEpipe);
     }
 
-    if (!enableErrorTTY && (globals.verbose || userCommand)) {
-      command.stderr.pipe(process.stderr);
-    }
-
-    // We won't need to collect the data if it is a user command in general
-    const readStdout = !userCommand && disableTTY;
-    if (!enableOutTTY && readStdout) {
+    if (readStdout) {
       command.stdout.on('data', function (data) {
         stdout.push(Buffer.from(data));
       });
     }
 
-    if (!enableErrorTTY) {
+    if (!enableErrorTTY && (globals.verbose || userCommand)) {
+      command.stderr.pipe(process.stderr);
+    }
+
+    if (readStderr) {
       command.stderr.on('data', function (data) {
         stderr.push(Buffer.from(data));
       });
@@ -166,15 +173,16 @@ function dockerExec(libdragonInfo, dockerParams, cmdWithParams, options) {
   const haveDockerParams =
     Array.isArray(dockerParams) && Array.isArray(cmdWithParams);
 
-  const disableTTY =
-    (haveDockerParams ? options?.disableTTY : cmdWithParams?.disableTTY) ??
-    true;
+  if (!haveDockerParams) {
+    options = cmdWithParams;
+  }
+
+  const disableTTY = options?.readStdout ?? true;
 
   const additionalParams = [];
 
-  // Docker TTY wants in&out streams to be a TTY
-  const ttyEnabled =
-    disableTTY !== true && process.stdout.isTTY && process.stdin.isTTY;
+  // Docker TTY wants in & out streams both to be a TTY
+  const ttyEnabled = !disableTTY && process.stdout.isTTY && process.stdin.isTTY;
 
   if (ttyEnabled) additionalParams.push('-t');
 
@@ -193,7 +201,7 @@ function dockerExec(libdragonInfo, dockerParams, cmdWithParams, options) {
       libdragonInfo.containerId,
       ...(haveDockerParams ? cmdWithParams : dockerParams),
     ],
-    haveDockerParams ? options : cmdWithParams
+    options
   );
 }
 

@@ -30,7 +30,7 @@ const exec = async (libdragonInfo, commandAndParams) => {
 
   const stdin = new PassThrough();
 
-  const tryCmd = (libdragonInfo, disableTTY, stdin) =>
+  const tryCmd = (libdragonInfo, opts = {}) =>
     libdragonInfo.containerId &&
     dockerExec(
       libdragonInfo,
@@ -41,8 +41,9 @@ const exec = async (libdragonInfo, commandAndParams) => {
       commandAndParams,
       {
         userCommand: true,
-        disableTTY,
-        stdin,
+        readStderr: false,
+        readStdout: false,
+        ...opts,
       }
     );
 
@@ -67,8 +68,7 @@ const exec = async (libdragonInfo, commandAndParams) => {
           ...libdragonInfo,
           containerId: newId,
         },
-        false,
-        stdin
+        { stdin }
       );
       return newId;
     }
@@ -88,8 +88,11 @@ const exec = async (libdragonInfo, commandAndParams) => {
     // stream is from a TTY, spawnProcess will already inherit it. Listening
     // to the stream here causes problems for unknown reasons.
     !process.stdin.isTTY && process.stdin.pipe(stdin);
-    // Only disable the error tty to be able to read the error message
-    await tryCmd(libdragonInfo, 'error');
+    // Only disable the error tty to be able to read the error message in case
+    // the container is not running
+    await tryCmd(libdragonInfo, {
+      readStderr: true,
+    });
   } catch (e) {
     if (
       !e.out ||

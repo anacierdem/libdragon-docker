@@ -1,4 +1,5 @@
 const path = require('path');
+const { PassThrough } = require('stream');
 const fs = require('fs/promises');
 
 const {
@@ -60,7 +61,9 @@ const updateImage = async (libdragonInfo, newImageName) => {
   const download = async () => {
     log(`Downloading docker image: ${newImageName}`);
     await spawnProcess('docker', ['pull', newImageName], {
-      disableTTY: false,
+      // We don't need to read them, let it show the user
+      readStdout: false,
+      readStderr: false,
     });
   };
 
@@ -114,19 +117,31 @@ async function runGitMaybeHost(libdragonInfo, params) {
     new Error('Should never run git if vendoring strategy is manual.')
   );
   try {
-    return await spawnProcess('git', ['-C', libdragonInfo.root, ...params], {
+    const isWin = /^win/.test(process.platform);
+    await spawnProcess(
+      'git',
+      ['-C', libdragonInfo.root, ...params],
       // Windows git is breaking the TTY somehow - disable TTY for now
       // We are not able to display progress for the initial clone b/c of this
-      disableTTY: /^win/.test(process.platform) ? true : false,
-    });
+      // Enable progress otherwise.
+      isWin
+        ? {
+            stdin: new PassThrough(), // Just a dummy stream without a tty
+          }
+        : {
+            readStdout: false,
+            readStderr: false,
+          }
+    );
   } catch (e) {
     if (!(e instanceof CommandError)) {
-      return await dockerExec(
+      await dockerExec(
         libdragonInfo,
         // Use the host user when initializing git as we will need access
         [...dockerHostUserParams(libdragonInfo)],
         ['git', ...params],
-        { disableTTY: false }
+        // Let's enable tty here to show the progress
+        { readStdout: false, readStderr: false }
       );
     }
     throw e;
