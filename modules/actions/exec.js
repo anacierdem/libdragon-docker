@@ -1,4 +1,5 @@
 const path = require('path');
+const { PassThrough } = require('stream');
 
 const { CONTAINER_TARGET_PATH } = require('../constants');
 const { log, dockerExec, toPosixPath } = require('../helpers');
@@ -27,7 +28,9 @@ const exec = async (libdragonInfo, commandAndParams) => {
     true
   );
 
-  const tryCmd = (libdragonInfo) =>
+  const stdin = new PassThrough();
+
+  const tryCmd = (libdragonInfo, disableTTY, stdin) =>
     libdragonInfo.containerId &&
     dockerExec(
       libdragonInfo,
@@ -38,12 +41,13 @@ const exec = async (libdragonInfo, commandAndParams) => {
       commandAndParams,
       {
         userCommand: true,
-        disableTTY: false,
+        disableTTY,
+        stdin,
       }
     );
 
   let started = false;
-  const startOnceAndCmd = async () => {
+  const startOnceAndCmd = async (stdin) => {
     if (!started) {
       const newId = await start(libdragonInfo);
       started = true;
@@ -58,10 +62,14 @@ const exec = async (libdragonInfo, commandAndParams) => {
           containerId: newId,
         });
       }
-      await tryCmd({
-        ...libdragonInfo,
-        containerId: newId,
-      });
+      await tryCmd(
+        {
+          ...libdragonInfo,
+          containerId: newId,
+        },
+        false,
+        stdin
+      );
       return newId;
     }
   };
@@ -73,7 +81,15 @@ const exec = async (libdragonInfo, commandAndParams) => {
   }
 
   try {
-    await tryCmd(libdragonInfo);
+    // Start collecting stdin data on an auxiliary stream such that we can pipe
+    // it back to the container process if this fails the first time. Then the
+    // initial failed docker process would eat up the input stream. Here, we pass
+    // it to the target process eventually via startOnceAndCmd. If the input
+    // stream is from a TTY, spawnProcess will already inherit it. Listening
+    // to the stream here causes problems for unknown reasons.
+    !process.stdin.isTTY && process.stdin.pipe(stdin);
+    // Only disable the error tty to be able to read the error message
+    await tryCmd(libdragonInfo, 'error');
   } catch (e) {
     if (
       !e.out ||
@@ -82,7 +98,7 @@ const exec = async (libdragonInfo, commandAndParams) => {
     ) {
       throw e;
     }
-    await startOnceAndCmd();
+    await startOnceAndCmd(stdin);
   }
   return libdragonInfo;
 };

@@ -50,18 +50,23 @@ async function dirExists(path) {
     });
 }
 
-// A simple Promise wrapper for child_process.spawn. If interactive is true,
-// stdout becomes a tty when available and we cannot read the stdout from the
-// command anymore. If interactive is "full", the error stream is also piped to
-// the main process as TTY, so it is not readable anymore as well. For the
+// A simple Promise wrapper for child_process.spawn. For the
 // commands using stderr as TTY it should be set to "full"
 function spawnProcess(
   cmd,
   params = [],
-  { userCommand = false, disableTTY = true, spawnOptions = {} } = {
+  {
+    // Used to decorate the potential CommandError with a prop such that we can
+    // report this error back to the user.
+    userCommand = false,
+    disableTTY = true,
+    spawnOptions = {},
+    stdin = process.stdin,
+  } = {
     userCommand: false,
     disableTTY: true,
     spawnOptions: {},
+    stdin: process.stdin,
   }
 ) {
   return new Promise((resolve, reject) => {
@@ -98,6 +103,11 @@ function spawnProcess(
       // last bytes from the buffers to create a correct utf-8 string.
       resolve('');
     };
+
+    if (!enableInTTY) {
+      stdin.pipe(command.stdin);
+    }
+
     if (!enableOutTTY && (globals.verbose || userCommand)) {
       command.stdout.pipe(process.stdout);
       process.stdout.once('error', eatEpipe);
@@ -162,9 +172,17 @@ function dockerExec(libdragonInfo, dockerParams, cmdWithParams, options) {
 
   const additionalParams = [];
 
-  const ttyEnabled = disableTTY !== true && process.stdout.isTTY;
+  // Docker TTY wants in&out streams to be a TTY
+  const ttyEnabled =
+    disableTTY !== true && process.stdout.isTTY && process.stdin.isTTY;
 
-  if (ttyEnabled) additionalParams.push('-it');
+  if (ttyEnabled) additionalParams.push('-t');
+
+  // Always enable stdin, also see; https://github.com/anacierdem/libdragon-docker/issues/45
+  // Currently we run all exec commands in stdin mode even if the actual process
+  // does not need any input. This will eat any user input by default.
+  additionalParams.push('-i');
+
   return spawnProcess(
     'docker',
     [
