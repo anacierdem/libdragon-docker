@@ -60,7 +60,7 @@ const updateImage = async (libdragonInfo, newImageName) => {
   const download = async () => {
     log(`Downloading docker image: ${newImageName}`);
     await spawnProcess('docker', ['pull', newImageName], {
-      interactive: true,
+      disableTTY: false,
     });
   };
 
@@ -115,9 +115,9 @@ async function runGitMaybeHost(libdragonInfo, params) {
   );
   try {
     return await spawnProcess('git', ['-C', libdragonInfo.root, ...params], {
-      // Windows git is breaking the TTY somehow - disable interactive for now
+      // Windows git is breaking the TTY somehow - disable TTY for now
       // We are not able to display progress for the initial clone b/c of this
-      interactive: /^win/.test(process.platform) ? false : 'full',
+      disableTTY: /^win/.test(process.platform) ? true : false,
     });
   } catch (e) {
     if (!(e instanceof CommandError)) {
@@ -126,7 +126,7 @@ async function runGitMaybeHost(libdragonInfo, params) {
         // Use the host user when initializing git as we will need access
         [...dockerHostUserParams(libdragonInfo)],
         ['git', ...params],
-        { interactive: 'full' }
+        { disableTTY: false }
       );
     }
     throw e;

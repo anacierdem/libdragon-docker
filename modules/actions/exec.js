@@ -38,8 +38,7 @@ const exec = async (libdragonInfo, commandAndParams) => {
       commandAndParams,
       {
         userCommand: true,
-        // Cannot use "full" here, we need to know if the container is alive
-        interactive: true,
+        disableTTY: false,
       }
     );
 
