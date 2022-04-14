@@ -26,6 +26,11 @@ it will pass it through to the target. In case of no running container, it will
 keep a copy of the stdin stream until the docker process is ready. This enables
 piping in data from the host if ever needed for some reason. This enables usages
 like `cat file.txt | libdragon exec cat - | less`.
+- Automatically convert host paths into posix format so that the user can use
+the host's path autocompletion. It will also convert absolute host paths into
+relative container paths automatically. Previously all paths were assumed to be
+container paths relative to the location corresponding to the host cwd.
+Closes #24.
 
 ### Changed
 
