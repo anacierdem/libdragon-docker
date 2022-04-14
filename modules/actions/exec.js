@@ -2,7 +2,13 @@ const path = require('path');
 const { PassThrough } = require('stream');
 
 const { CONTAINER_TARGET_PATH } = require('../constants');
-const { log, dockerExec, toPosixPath } = require('../helpers');
+const {
+  log,
+  dockerExec,
+  toPosixPath,
+  fileExists,
+  dirExists,
+} = require('../helpers');
 
 const { start } = require('./start');
 const { dockerHostUserParams } = require('./docker-utils');
@@ -21,14 +27,27 @@ function dockerRelativeWorkdirParams(libdragonInfo) {
 }
 
 const exec = async (libdragonInfo, commandAndParams) => {
+  const parameters = commandAndParams.slice(1);
   log(
     `Running ${commandAndParams[0]} at ${dockerRelativeWorkdir(
       libdragonInfo
-    )} with [${commandAndParams.slice(1)}]`,
+    )} with [${parameters}]`,
     true
   );
 
   const stdin = new PassThrough();
+
+  const paramsWithConvertedPaths = parameters.map((item) => {
+    if (item.startsWith('-')) {
+      return item;
+    }
+    if (item.includes(path.sep) && (fileExists(item) || dirExists(item))) {
+      return toPosixPath(
+        path.isAbsolute(item) ? path.relative(process.cwd(), item) : item
+      );
+    }
+    return item;
+  });
 
   const tryCmd = (libdragonInfo, opts = {}) => {
     const enableTTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
@@ -41,7 +60,7 @@ const exec = async (libdragonInfo, commandAndParams) => {
           ...dockerRelativeWorkdirParams(libdragonInfo),
           ...dockerHostUserParams(libdragonInfo),
         ],
-        commandAndParams,
+        [commandAndParams[0], ...paramsWithConvertedPaths],
         {
           userCommand: true,
           // Inherit stdin/out in tandem if we are going to disable TTY o/w the input
