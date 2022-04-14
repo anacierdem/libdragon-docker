@@ -30,22 +30,35 @@ const exec = async (libdragonInfo, commandAndParams) => {
 
   const stdin = new PassThrough();
 
-  const tryCmd = (libdragonInfo, opts = {}) =>
-    libdragonInfo.containerId &&
-    dockerExec(
-      libdragonInfo,
-      [
-        ...dockerRelativeWorkdirParams(libdragonInfo),
-        ...dockerHostUserParams(libdragonInfo),
-      ],
-      commandAndParams,
-      {
-        userCommand: true,
-        readStderr: false,
-        readStdout: false,
-        ...opts,
-      }
+  const tryCmd = (libdragonInfo, opts = {}) => {
+    const enableTTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
+
+    return (
+      libdragonInfo.containerId &&
+      dockerExec(
+        libdragonInfo,
+        [
+          ...dockerRelativeWorkdirParams(libdragonInfo),
+          ...dockerHostUserParams(libdragonInfo),
+        ],
+        commandAndParams,
+        {
+          userCommand: true,
+          // Inherit stdin/out in tandem if we are going to disable TTY o/w the input
+          // stream remains inherited by the node process while the output pipe is
+          // waiting data from stdout and it behaves like we are still controlling
+          // the spawned process while the terminal is actually displaying say for
+          // example `less`.
+          inheritStdout: enableTTY,
+          inheritStdin: enableTTY,
+          // spawnProcess defaults does not apply to dockerExec so we need to
+          // provide these explicitly here.
+          inheritStderr: true,
+          ...opts,
+        }
+      )
     );
+  };
 
   let started = false;
   const startOnceAndCmd = async (stdin) => {
@@ -88,10 +101,13 @@ const exec = async (libdragonInfo, commandAndParams) => {
     // stream is from a TTY, spawnProcess will already inherit it. Listening
     // to the stream here causes problems for unknown reasons.
     !process.stdin.isTTY && process.stdin.pipe(stdin);
-    // Only disable the error tty to be able to read the error message in case
-    // the container is not running
     await tryCmd(libdragonInfo, {
-      readStderr: true,
+      // Disable the error tty to be able to read the error message in case
+      // the container is not running
+      inheritStderr: false,
+      // In the first run, pass the stdin to the process if it is not a TTY
+      // o/w we loose a user input unnecesarily somehow.
+      stdin: !process.stdin.isTTY && process.stdin,
     });
   } catch (e) {
     if (

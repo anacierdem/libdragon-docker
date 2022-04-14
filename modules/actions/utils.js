@@ -1,5 +1,4 @@
 const path = require('path');
-const { PassThrough } = require('stream');
 const fs = require('fs/promises');
 
 const {
@@ -62,8 +61,8 @@ const updateImage = async (libdragonInfo, newImageName) => {
     log(`Downloading docker image: ${newImageName}`);
     await spawnProcess('docker', ['pull', newImageName], {
       // We don't need to read them, let it show the user
-      readStdout: false,
-      readStderr: false,
+      inheritStdout: true,
+      inheritStderr: true,
     });
   };
 
@@ -125,13 +124,8 @@ async function runGitMaybeHost(libdragonInfo, params) {
       // We are not able to display progress for the initial clone b/c of this
       // Enable progress otherwise.
       isWin
-        ? {
-            stdin: new PassThrough(), // Just a dummy stream without a tty
-          }
-        : {
-            readStdout: false,
-            readStderr: false,
-          }
+        ? { inheritStdin: false }
+        : { inheritStdout: true, inheritStderr: true }
     );
   } catch (e) {
     if (!(e instanceof CommandError)) {
@@ -141,7 +135,7 @@ async function runGitMaybeHost(libdragonInfo, params) {
         [...dockerHostUserParams(libdragonInfo)],
         ['git', ...params],
         // Let's enable tty here to show the progress
-        { readStdout: false, readStderr: false }
+        { inheritStdout: true, inheritStderr: true }
       );
     }
     throw e;

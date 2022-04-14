@@ -51,7 +51,8 @@ async function dirExists(path) {
 }
 
 // A simple Promise wrapper for child_process.spawn. Return the err/out streams
-// from the process bu default. Specify readStderr / readStdout to disable.
+// from the process by default. Specify inheritStdout / inheritStderr to disable
+// this and inherit the parent process's stream, passing through the TTY if any.
 function spawnProcess(
   cmd,
   params = [],
@@ -59,23 +60,23 @@ function spawnProcess(
     // Used to decorate the potential CommandError with a prop such that we can
     // report this error back to the user.
     userCommand = false,
-    // This is the stream where we the process will receive its input.
-    stdin = process.stdin,
-    // Used to notify the error stream is required by the caller. If this is
-    // true, stderr cannot be a tty anymore.
-    readStderr = true,
-    // Used to notify the out stream is required by the caller. If this is true,
-    // stdout cannot be a tty anymore. We won't need to collect the data if it
-    // is a user command in general
-    readStdout = true,
+    // This is the stream where the process will receive its input.
+    stdin,
+    // If this is true, the related stream is inherited from the parent process
+    // and we cannot read them anymore. So if you need to read a stream, you
+    // should disable it. When disabled, the relevant stream cannot be a tty
+    // anymore. By default, we expect the caller to read err/out.
+    inheritStdin = true,
+    inheritStdout = false,
+    inheritStderr = false,
     // Passthrough to spawn
     spawnOptions = {},
   } = {
     userCommand: false,
-    readStderr: true,
-    readStdout: true,
+    inheritStdin: true,
+    inheritStdout: false,
+    inheritStderr: false,
     spawnOptions: {},
-    stdin: process.stdin,
   }
 ) {
   return new Promise((resolve, reject) => {
@@ -84,9 +85,9 @@ function spawnProcess(
 
     log(chalk.grey(`Spawning: ${cmd} ${params.join(' ')}`), true);
 
-    const enableInTTY = stdin.isTTY;
-    const enableOutTTY = process.stdout.isTTY && !readStdout;
-    const enableErrorTTY = process.stderr.isTTY && !readStderr;
+    const enableInTTY = Boolean(process.stdin.isTTY) && inheritStdin;
+    const enableOutTTY = Boolean(process.stdout.isTTY) && inheritStdout;
+    const enableErrorTTY = Boolean(process.stderr.isTTY) && inheritStderr;
 
     const command = spawn(cmd, params, {
       stdio: [
@@ -122,7 +123,7 @@ function spawnProcess(
       process.stdout.once('error', eatEpipe);
     }
 
-    if (readStdout) {
+    if (!inheritStdout) {
       command.stdout.on('data', function (data) {
         stdout.push(Buffer.from(data));
       });
@@ -132,7 +133,7 @@ function spawnProcess(
       command.stderr.pipe(process.stderr);
     }
 
-    if (readStderr) {
+    if (!inheritStderr) {
       command.stderr.on('data', function (data) {
         stderr.push(Buffer.from(data));
       });
@@ -177,14 +178,19 @@ function dockerExec(libdragonInfo, dockerParams, cmdWithParams, options) {
     options = cmdWithParams;
   }
 
-  const disableTTY = options?.readStdout ?? true;
-
   const additionalParams = [];
 
   // Docker TTY wants in & out streams both to be a TTY
-  const ttyEnabled = !disableTTY && process.stdout.isTTY && process.stdin.isTTY;
+  // If no options are provided, disable TTY as spawnProcess defaults to no
+  // inherit as well.
+  const enableTTY = options
+    ? options.inheritStdout && options.inheritStdin
+    : false;
+  const ttyEnabled = enableTTY && process.stdout.isTTY && process.stdin.isTTY;
 
-  if (ttyEnabled) additionalParams.push('-t');
+  if (ttyEnabled) {
+    additionalParams.push('-t');
+  }
 
   // Always enable stdin, also see; https://github.com/anacierdem/libdragon-docker/issues/45
   // Currently we run all exec commands in stdin mode even if the actual process

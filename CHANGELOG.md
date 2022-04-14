@@ -1,6 +1,6 @@
 # Change Log
 
-## [10.6.1] - 2022-04-10
+## [10.7.0] - 2022-04-14
 
 ### Fixed
 
@@ -15,7 +15,16 @@ as a native path. That would prevent proper container discovery. This was not
 being an issue previously but I realized it was not working for Windows now.
 - Do not throw if the output stream is not finalized. This wa previously causing
 issues when the long output of a command is piped to another process like `less`.
+Fixes #46
 - Produce a correct error if an invalid flag with a singe `-` is provided.
+
+### Added
+
+- Stdin consumption support. Now it is possible to pipe anything to `exec` and
+it will pass it through to the target. In case of no running container, it will
+keep a copy of the stdin stream until the docker process is ready. This enables
+piping in data from the host if ever needed for some reason. This enables usages
+like `cat file.txt | libdragon exec cat - | less`.
 
 ### Changed
 
