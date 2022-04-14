@@ -17,6 +17,7 @@ being an issue previously but I realized it was not working for Windows now.
 issues when the long output of a command is piped to another process like `less`.
 Fixes #46
 - Produce a correct error if an invalid flag with a singe `-` is provided.
+- Sekeleton project's Makefile `clean` recipe now works properly. Fixes #56.
 
 ### Added
 
