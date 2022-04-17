@@ -50,56 +50,49 @@ async function dirExists(path) {
     });
 }
 
-// A simple Promise wrapper for child_process.spawn. If interactive is true,
-// stdout becomes a tty when available and we cannot read the stdout from the
-// command anymore. If interactive is "full", the error stream is also piped to
-// the main process as TTY, so it is not readable anymore as well. For the
-// commands using stderr as TTY it should be set to "full"
+// A simple Promise wrapper for child_process.spawn. Return the err/out streams
+// from the process by default. Specify inheritStdout / inheritStderr to disable
+// this and inherit the parent process's stream, passing through the TTY if any.
 function spawnProcess(
   cmd,
   params = [],
   {
+    // Used to decorate the potential CommandError with a prop such that we can
+    // report this error back to the user.
     userCommand = false,
-    interactive = false,
-    readStdout,
+    // This is the stream where the process will receive its input.
+    stdin,
+    // If this is true, the related stream is inherited from the parent process
+    // and we cannot read them anymore. So if you need to read a stream, you
+    // should disable it. When disabled, the relevant stream cannot be a tty
+    // anymore. By default, we expect the caller to read err/out.
+    inheritStdin = true,
+    inheritStdout = false,
+    inheritStderr = false,
+    // Passthrough to spawn
     spawnOptions = {},
-    pipeOutputs,
   } = {
     userCommand: false,
-    interactive: false,
+    inheritStdin: true,
+    inheritStdout: false,
+    inheritStderr: false,
     spawnOptions: {},
   }
 ) {
-  // We won't need to collect the data if it is a user command in general
-  readStdout =
-    typeof readStdout === 'undefined'
-      ? !userCommand && !interactive
-      : readStdout;
-
-  // By default we want the outputs to get piped if it is user initiated
-  pipeOutputs = typeof pipeOutputs === 'undefined' ? userCommand : pipeOutputs;
-
-  assert(
-    !interactive || !readStdout,
-    new Error('Cannot enable TTY and read data at the same time for now.')
-  );
   return new Promise((resolve, reject) => {
-    let stdout = [];
-    let stderr = [];
+    const stdout = [];
+    const stderr = [];
 
     log(chalk.grey(`Spawning: ${cmd} ${params.join(' ')}`), true);
 
-    const isTTY =
-      process.stdin.isTTY && process.stdout.isTTY && process.stderr.isTTY;
-    const enableTTY = isTTY && !!interactive;
-    const enableErrorTTY = isTTY && interactive === 'full';
+    const enableInTTY = Boolean(process.stdin.isTTY) && inheritStdin;
+    const enableOutTTY = Boolean(process.stdout.isTTY) && inheritStdout;
+    const enableErrorTTY = Boolean(process.stderr.isTTY) && inheritStderr;
 
     const command = spawn(cmd, params, {
-      // We should redirect streams together for the TTY to work
-      // properly if they are all used as TTY
       stdio: [
-        enableTTY ? 'inherit' : 'pipe',
-        enableTTY ? 'inherit' : 'pipe',
+        enableInTTY ? 'inherit' : 'pipe',
+        enableOutTTY ? 'inherit' : 'pipe',
         enableErrorTTY ? 'inherit' : 'pipe',
       ],
       ...spawnOptions,
@@ -120,22 +113,27 @@ function spawnProcess(
       // last bytes from the buffers to create a correct utf-8 string.
       resolve('');
     };
-    if (!enableTTY && (globals.verbose || pipeOutputs)) {
+
+    if (!enableInTTY && stdin) {
+      stdin.pipe(command.stdin);
+    }
+
+    if (!enableOutTTY && (globals.verbose || userCommand)) {
       command.stdout.pipe(process.stdout);
       process.stdout.once('error', eatEpipe);
     }
 
-    if (!enableErrorTTY && (globals.verbose || pipeOutputs)) {
-      command.stderr.pipe(process.stderr);
-    }
-
-    if (!enableTTY && readStdout) {
+    if (!inheritStdout) {
       command.stdout.on('data', function (data) {
         stdout.push(Buffer.from(data));
       });
     }
 
-    if (!enableErrorTTY) {
+    if (!enableErrorTTY && (globals.verbose || userCommand)) {
+      command.stderr.pipe(process.stderr);
+    }
+
+    if (!inheritStderr) {
       command.stderr.on('data', function (data) {
         stderr.push(Buffer.from(data));
       });
@@ -175,13 +173,30 @@ function dockerExec(libdragonInfo, dockerParams, cmdWithParams, options) {
   // TODO: assert for invalid args
   const haveDockerParams =
     Array.isArray(dockerParams) && Array.isArray(cmdWithParams);
-  const isTTY = process.stdin.isTTY && process.stdout.isTTY;
-  // interactive and TTY?
-  const additionalParams =
-    isTTY &&
-    (haveDockerParams ? options?.interactive : cmdWithParams?.interactive)
-      ? ['-it']
-      : [];
+
+  if (!haveDockerParams) {
+    options = cmdWithParams;
+  }
+
+  const additionalParams = [];
+
+  // Docker TTY wants in & out streams both to be a TTY
+  // If no options are provided, disable TTY as spawnProcess defaults to no
+  // inherit as well.
+  const enableTTY = options
+    ? options.inheritStdout && options.inheritStdin
+    : false;
+  const ttyEnabled = enableTTY && process.stdout.isTTY && process.stdin.isTTY;
+
+  if (ttyEnabled) {
+    additionalParams.push('-t');
+  }
+
+  // Always enable stdin, also see; https://github.com/anacierdem/libdragon-docker/issues/45
+  // Currently we run all exec commands in stdin mode even if the actual process
+  // does not need any input. This will eat any user input by default.
+  additionalParams.push('-i');
+
   return spawnProcess(
     'docker',
     [
@@ -192,7 +207,7 @@ function dockerExec(libdragonInfo, dockerParams, cmdWithParams, options) {
       libdragonInfo.containerId,
       ...(haveDockerParams ? cmdWithParams : dockerParams),
     ],
-    haveDockerParams ? options : cmdWithParams
+    options
   );
 }
 

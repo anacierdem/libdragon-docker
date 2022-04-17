@@ -1,4 +1,5 @@
 const path = require('path');
+const { PassThrough } = require('stream');
 
 const { CONTAINER_TARGET_PATH } = require('../constants');
 const { log, dockerExec, toPosixPath } = require('../helpers');
@@ -27,24 +28,40 @@ const exec = async (libdragonInfo, commandAndParams) => {
     true
   );
 
-  const tryCmd = (libdragonInfo) =>
-    libdragonInfo.containerId &&
-    dockerExec(
-      libdragonInfo,
-      [
-        ...dockerRelativeWorkdirParams(libdragonInfo),
-        ...dockerHostUserParams(libdragonInfo),
-      ],
-      commandAndParams,
-      {
-        userCommand: true,
-        // Cannot use "full" here, we need to know if the container is alive
-        interactive: true,
-      }
+  const stdin = new PassThrough();
+
+  const tryCmd = (libdragonInfo, opts = {}) => {
+    const enableTTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
+
+    return (
+      libdragonInfo.containerId &&
+      dockerExec(
+        libdragonInfo,
+        [
+          ...dockerRelativeWorkdirParams(libdragonInfo),
+          ...dockerHostUserParams(libdragonInfo),
+        ],
+        commandAndParams,
+        {
+          userCommand: true,
+          // Inherit stdin/out in tandem if we are going to disable TTY o/w the input
+          // stream remains inherited by the node process while the output pipe is
+          // waiting data from stdout and it behaves like we are still controlling
+          // the spawned process while the terminal is actually displaying say for
+          // example `less`.
+          inheritStdout: enableTTY,
+          inheritStdin: enableTTY,
+          // spawnProcess defaults does not apply to dockerExec so we need to
+          // provide these explicitly here.
+          inheritStderr: true,
+          ...opts,
+        }
+      )
     );
+  };
 
   let started = false;
-  const startOnceAndCmd = async () => {
+  const startOnceAndCmd = async (stdin) => {
     if (!started) {
       const newId = await start(libdragonInfo);
       started = true;
@@ -59,10 +76,13 @@ const exec = async (libdragonInfo, commandAndParams) => {
           containerId: newId,
         });
       }
-      await tryCmd({
-        ...libdragonInfo,
-        containerId: newId,
-      });
+      await tryCmd(
+        {
+          ...libdragonInfo,
+          containerId: newId,
+        },
+        { stdin }
+      );
       return newId;
     }
   };
@@ -74,7 +94,21 @@ const exec = async (libdragonInfo, commandAndParams) => {
   }
 
   try {
-    await tryCmd(libdragonInfo);
+    // Start collecting stdin data on an auxiliary stream such that we can pipe
+    // it back to the container process if this fails the first time. Then the
+    // initial failed docker process would eat up the input stream. Here, we pass
+    // it to the target process eventually via startOnceAndCmd. If the input
+    // stream is from a TTY, spawnProcess will already inherit it. Listening
+    // to the stream here causes problems for unknown reasons.
+    !process.stdin.isTTY && process.stdin.pipe(stdin);
+    await tryCmd(libdragonInfo, {
+      // Disable the error tty to be able to read the error message in case
+      // the container is not running
+      inheritStderr: false,
+      // In the first run, pass the stdin to the process if it is not a TTY
+      // o/w we loose a user input unnecesarily somehow.
+      stdin: !process.stdin.isTTY && process.stdin,
+    });
   } catch (e) {
     if (
       !e.out ||
@@ -83,7 +117,7 @@ const exec = async (libdragonInfo, commandAndParams) => {
     ) {
       throw e;
     }
-    await startOnceAndCmd();
+    await startOnceAndCmd(stdin);
   }
   return libdragonInfo;
 };
