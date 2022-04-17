@@ -7,7 +7,7 @@ const { fn: install } = require('./install');
 const { start } = require('./start');
 const {
   installDependencies,
-  tryCacheContainerId,
+  initGitAndCacheContainerId,
   updateImage,
   runGitMaybeHost,
 } = require('./utils');
@@ -150,24 +150,20 @@ async function init(info) {
   await updateImage(newInfo, newInfo.imageName);
 
   // Download image and start it
-  const containerReadyPromise = start(newInfo).then((newId) => ({
-    ...newInfo,
-    containerId: newId,
-  }));
+  newInfo.containerId = await start(newInfo);
 
-  let vendorAndGitReadyPromise = containerReadyPromise;
+  // We have created a new container, save the new info ASAP
+  await initGitAndCacheContainerId(newInfo);
+
   if (newInfo.vendorStrategy !== 'manual') {
     const vendorTarget = path.relative(
       newInfo.root,
       toNativePath(newInfo.vendorDirectory)
     );
-    const [vendorTargetExists] = await Promise.all([
-      fs.stat(vendorTarget).catch((e) => {
-        if (e.code !== 'ENOENT') throw e;
-        return false;
-      }),
-      containerReadyPromise,
-    ]);
+    const vendorTargetExists = await fs.stat(vendorTarget).catch((e) => {
+      if (e.code !== 'ENOENT') throw e;
+      return false;
+    });
 
     if (vendorTargetExists) {
       throw new ValidationError(
@@ -177,16 +173,14 @@ async function init(info) {
       );
     }
 
-    vendorAndGitReadyPromise = containerReadyPromise.then(autoVendor);
+    newInfo = await autoVendor(newInfo);
   }
 
   log(`Preparing project files...`);
   const skeletonFolder = path.join(__dirname, '../../skeleton');
 
   await Promise.all([
-    // We have created a new container, save the new info
-    vendorAndGitReadyPromise.then(tryCacheContainerId),
-    vendorAndGitReadyPromise.then(installDependencies),
+    installDependencies(newInfo),
     // node copy functions does not work with pkg
     copyDirContents(skeletonFolder, newInfo.root),
   ]);

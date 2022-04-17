@@ -21,6 +21,9 @@ Fixes #46
 - A case where it is impossible to recover the container is fixed. This was
 happening when the host does not have git and the cached container file is
 missing. In that case the cli was attempting to run git without the containerId.
+- `destroy` can now cleanup any remaining container even if the project init was
+failed. This is also useful to clean up old folders that were once libdragon
+projects.
 
 ### Added
 
@@ -42,6 +45,7 @@ Closes #24.
 - Reorder actions & correction on flag usage for help output.
 - Setting `--verbose` for `start` does not guarantee the only-id output anymore.
 - Refactored parameter parsing.
+- Update submdule for local development.
 
 ## [10.6.0] - 2022-04-09
 ### Fixed
