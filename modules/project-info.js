@@ -66,13 +66,14 @@ async function findContainerId(libdragonInfo) {
     const idIndex = str.indexOf(shortId);
     const longId = str.slice(idIndex, idIndex + 64);
     if (longId.length === 64) {
+      const newInfo = { ...libdragonInfo, containerId: longId };
       // If there is managed vendoring, make sure we have a git repo. This shouldn't
       // happen but if the user somehow deleted the .git folder (we don't have
       // the container id file at this point) we can recover the project.
       if (libdragonInfo.vendorStrategy !== 'manual') {
-        await runGitMaybeHost(libdragonInfo, ['init']);
+        await runGitMaybeHost(newInfo, ['init']);
       }
-      await tryCacheContainerId({ ...libdragonInfo, containerId: longId });
+      await tryCacheContainerId(newInfo);
       return longId;
     }
   }

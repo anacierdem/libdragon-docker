@@ -128,17 +128,18 @@ async function runGitMaybeHost(libdragonInfo, params) {
         : { inheritStdout: true, inheritStderr: true }
     );
   } catch (e) {
-    if (!(e instanceof CommandError)) {
-      await dockerExec(
-        libdragonInfo,
-        // Use the host user when initializing git as we will need access
-        [...dockerHostUserParams(libdragonInfo)],
-        ['git', ...params],
-        // Let's enable tty here to show the progress
-        { inheritStdout: true, inheritStderr: true }
-      );
+    if (e instanceof CommandError) {
+      throw e;
     }
-    throw e;
+
+    await dockerExec(
+      libdragonInfo,
+      // Use the host user when initializing git as we will need access
+      [...dockerHostUserParams(libdragonInfo)],
+      ['git', ...params],
+      // Let's enable tty here to show the progress
+      { inheritStdout: true, inheritStderr: true }
+    );
   }
 }
 

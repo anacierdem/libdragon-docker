@@ -18,6 +18,9 @@ issues when the long output of a command is piped to another process like `less`
 Fixes #46
 - Produce a correct error if an invalid flag with a singe `-` is provided.
 - Sekeleton project's Makefile `clean` recipe now works properly. Fixes #56.
+- A case where it is impossible to recover the container is fixed. This was
+happening when the host does not have git and the cached container file is
+missing. In that case the cli was attempting to run git without the containerId.
 
 ### Added
 

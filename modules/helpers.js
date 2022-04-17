@@ -171,6 +171,11 @@ function spawnProcess(
 }
 
 function dockerExec(libdragonInfo, dockerParams, cmdWithParams, options) {
+  assert(
+    libdragonInfo.containerId,
+    new Error('Trying to invoke dockerExec without a containerId.')
+  );
+
   // TODO: assert for invalid args
   const haveDockerParams =
     Array.isArray(dockerParams) && Array.isArray(cmdWithParams);
