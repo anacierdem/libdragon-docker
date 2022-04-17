@@ -18,8 +18,9 @@ class CommandError extends Error {
 
 // The user provided an unexpected input
 class ParameterError extends Error {
-  constructor(message) {
+  constructor(message, actionName) {
     super(message);
+    this.actionName = actionName;
   }
 }
 

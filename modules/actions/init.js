@@ -80,10 +80,10 @@ const autoVendor = async (libdragonInfo) => {
  * Initialize a new libdragon project in current working directory
  * Also downloads the image
  */
-async function init(libdragonInfo) {
-  log(`Initializing a libdragon project at ${libdragonInfo.root}`);
+async function init(info) {
+  log(`Initializing a libdragon project at ${info.root}`);
 
-  let newInfo = libdragonInfo;
+  let newInfo = info;
 
   // Validate manifest
   const manifestPath = path.join(newInfo.root, LIBDRAGON_PROJECT_MANIFEST);
@@ -106,7 +106,8 @@ async function init(libdragonInfo) {
     newInfo.vendorStrategy !== newInfo.options.VENDOR_STRAT
   ) {
     throw new ParameterError(
-      `Requested strategy switch: ${newInfo.vendorStrategy} -> ${newInfo.options.VENDOR_STRAT} It is not possible to switch vendoring strategy after initializing a project. You can always switch to manual and handle libdragon yourself.`
+      `Requested strategy switch: ${newInfo.vendorStrategy} -> ${newInfo.options.VENDOR_STRAT} It is not possible to switch vendoring strategy after initializing a project. You can always switch to manual and handle libdragon yourself.`,
+      info.options.CURRENT_ACTION.name
     );
   }
 
@@ -117,14 +118,12 @@ async function init(libdragonInfo) {
 
   // Update the directory information for the project if the flag is provided
   if (newInfo.options.VENDOR_DIR) {
-    const relativeVendorDir = path.relative(
-      libdragonInfo.root,
-      libdragonInfo.options.VENDOR_DIR
-    );
+    const relativeVendorDir = path.relative(info.root, info.options.VENDOR_DIR);
     // Validate vendoring path
     if (relativeVendorDir.startsWith('..')) {
       throw new ParameterError(
-        `\`--directory=${libdragonInfo.options.VENDOR_DIR}\` is outside the project directory.`
+        `\`--directory=${info.options.VENDOR_DIR}\` is outside the project directory.`,
+        info.options.CURRENT_ACTION.name
       );
     }
 

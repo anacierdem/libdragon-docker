@@ -26,11 +26,11 @@ function dockerRelativeWorkdirParams(libdragonInfo) {
   return ['--workdir', dockerRelativeWorkdir(libdragonInfo)];
 }
 
-const exec = async (libdragonInfo, commandAndParams) => {
-  const parameters = commandAndParams.slice(1);
+const exec = async (info) => {
+  const parameters = info.options.EXTRA_PARAMS.slice(1);
   log(
-    `Running ${commandAndParams[0]} at ${dockerRelativeWorkdir(
-      libdragonInfo
+    `Running ${info.options.EXTRA_PARAMS[0]} at ${dockerRelativeWorkdir(
+      info
     )} with [${parameters}]`,
     true
   );
@@ -60,7 +60,7 @@ const exec = async (libdragonInfo, commandAndParams) => {
           ...dockerRelativeWorkdirParams(libdragonInfo),
           ...dockerHostUserParams(libdragonInfo),
         ],
-        [commandAndParams[0], ...paramsWithConvertedPaths],
+        [libdragonInfo.options.EXTRA_PARAMS[0], ...paramsWithConvertedPaths],
         {
           userCommand: true,
           // Inherit stdin/out in tandem if we are going to disable TTY o/w the input
@@ -82,34 +82,29 @@ const exec = async (libdragonInfo, commandAndParams) => {
   let started = false;
   const startOnceAndCmd = async (stdin) => {
     if (!started) {
-      const newId = await start(libdragonInfo);
+      const newId = await start(info);
+      const newInfo = {
+        ...info,
+        containerId: newId,
+      };
       started = true;
 
       // Re-install vendors on new container if one was created upon start
       // Ideally we would want the consumer to handle dependencies and rebuild
       // libdragon if necessary. Currently this saves the day with a little bit
       // extra waiting when the container is deleted.
-      if (libdragonInfo.containerId !== newId) {
-        await installDependencies({
-          ...libdragonInfo,
-          containerId: newId,
-        });
+      if (info.containerId !== newId) {
+        await installDependencies(newInfo);
       }
-      await tryCmd(
-        {
-          ...libdragonInfo,
-          containerId: newId,
-        },
-        { stdin }
-      );
+      await tryCmd(newInfo, { stdin });
       return newId;
     }
   };
 
-  if (!libdragonInfo.containerId) {
+  if (!info.containerId) {
     log(`Container does not exist for sure, restart`, true);
     await startOnceAndCmd();
-    return libdragonInfo;
+    return info;
   }
 
   try {
@@ -120,7 +115,7 @@ const exec = async (libdragonInfo, commandAndParams) => {
     // stream is from a TTY, spawnProcess will already inherit it. Listening
     // to the stream here causes problems for unknown reasons.
     !process.stdin.isTTY && process.stdin.pipe(stdin);
-    await tryCmd(libdragonInfo, {
+    await tryCmd(info, {
       // Disable the error tty to be able to read the error message in case
       // the container is not running
       inheritStderr: false,
@@ -132,13 +127,13 @@ const exec = async (libdragonInfo, commandAndParams) => {
     if (
       !e.out ||
       // TODO: is there a better way?
-      !e.out.toString().includes(libdragonInfo.containerId)
+      !e.out.toString().includes(info.containerId)
     ) {
       throw e;
     }
     await startOnceAndCmd(stdin);
   }
-  return libdragonInfo;
+  return info;
 };
 
 module.exports = {

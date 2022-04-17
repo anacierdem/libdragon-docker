@@ -3,7 +3,7 @@ const commandLineUsage = require('command-line-usage');
 
 const { print } = require('../helpers');
 
-const printUsage = (_, actionArr) => {
+const printUsage = (info) => {
   const actions = require('./');
   const globalOptionDefinitions = [
     {
@@ -42,15 +42,17 @@ const printUsage = (_, actionArr) => {
         You can always switch to manual by re-running \`init\` with \`--strategy manual\`, though you will be responsible for managing the existing submodule/subtree. Also it is not possible to automatically switch back.
 
         With the \`manual\` strategy, it is still recommended to have a git repository at project root such that container actions can execute faster by caching the container id inside the \`.git\` folder.\n`,
-      alias: 'v',
+      alias: 's',
       typeLabel: '<strategy>',
       group: 'vendoring',
     },
   ];
 
-  const actionsToShow = actionArr
-    ?.filter((action) => Object.keys(actions).includes(action))
-    .filter((action) => !['help'].includes(action));
+  const actionsToShow =
+    info?.options.EXTRA_PARAMS?.filter(
+      (action) =>
+        Object.keys(actions).includes(action) && !['help'].includes(action)
+    ) ?? (info ? [info.options.CURRENT_ACTION.name] : []);
 
   const sections = [
     {

@@ -43,41 +43,50 @@ const findElf = async (stop, start = '.') => {
   }
 };
 
-const disasm = async (libdragonInfo, extraArgs) => {
+const disasm = async (info) => {
   let elfPath;
-  if (libdragonInfo.options.FILE) {
-    if (
-      path
-        .relative(libdragonInfo.root, libdragonInfo.options.FILE)
-        .startsWith('..')
-    ) {
+  if (info.options.FILE) {
+    if (path.relative(info.root, info.options.FILE).startsWith('..')) {
       throw new ParameterError(
-        `Provided file ${libdragonInfo.options.FILE} is outside the project directory.`
+        `Provided file ${info.options.FILE} is outside the project directory.`,
+        info.options.CURRENT_ACTION.name
       );
     }
-    if (!(await fileExists(libdragonInfo.options.FILE)))
+    if (!(await fileExists(info.options.FILE)))
       throw new ParameterError(
-        `Provided file ${libdragonInfo.options.FILE} does not exist`
+        `Provided file ${info.options.FILE} does not exist`,
+        info.options.CURRENT_ACTION.name
       );
-    elfPath = libdragonInfo.options.FILE;
+    elfPath = info.options.FILE;
   }
-  elfPath = elfPath ?? (await findElf(libdragonInfo.root));
+  elfPath = elfPath ?? (await findElf(info.root));
 
-  const haveSymbol = extraArgs.length > 0 && !extraArgs[0].startsWith('-');
+  const haveSymbol =
+    info.options.EXTRA_PARAMS.length > 0 &&
+    !info.options.EXTRA_PARAMS[0].startsWith('-');
 
   const finalArgs = haveSymbol
-    ? [`--disassemble=${extraArgs[0]}`, ...extraArgs.slice(1)]
-    : extraArgs;
+    ? [
+        `--disassemble=${info.options.EXTRA_PARAMS[0]}`,
+        ...info.options.EXTRA_PARAMS.slice(1),
+      ]
+    : info.options.EXTRA_PARAMS;
 
   const intermixSourceParams =
-    extraArgs.length === 0 || haveSymbol ? ['-S'] : [];
+    info.options.EXTRA_PARAMS.length === 0 || haveSymbol ? ['-S'] : [];
 
-  return await exec(libdragonInfo, [
-    'mips64-elf-objdump',
-    ...finalArgs,
-    ...intermixSourceParams,
-    toPosixPath(path.relative(process.cwd(), elfPath)),
-  ]);
+  return await exec({
+    ...info,
+    options: {
+      ...info.options,
+      EXTRA_PARAMS: [
+        'mips64-elf-objdump',
+        ...finalArgs,
+        ...intermixSourceParams,
+        toPosixPath(path.relative(process.cwd(), elfPath)),
+      ],
+    },
+  });
 };
 
 module.exports = {

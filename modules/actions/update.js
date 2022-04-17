@@ -4,8 +4,8 @@ const { runGitMaybeHost } = require('./utils');
 const { fn: install } = require('./install');
 const { updateAndStart } = require('./update-and-start');
 
-const update = async (libdragonInfo) => {
-  const newInfo = await updateAndStart(libdragonInfo);
+const update = async (info) => {
+  const newInfo = await updateAndStart(info);
 
   if (newInfo.vendorStrategy !== 'manual') {
     log(`Updating ${newInfo.vendorStrategy}...`);
@@ -24,7 +24,7 @@ const update = async (libdragonInfo) => {
       'subtree',
       'pull',
       '--prefix',
-      libdragonInfo.vendorDirectory,
+      info.vendorDirectory,
       LIBDRAGON_GIT,
       LIBDRAGON_BRANCH,
       '--squash',

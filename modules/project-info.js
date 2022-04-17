@@ -101,23 +101,28 @@ async function findGitRoot() {
   }
 }
 
-async function readProjectInfo(currentAction) {
+async function readProjectInfo(info) {
   // No need to do anything here if the action does not depend on the project
   // The only exception is the init action, which does not need an existing
   // project but readProjectInfo must always run to analyze the situation
-  if (currentAction.mustHaveProject === false && currentAction !== initAction) {
-    return;
+  if (
+    info.options.CURRENT_ACTION.mustHaveProject === false &&
+    info.options.CURRENT_ACTION !== initAction
+  ) {
+    return info;
   }
 
   const projectRoot = await findLibdragonRoot();
 
-  if (!projectRoot && currentAction !== initAction) {
+  if (!projectRoot && info.options.CURRENT_ACTION !== initAction) {
     throw new ParameterError(
-      'This is not a libdragon project. Initialize with `libdragon init` first.'
+      'This is not a libdragon project. Initialize with `libdragon init` first.',
+      info.options.CURRENT_ACTION.name
     );
   }
 
-  let info = {
+  info = {
+    ...info,
     root: projectRoot ?? (await findNPMRoot()) ?? (await findGitRoot()),
     userInfo: os.userInfo(),
 

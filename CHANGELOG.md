@@ -35,8 +35,10 @@ Closes #24.
 ### Changed
 
 - Refactored process spawns.
+- Refactored main flow and separated parsing logic.
 - Reorder actions in the help output.
 - Setting `--verbose` for `start` does not guarantee the only-id output anymore.
+- Refactored parameter parsing.
 
 ## [10.6.0] - 2022-04-09
 ### Fixed

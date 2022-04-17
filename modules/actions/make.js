@@ -1,7 +1,13 @@
 const { fn: exec } = require('./exec');
 
-const make = async (libdragonInfo, params) => {
-  return await exec(libdragonInfo, ['make', ...params]);
+const make = async (info) => {
+  return await exec({
+    ...info,
+    options: {
+      ...info.options,
+      EXTRA_PARAMS: ['make', ...info.options.EXTRA_PARAMS],
+    },
+  });
 };
 
 module.exports = {
