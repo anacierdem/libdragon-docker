@@ -29,8 +29,6 @@ module.exports = {
   usage: {
     name: 'destroy',
     summary: 'Do clean-up for current project.',
-    description: `Removes libdragon configuration from current project and removes any known containers but will not touch previously vendored files. \`libdragon\` will not work anymore for this project.
-
-      Must be run in an initialized libdragon project.`,
+    description: `Removes libdragon configuration from current project and removes any known containers but will not touch previously vendored files. \`libdragon\` will not work anymore for this project.`,
   },
 };

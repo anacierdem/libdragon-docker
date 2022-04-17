@@ -45,6 +45,7 @@ Closes #24.
 - Reorder actions & correction on flag usage for help output.
 - Setting `--verbose` for `start` does not guarantee the only-id output anymore.
 - Refactored parameter parsing.
+- Update submdule for local development.
 
 ## [10.6.0] - 2022-04-09
 ### Fixed
