@@ -59,7 +59,7 @@ const printUsage = (info) => {
       header: chalk.green('Usage:'),
       content: `libdragon [flags] <action>
 
-      For string flags valid syntax are: \`-i <value>\` or \`--image=<value>\``,
+      Joining flags not supported, provide them separately like \`-v -i\` `,
     },
     ...(actionsToShow?.length
       ? actionsToShow.flatMap((action) => [

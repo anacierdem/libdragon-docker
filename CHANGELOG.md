@@ -39,7 +39,7 @@ Closes #24.
 
 - Refactored process spawns.
 - Refactored main flow and separated parsing logic.
-- Reorder actions in the help output.
+- Reorder actions & correction on flag usage for help output.
 - Setting `--verbose` for `start` does not guarantee the only-id output anymore.
 - Refactored parameter parsing.
 
