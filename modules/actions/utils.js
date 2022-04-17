@@ -181,7 +181,12 @@ async function checkContainerRunning(containerId) {
   return running ? containerId : undefined;
 }
 
-async function tryCacheContainerId(libdragonInfo) {
+async function initGitAndCacheContainerId(libdragonInfo) {
+  // If there is managed vendoring, make sure we have a git repo. `git init` is
+  // safe anyways...
+  if (libdragonInfo.vendorStrategy !== 'manual') {
+    await runGitMaybeHost(libdragonInfo, ['init']);
+  }
   const gitFolder = path.join(libdragonInfo.root, '.git');
   if (await dirExists(gitFolder)) {
     await fs.writeFile(
@@ -197,6 +202,6 @@ module.exports = {
   destroyContainer,
   checkContainerRunning,
   checkContainerAndClean,
-  tryCacheContainerId,
+  initGitAndCacheContainerId,
   runGitMaybeHost,
 };

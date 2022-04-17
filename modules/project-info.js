@@ -4,8 +4,7 @@ const fs = require('fs/promises');
 
 const {
   checkContainerAndClean,
-  tryCacheContainerId,
-  runGitMaybeHost,
+  initGitAndCacheContainerId,
 } = require('./actions/utils');
 
 const { findNPMRoot } = require('./actions/npm-utils');
@@ -31,6 +30,7 @@ const {
 } = require('./helpers');
 
 const initAction = require('./actions/init');
+const destroyAction = require('./actions/destroy');
 
 async function findContainerId(libdragonInfo) {
   const idFile = path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE);
@@ -67,13 +67,11 @@ async function findContainerId(libdragonInfo) {
     const longId = str.slice(idIndex, idIndex + 64);
     if (longId.length === 64) {
       const newInfo = { ...libdragonInfo, containerId: longId };
-      // If there is managed vendoring, make sure we have a git repo. This shouldn't
-      // happen but if the user somehow deleted the .git folder (we don't have
-      // the container id file at this point) we can recover the project.
-      if (libdragonInfo.vendorStrategy !== 'manual') {
-        await runGitMaybeHost(newInfo, ['init']);
-      }
-      await tryCacheContainerId(newInfo);
+      // This shouldn't happen but if the user somehow deleted the .git folder
+      // (we don't have the container id file at this point) we can recover the
+      // project. `git init` is safe anyways and it is not executed if strategy
+      // is `manual`
+      await initGitAndCacheContainerId(newInfo);
       return longId;
     }
   }
@@ -104,18 +102,21 @@ async function findGitRoot() {
 
 async function readProjectInfo(info) {
   // No need to do anything here if the action does not depend on the project
-  // The only exception is the init action, which does not need an existing
-  // project but readProjectInfo must always run to analyze the situation
+  // The only exception is the init and destroy actions, which do not need an
+  // existing project but readProjectInfo must always run to analyze the situation
+  const forceReadProjectInfo = [initAction, destroyAction].includes(
+    info.options.CURRENT_ACTION
+  );
   if (
     info.options.CURRENT_ACTION.mustHaveProject === false &&
-    info.options.CURRENT_ACTION !== initAction
+    !forceReadProjectInfo
   ) {
     return info;
   }
 
   const projectRoot = await findLibdragonRoot();
 
-  if (!projectRoot && info.options.CURRENT_ACTION !== initAction) {
+  if (!projectRoot && !forceReadProjectInfo) {
     throw new ParameterError(
       'This is not a libdragon project. Initialize with `libdragon init` first.',
       info.options.CURRENT_ACTION.name

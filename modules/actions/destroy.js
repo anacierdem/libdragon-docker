@@ -3,7 +3,8 @@ const path = require('path');
 
 const { destroyContainer } = require('./utils');
 const { CONFIG_FILE, LIBDRAGON_PROJECT_MANIFEST } = require('../constants');
-const { fileExists, dirExists } = require('../helpers');
+const { fileExists, dirExists, log } = require('../helpers');
+const chalk = require('chalk');
 
 const destroy = async (libdragonInfo) => {
   await destroyContainer(libdragonInfo);
@@ -14,14 +15,17 @@ const destroy = async (libdragonInfo) => {
   if (await fileExists(configPath)) {
     await fs.rm(configPath);
   }
-  if (dirExists(projectPath)) {
+  if (await dirExists(projectPath)) {
     await fs.rmdir(projectPath);
   }
+
+  log(chalk.green('Done cleanup.'));
 };
 
 module.exports = {
   name: 'destroy',
   fn: destroy,
+  mustHaveProject: false,
   usage: {
     name: 'destroy',
     summary: 'Do clean-up for current project.',
