@@ -2,7 +2,6 @@ const chalk = require('chalk').stderr;
 
 const { log } = require('./helpers');
 const actions = require('./actions');
-const { fn: printUsage } = require('./actions/help');
 const { STATUS_BAD_PARAM } = require('./constants');
 const { globals } = require('./globals');
 
@@ -56,13 +55,11 @@ const parseParameters = async (argv) => {
 
     if (val.indexOf('-') == 0) {
       log(chalk.red(`Invalid flag \`${val}\``));
-      printUsage();
       process.exit(STATUS_BAD_PARAM);
     }
 
     if (options.CURRENT_ACTION) {
       log(chalk.red(`Expected only a single action, found: \`${val}\``));
-      printUsage();
       process.exit(STATUS_BAD_PARAM);
     }
 
@@ -70,7 +67,6 @@ const parseParameters = async (argv) => {
 
     if (!options.CURRENT_ACTION) {
       log(chalk.red(`Invalid action \`${val}\``));
-      printUsage();
       process.exit(STATUS_BAD_PARAM);
     }
 
@@ -82,7 +78,6 @@ const parseParameters = async (argv) => {
 
   if (!options.CURRENT_ACTION) {
     log(chalk.red('No action provided'));
-    printUsage();
     process.exit(STATUS_BAD_PARAM);
   }
 
@@ -91,7 +86,6 @@ const parseParameters = async (argv) => {
     options.EXTRA_PARAMS.length === 0
   ) {
     log(chalk.red('You should provide a command to exec'));
-    printUsage(undefined, [options.CURRENT_ACTION.name]);
     process.exit(STATUS_BAD_PARAM);
   }
 
@@ -102,7 +96,6 @@ const parseParameters = async (argv) => {
     options.DOCKER_IMAGE
   ) {
     log(chalk.red('Invalid flag: image'));
-    printUsage(undefined, [options.CURRENT_ACTION.name]);
     process.exit(STATUS_BAD_PARAM);
   }
 
@@ -111,13 +104,11 @@ const parseParameters = async (argv) => {
     !['submodule', 'subtree', 'manual'].includes(options.VENDOR_STRAT)
   ) {
     log(chalk.red(`Invalid strategy \`${options.VENDOR_STRAT}\``));
-    printUsage();
     process.exit(STATUS_BAD_PARAM);
   }
 
   if (![actions.disasm].includes(options.CURRENT_ACTION) && options.FILE) {
     log(chalk.red('Invalid flag: file'));
-    printUsage(undefined, [options.CURRENT_ACTION.name]);
     process.exit(STATUS_BAD_PARAM);
   }
 

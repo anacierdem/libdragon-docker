@@ -1,5 +1,11 @@
 # Change Log
 
+## [10.7.1] - 2022-04-20
+
+### Changed
+
+- Do not print usage information when a command fails.
+
 ## [10.7.0] - 2022-04-17
 
 ### Fixed
@@ -8,22 +14,6 @@
 means the id output of the `start` action is now written to stdout while we can
 also display other information on the terminal. This allowed enabling the docker
 logs for a more responsive experience. The output of `help` still goes to stdout.
-- Skip reading the project information for `version` and `help` commands. This
-was breaking things when these were run with a stopped docker service.
-- Resolved a potential failure case where the host mount path is not reported
-as a native path. That would prevent proper container discovery. This was not
-being an issue previously but I realized it was not working for Windows now.
-- Do not throw if the output stream is not finalized. This was previously causing
-issues when the long output of a command is piped to another process like `less`.
-Fixes #46
-- Produce a correct error if an invalid flag with a singe `-` is provided.
-- Sekeleton project's Makefile `clean` recipe now works properly. Fixes #56.
-- A case where it is impossible to recover the container is fixed. This was
-happening when the host does not have git and the cached container file is
-missing. In that case the cli was attempting to run git without the containerId.
-- `destroy` can now cleanup any remaining container even if the project init was
-failed. This is also useful to clean up old folders that were once libdragon
-projects.
 
 ### Added
 

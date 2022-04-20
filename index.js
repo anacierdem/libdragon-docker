@@ -2,7 +2,6 @@
 
 const chalk = require('chalk').stderr;
 
-const { fn: printUsage } = require('./modules/actions/help');
 const {
   STATUS_OK,
   STATUS_BAD_PARAM,
@@ -25,11 +24,6 @@ parseParameters(process.argv)
   .catch((e) => {
     if (e instanceof ParameterError) {
       log(chalk.red(e.message));
-      printUsage({
-        options: {
-          EXTRA_PARAMS: [e.actionName],
-        },
-      });
       process.exit(STATUS_BAD_PARAM);
     }
     if (e instanceof ValidationError) {
