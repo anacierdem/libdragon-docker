@@ -77,17 +77,21 @@ async function findContainerId(libdragonInfo) {
   }
 }
 
-async function findLibdragonRoot(start = '.') {
-  const manifest = path.join(start, LIBDRAGON_PROJECT_MANIFEST, CONFIG_FILE);
-  if (await fileExists(manifest)) {
+async function findLibdragonRoot(
+  start = '.',
+  relativeFile = path.join(LIBDRAGON_PROJECT_MANIFEST, CONFIG_FILE)
+) {
+  const fileToCheck = path.join(start, relativeFile);
+  log(`Checking if file exists: ${path.resolve(fileToCheck)}`, true);
+  if (await fileExists(fileToCheck)) {
     return path.resolve(start);
+  }
+
+  const parent = path.resolve(start, '..');
+  if (parent !== path.resolve(start)) {
+    return findLibdragonRoot(parent, relativeFile);
   } else {
-    const parent = path.resolve(start, '..');
-    if (parent !== path.resolve(start)) {
-      return findLibdragonRoot(parent);
-    } else {
-      return;
-    }
+    return;
   }
 }
 
@@ -114,7 +118,15 @@ async function readProjectInfo(info) {
     return info;
   }
 
-  const projectRoot = await findLibdragonRoot();
+  const migratedRoot = await findLibdragonRoot();
+
+  // Look for old one for backwards compatibility
+  const projectRoot =
+    migratedRoot ??
+    (await findLibdragonRoot(
+      '.',
+      path.join(LIBDRAGON_PROJECT_MANIFEST, IMAGE_FILE)
+    ));
 
   if (!projectRoot && !forceReadProjectInfo) {
     throw new ParameterError(
@@ -146,16 +158,15 @@ async function readProjectInfo(info) {
 
   log(`Project root: ${info.root}`, true);
 
-  const configFile = path.join(
-    info.root,
-    LIBDRAGON_PROJECT_MANIFEST,
-    CONFIG_FILE
-  );
-
-  if (await fileExists(configFile)) {
+  if (migratedRoot) {
     info = {
       ...info,
-      ...JSON.parse(await fs.readFile(configFile, { encoding: 'utf8' })),
+      ...JSON.parse(
+        await fs.readFile(
+          path.join(info.root, LIBDRAGON_PROJECT_MANIFEST, CONFIG_FILE),
+          { encoding: 'utf8' }
+        )
+      ),
     };
   } else {
     // Cleanup old files and migrate to the new config file

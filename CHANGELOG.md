@@ -2,6 +2,11 @@
 
 ## [10.7.1] - 2022-04-20
 
+### Fixed
+
+- Migrating from and old version was incorrectly erroring out to do an additional
+`init`, which is not necessarily required.
+
 ### Changed
 
 - Do not print usage information when a command fails.
