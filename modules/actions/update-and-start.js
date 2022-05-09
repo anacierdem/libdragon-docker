@@ -2,7 +2,7 @@ const { log } = require('../helpers');
 const { updateImage, destroyContainer } = require('./utils');
 const { start } = require('./start');
 
-async function updateAndStart(libdragonInfo) {
+async function syncImageAndStart(libdragonInfo) {
   const oldImageName = libdragonInfo.imageName;
   const imageName = libdragonInfo.options.DOCKER_IMAGE ?? oldImageName;
   // If an image is provided, always attempt to install it
@@ -29,5 +29,5 @@ async function updateAndStart(libdragonInfo) {
 }
 
 module.exports = {
-  updateAndStart,
+  syncImageAndStart,
 };

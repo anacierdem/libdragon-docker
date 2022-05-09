@@ -48,6 +48,7 @@ jobs:
           npm run libdragon -- --verbose destroy
           npm run libdragon -- --verbose help
           npm run libdragon -- --verbose version
+          npm run libdragon -- --verbose init -s submodule
 
   ci-clean-files:
     runs-on: ubuntu-latest
@@ -106,6 +107,7 @@ jobs:
           npm run libdragon -- --verbose destroy
           npm run libdragon -- --verbose help
           npm run libdragon -- --verbose version
+          npm run libdragon -- --verbose init -s manual -d ./libdragon_test
 
   ci-subtree:
     runs-on: ubuntu-latest
@@ -138,6 +140,7 @@ jobs:
           npm run libdragon -- --verbose destroy
           npm run libdragon -- --verbose help
           npm run libdragon -- --verbose version
+          npm run libdragon -- --verbose init -s subtree -d ./libdragon
 
   ci-pack:
     runs-on: ubuntu-latest

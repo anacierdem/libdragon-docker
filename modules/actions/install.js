@@ -2,7 +2,7 @@ const chalk = require('chalk').stderr;
 
 const { installDependencies } = require('./utils');
 const { start } = require('./start');
-const { updateAndStart } = require('./update-and-start');
+const { syncImageAndStart } = require('./update-and-start');
 const { log } = require('../helpers');
 
 /**
@@ -16,17 +16,17 @@ const { log } = require('../helpers');
  * depends on it. It used to only update the image if the flag is provided and
  * we still keep that logic but with a deprecation warning.
  */
-const install = async (libdragonInfo, skipUpdate) => {
+const install = async (libdragonInfo) => {
   let updatedInfo = libdragonInfo;
   const imageName = libdragonInfo.options.DOCKER_IMAGE;
   // If an image is provided, attempt to install
-  if (imageName && skipUpdate !== true) {
+  if (imageName) {
     log(
       chalk.yellow(
         'Using `install` action to update the docker image is deprecated. Use the `update` action instead.'
       )
     );
-    updatedInfo = await updateAndStart(libdragonInfo);
+    updatedInfo = await syncImageAndStart(libdragonInfo);
   } else {
     // Make sure existing one is running
     updatedInfo = {

@@ -66,12 +66,14 @@ async function findContainerId(libdragonInfo) {
     const idIndex = str.indexOf(shortId);
     const longId = str.slice(idIndex, idIndex + 64);
     if (longId.length === 64) {
-      const newInfo = { ...libdragonInfo, containerId: longId };
       // This shouldn't happen but if the user somehow deleted the .git folder
       // (we don't have the container id file at this point) we can recover the
       // project. `git init` is safe anyways and it is not executed if strategy
       // is `manual`
-      await initGitAndCacheContainerId(newInfo);
+      await initGitAndCacheContainerId({
+        ...libdragonInfo,
+        containerId: longId,
+      });
       return longId;
     }
   }
