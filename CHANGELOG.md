@@ -1,5 +1,17 @@
 # Change Log
 
+## [10.8.0] - 2022-05-09
+
+### Added
+
+- Vendored library detection. `init` action can now detect whether an existing
+libdragon copy is a submodule or a subtree. This allows changing the vendoring
+strategy after the project is initialized if the user prepares a new vendored
+copy and points to it when running `init`. Also it is now possible to convert
+an existing project to a libdragon project by pointing at the sumbodule/subtree
+libdragon copy. The contents of the copy is not verified, this is still user's
+responsibility.
+
 ## [10.7.1] - 2022-04-20
 
 ### Fixed

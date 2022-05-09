@@ -1,26 +1,25 @@
 const { log } = require('../helpers');
 const { LIBDRAGON_GIT, LIBDRAGON_BRANCH } = require('../constants');
-const { runGitMaybeHost } = require('./utils');
-const { fn: install } = require('./install');
-const { updateAndStart } = require('./update-and-start');
+const { runGitMaybeHost, installDependencies } = require('./utils');
+const { syncImageAndStart } = require('./update-and-start');
 
 const update = async (info) => {
-  const newInfo = await updateAndStart(info);
+  info = await syncImageAndStart(info);
 
-  if (newInfo.vendorStrategy !== 'manual') {
-    log(`Updating ${newInfo.vendorStrategy}...`);
+  if (info.vendorStrategy !== 'manual') {
+    log(`Updating ${info.vendorStrategy}...`);
   }
 
-  if (newInfo.vendorStrategy === 'submodule') {
-    await runGitMaybeHost(newInfo, [
+  if (info.vendorStrategy === 'submodule') {
+    await runGitMaybeHost(info, [
       'submodule',
       'update',
       '--remote',
       '--merge',
-      newInfo.vendorDirectory,
+      info.vendorDirectory,
     ]);
-  } else if (newInfo.vendorStrategy === 'subtree') {
-    await runGitMaybeHost(newInfo, [
+  } else if (info.vendorStrategy === 'subtree') {
+    await runGitMaybeHost(info, [
       'subtree',
       'pull',
       '--prefix',
@@ -31,9 +30,7 @@ const update = async (info) => {
     ]);
   }
 
-  // The second parameter forces it to skip the image update step as we already
-  // do that above.
-  return await install(newInfo, true);
+  await installDependencies(info);
 };
 
 module.exports = {

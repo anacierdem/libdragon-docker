@@ -34,19 +34,20 @@ const initContainer = async (libdragonInfo) => {
       ])
     ).trim();
 
-    const newInfo = {
-      ...libdragonInfo,
-      containerId: newId,
-    };
-
     // chown the installation folder once on init
     const { uid, gid } = libdragonInfo.userInfo;
-    await dockerExec(newInfo, [
-      'chown',
-      '-R',
-      `${uid >= 0 ? uid : ''}:${gid >= 0 ? gid : ''}`,
-      '/n64_toolchain',
-    ]);
+    await dockerExec(
+      {
+        ...libdragonInfo,
+        containerId: newId,
+      },
+      [
+        'chown',
+        '-R',
+        `${uid >= 0 ? uid : ''}:${gid >= 0 ? gid : ''}`,
+        '/n64_toolchain',
+      ]
+    );
   } catch (e) {
     // Dispose the invalid container, clean and exit
     await destroyContainer({

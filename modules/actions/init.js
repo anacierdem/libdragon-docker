@@ -27,12 +27,99 @@ const {
   toPosixPath,
   toNativePath,
 } = require('../helpers');
+const { syncImageAndStart } = require('./update-and-start');
 
-const autoVendor = async (libdragonInfo) => {
-  await runGitMaybeHost(libdragonInfo, ['init']);
+const autoDetect = async (info) => {
+  const vendorTarget = path.relative(
+    info.root,
+    toNativePath(info.vendorDirectory)
+  );
+  const vendorTargetExists = await fs.stat(vendorTarget).catch((e) => {
+    if (e.code !== 'ENOENT') throw e;
+    return false;
+  });
 
-  if (libdragonInfo.vendorStrategy === 'submodule') {
-    await runGitMaybeHost(libdragonInfo, [
+  if (
+    vendorTargetExists &&
+    (await runGitMaybeHost(info, [
+      'submodule',
+      'status',
+      info.vendorDirectory,
+    ]).catch((e) => {
+      if (!(e instanceof CommandError)) {
+        throw e;
+      }
+    }))
+  ) {
+    log(`${info.vendorDirectory} is a submodule.`);
+    return 'submodule';
+  }
+
+  if (vendorTargetExists) {
+    const gitLogs = await runGitMaybeHost(info, ['log'], {
+      inheritStdin: false,
+      inheritStdout: false,
+      inheritStderr: false,
+    });
+
+    if (gitLogs.includes(`git-subtree-dir: ${info.vendorDirectory}`)) {
+      log(`${info.vendorDirectory} is a subtree.`);
+      return 'subtree';
+    }
+  }
+};
+
+const autoVendor = async (info) => {
+  // Update the strategy information for the project if the flag is provided
+  if (info.options.VENDOR_STRAT) {
+    info.vendorStrategy = info.options.VENDOR_STRAT;
+  }
+
+  // Update the directory information for the project if the flag is provided
+  if (info.options.VENDOR_DIR) {
+    const relativeVendorDir = path.relative(info.root, info.options.VENDOR_DIR);
+    // Validate vendoring path
+    if (relativeVendorDir.startsWith('..')) {
+      throw new ParameterError(
+        `\`--directory=${info.options.VENDOR_DIR}\` is outside the project directory.`,
+        info.options.CURRENT_ACTION.name
+      );
+    }
+
+    // Immeditately convert it to a posix and relative path
+    info.vendorDirectory = toPosixPath(relativeVendorDir);
+  }
+
+  // No need to do anything here
+  if (info.vendorStrategy === 'manual') {
+    return info;
+  }
+
+  await runGitMaybeHost(info, ['init']);
+  const detectedStrategy = await autoDetect(info);
+
+  if (
+    info.options.VENDOR_STRAT &&
+    detectedStrategy &&
+    detectedStrategy !== info.options.VENDOR_STRAT
+  ) {
+    throw new ValidationError(
+      `${info.vendorDirectory} is a ${detectedStrategy} which is different from the provided strategy: ${info.options.VENDOR_STRAT}.`
+    );
+  }
+
+  if (detectedStrategy) {
+    log(
+      `Using ${info.vendorDirectory} as a ${detectedStrategy} vendoring target.`
+    );
+    return {
+      ...info,
+      vendorStrategy: detectedStrategy,
+    };
+  }
+
+  if (info.vendorStrategy === 'submodule') {
+    await runGitMaybeHost(info, [
       'submodule',
       'add',
       '--force',
@@ -41,19 +128,22 @@ const autoVendor = async (libdragonInfo) => {
       '--branch',
       LIBDRAGON_BRANCH,
       LIBDRAGON_GIT,
-      libdragonInfo.vendorDirectory,
+      info.vendorDirectory,
     ]);
-  } else if (libdragonInfo.vendorStrategy === 'subtree') {
+    return info;
+  }
+
+  if (info.vendorStrategy === 'subtree') {
     // Create a commit if it does not exist. This is required for subtree.
     try {
-      await runGitMaybeHost(libdragonInfo, ['rev-parse', 'HEAD']);
+      await runGitMaybeHost(info, ['rev-parse', 'HEAD']);
     } catch (e) {
       if (!(e instanceof CommandError)) throw e;
 
       // This will throw if git user name/email is not set up. Let's not assume
       // anything for now. This means subtree is not supported for someone without
       // git on the host machine.
-      await runGitMaybeHost(libdragonInfo, [
+      await runGitMaybeHost(info, [
         'commit',
         '--allow-empty',
         '-n',
@@ -62,18 +152,17 @@ const autoVendor = async (libdragonInfo) => {
       ]);
     }
 
-    await runGitMaybeHost(libdragonInfo, [
+    await runGitMaybeHost(info, [
       'subtree',
       'add',
       '--prefix',
-      path.relative(libdragonInfo.root, libdragonInfo.vendorDirectory),
+      path.relative(info.root, info.vendorDirectory),
       LIBDRAGON_GIT,
       LIBDRAGON_BRANCH,
       '--squash',
     ]);
+    return info;
   }
-
-  return libdragonInfo;
 };
 
 /**
@@ -83,10 +172,8 @@ const autoVendor = async (libdragonInfo) => {
 async function init(info) {
   log(`Initializing a libdragon project at ${info.root}`);
 
-  let newInfo = info;
-
   // Validate manifest
-  const manifestPath = path.join(newInfo.root, LIBDRAGON_PROJECT_MANIFEST);
+  const manifestPath = path.join(info.root, LIBDRAGON_PROJECT_MANIFEST);
   const manifestStats = await fs.stat(manifestPath).catch((e) => {
     if (e.code !== 'ENOENT') throw e;
     return false;
@@ -98,95 +185,52 @@ async function init(info) {
     );
   }
 
-  // Validate vendoring strategy. Do not allow a switch after successful initialization
-  if (
-    newInfo.haveProjectConfig &&
-    newInfo.options.VENDOR_STRAT &&
-    newInfo.options.VENDOR_STRAT !== 'manual' &&
-    newInfo.vendorStrategy !== newInfo.options.VENDOR_STRAT
-  ) {
-    throw new ParameterError(
-      `Requested strategy switch: ${newInfo.vendorStrategy} -> ${newInfo.options.VENDOR_STRAT} It is not possible to switch vendoring strategy after initializing a project. You can always switch to manual and handle libdragon yourself.`,
-      info.options.CURRENT_ACTION.name
-    );
-  }
-
-  // Update the strategy information for the project if the flag is provided
-  if (newInfo.options.VENDOR_STRAT) {
-    newInfo.vendorStrategy = newInfo.options.VENDOR_STRAT;
-  }
-
-  // Update the directory information for the project if the flag is provided
-  if (newInfo.options.VENDOR_DIR) {
-    const relativeVendorDir = path.relative(info.root, info.options.VENDOR_DIR);
-    // Validate vendoring path
-    if (relativeVendorDir.startsWith('..')) {
-      throw new ParameterError(
-        `\`--directory=${info.options.VENDOR_DIR}\` is outside the project directory.`,
-        info.options.CURRENT_ACTION.name
-      );
-    }
-
-    // Immeditately convert it to a posix and relative path
-    newInfo.vendorDirectory = toPosixPath(relativeVendorDir);
-  }
-
-  if (newInfo.haveProjectConfig) {
+  if (info.haveProjectConfig) {
     log(
       `${path.join(
-        newInfo.root,
+        info.root,
         LIBDRAGON_PROJECT_MANIFEST
       )} exists. This is already a libdragon project, starting it...`
     );
-    if (newInfo.options.DOCKER_IMAGE) {
+    if (info.options.DOCKER_IMAGE) {
       log(
         `Not changing docker image. Use the install action if you want to override the image.`
       );
     }
-    // TODO: we may make sure git and submodule is initialized here
-    return await install(newInfo);
+    if (info.options.DOCKER_IMAGE) {
+      info = await syncImageAndStart(info);
+    } else {
+      info = {
+        ...info,
+        containerId: await start(info),
+      };
+    }
+    info = await autoVendor(info);
+    await installDependencies(info);
+    return info;
   }
 
-  await updateImage(newInfo, newInfo.imageName);
+  await updateImage(info, info.imageName);
 
   // Download image and start it
-  newInfo.containerId = await start(newInfo);
+  info.containerId = await start(info);
 
   // We have created a new container, save the new info ASAP
-  await initGitAndCacheContainerId(newInfo);
+  await initGitAndCacheContainerId(info);
 
-  if (newInfo.vendorStrategy !== 'manual') {
-    const vendorTarget = path.relative(
-      newInfo.root,
-      toNativePath(newInfo.vendorDirectory)
-    );
-    const vendorTargetExists = await fs.stat(vendorTarget).catch((e) => {
-      if (e.code !== 'ENOENT') throw e;
-      return false;
-    });
-
-    if (vendorTargetExists) {
-      throw new ValidationError(
-        `${path.resolve(
-          vendorTarget
-        )} already exists. That is the libdragon vendoring target, please remove and retry.`
-      );
-    }
-
-    newInfo = await autoVendor(newInfo);
-  }
+  info = await autoVendor(info);
 
   log(`Preparing project files...`);
   const skeletonFolder = path.join(__dirname, '../../skeleton');
 
   await Promise.all([
-    installDependencies(newInfo),
+    installDependencies(info),
     // node copy functions does not work with pkg
-    copyDirContents(skeletonFolder, newInfo.root),
+    copyDirContents(skeletonFolder, info.root),
   ]);
 
-  log(chalk.green(`libdragon ready at \`${newInfo.root}\`.`));
-  return newInfo;
+  log(chalk.green(`libdragon ready at \`${info.root}\`.`));
+  return info;
 }
 
 module.exports = {
@@ -200,7 +244,9 @@ module.exports = {
 
     By default, a git repository and a submodule at \`./libdragon\` will be created to automatically update the vendored libdragon files on subsequent \`update\`s. If you intend to opt-out from this feature, see the \`--strategy manual\` flag to provide your self-managed libdragon copy. The default behaviour is intended for users who primarily want to consume libdragon as is.
 
-    If this is the first time you are creating a libdragon project at that location, this action will also create skeleton project files to kickstart things with the given image, if provided. For subsequent runs, it will act like \`start\` thus can be used to revive an existing project without modifying it.`,
+    If this is the first time you are creating a libdragon project at that location, this action will also create skeleton project files to kickstart things with the given image, if provided. For subsequent runs, it will act like \`start\` thus can be used to revive an existing project without modifying it.
+
+    If you have an existing project with an already vendored submodule or subtree libdragon copy, \`init\` will automatically detect it at the provided \`--directory\`.`,
     group: ['docker', 'vendoring'],
   },
 };
