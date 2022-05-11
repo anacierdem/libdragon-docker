@@ -39,10 +39,14 @@
     "lodash": "^4.17.20"
   },
   "devDependencies": {
+    "@semantic-release/exec": "^6.0.3",
+    "commitizen": "^4.2.4",
+    "cz-conventional-changelog": "^3.3.0",
     "ed64": "^2.0.4",
     "eslint": "^7.32.0",
     "pkg": "^5.5.2",
-    "prettier": "^2.4.0"
+    "prettier": "^2.4.0",
+    "semantic-release": "^19.0.2"
   },
   "pkg": {
     "targets": [
@@ -53,5 +57,19 @@
     "assets": [
       "skeleton/**"
     ]
+  },
+  "release": {
+    "dryRun": true,
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm",
+      "@semantic-release/github"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }

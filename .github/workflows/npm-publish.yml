@@ -1,14 +1,12 @@
-name: NPM Publish
-
+name: Release
 on:
   push:
-    tags:
-      - v*
-
+    branches:
+      - master
 jobs:
-  Deploy:
+  release:
+    name: Release
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.ref, 'rc') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -22,7 +20,8 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Publish
-        run: npm publish
+      - name: Release
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
