@@ -110,35 +110,35 @@ const destroyContainer = async (libdragonInfo) => {
  * Invokes host git with provided params. If host does not have git, falls back
  * to the docker git, with the nix user set to the user running libdragon.
  */
-async function runGitMaybeHost(libdragonInfo, params) {
+async function runGitMaybeHost(libdragonInfo, params, options = {}) {
   assert(
     libdragonInfo.vendorStrategy !== 'manual',
     new Error('Should never run git if vendoring strategy is manual.')
   );
   try {
     const isWin = /^win/.test(process.platform);
-    await spawnProcess(
+    return await spawnProcess(
       'git',
       ['-C', libdragonInfo.root, ...params],
       // Windows git is breaking the TTY somehow - disable TTY for now
       // We are not able to display progress for the initial clone b/c of this
       // Enable progress otherwise.
       isWin
-        ? { inheritStdin: false }
-        : { inheritStdout: true, inheritStderr: true }
+        ? { inheritStdin: false, ...options }
+        : { inheritStdout: true, inheritStderr: true, ...options }
     );
   } catch (e) {
     if (e instanceof CommandError) {
       throw e;
     }
 
-    await dockerExec(
+    return await dockerExec(
       libdragonInfo,
       // Use the host user when initializing git as we will need access
       [...dockerHostUserParams(libdragonInfo)],
       ['git', ...params],
       // Let's enable tty here to show the progress
-      { inheritStdout: true, inheritStderr: true }
+      { inheritStdout: true, inheritStderr: true, ...options }
     );
   }
 }
