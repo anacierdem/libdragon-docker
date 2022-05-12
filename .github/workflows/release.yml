@@ -1,12 +1,12 @@
-name: Github Release
-
+name: Release
 on:
   push:
-    tags:
-      - v*
+    branches:
+      - master
 
 jobs:
-  Release:
+  release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -15,8 +15,9 @@ jobs:
       - name: Prepare
         uses: actions/setup-node@v2
         with:
+          # Do not include registy url here, it creates a .npmrc which prevents
+          # semantic-release from authenticating with npm
           node-version: '14'
-          registry-url: 'https://registry.npmjs.org'
 
       - name: Install
         run: npm ci
@@ -29,11 +30,8 @@ jobs:
           mv libdragon-win.exe libdragon.exe
           zip libdragon-win-x86_64.zip libdragon.exe
 
-      - name: Release executable
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            libdragon-linux-x86_64.tar.gz
-            libdragon-macos-x86_64.tar.gz
-            libdragon-win-x86_64.zip
-          prerelease: ${{ contains(github.ref, 'rc') }}
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release

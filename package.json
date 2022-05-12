@@ -4,7 +4,8 @@
   "description": "This is a docker wrapper for libdragon",
   "main": "index.js",
   "engines": {
-    "node": ">=14"
+    "node": ">=14",
+    "npm": ">=8"
   },
   "bin": {
     "libdragon": "./index.js"
@@ -39,7 +40,8 @@
     "lodash": "^4.17.20"
   },
   "devDependencies": {
-    "@semantic-release/exec": "^6.0.3",
+    "@semantic-release/changelog": "^6.0.1",
+    "@semantic-release/git": "^10.0.1",
     "commitizen": "^4.2.4",
     "cz-conventional-changelog": "^3.3.0",
     "ed64": "^2.0.4",
@@ -47,6 +49,9 @@
     "pkg": "^5.5.2",
     "prettier": "^2.4.0",
     "semantic-release": "^19.0.2"
+  },
+  "overrides": {
+    "minimist": "1.2.6"
   },
   "pkg": {
     "targets": [
@@ -59,12 +64,31 @@
     ]
   },
   "release": {
-    "dryRun": true,
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
       "@semantic-release/npm",
-      "@semantic-release/github"
+      "@semantic-release/git",
+      [
+        "@semantic-release/github",
+        {
+          "assets": [
+            {
+              "path": "libdragon-linux-x86_64.tar.gz",
+              "label": "Linux executable"
+            },
+            {
+              "path": "libdragon-macos-x86_64.tar.gz",
+              "label": "MacOS executable"
+            },
+            {
+              "path": "libdragon-win-x86_64.zip",
+              "label": "Windows executable"
+            }
+          ]
+        }
+      ]
     ]
   },
   "config": {
