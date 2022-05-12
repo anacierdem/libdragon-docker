@@ -11,11 +11,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Prepare
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+          registry-url: 'https://registry.npmjs.org'
+          token: ${{ secrets.NPM_TOKEN }}
+
       - name: Install
         run: npm ci
 
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
