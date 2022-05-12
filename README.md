@@ -123,6 +123,10 @@ will init the container for this project and run `make && make install` for `ed6
 
 This is an experimental dependency management.
 
+## TODOS
+
+- [ ] Skip CI checks for irrelevant changes.
+
 ## Funding
 
 If this tool helped you, consider supporting its development by sponsoring it!
