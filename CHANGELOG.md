@@ -5,8 +5,6 @@
 
 * **init.js:** add vendored library detection ([4465d08](https://github.com/anacierdem/libdragon-docker/commit/4465d08993b987d694de9675ea4bd9784e073cd5))
 
-# Change Log
-
 ## [10.7.1] - 2022-04-20
 
 ### Fixed
