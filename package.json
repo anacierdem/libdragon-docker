@@ -71,6 +71,12 @@
       "@semantic-release/npm",
       "@semantic-release/git",
       [
+        "@semantic-release/exec",
+        {
+          "prepareCmd": "./pack.sh"
+        }
+      ],
+      [
         "@semantic-release/github",
         {
           "assets": [

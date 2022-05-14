@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.SECRET_GITHUB_TOKEN }}
 
       - name: Prepare
         uses: actions/setup-node@v2
@@ -21,14 +23,6 @@ jobs:
 
       - name: Install
         run: npm ci
-
-      - name: Package
-        run: |
-          npm run pack
-          tar --transform='s/-linux//' -cvzf libdragon-linux-x86_64.tar.gz libdragon-linux
-          tar --transform='s/-macos//' -cvzf libdragon-macos-x86_64.tar.gz libdragon-macos
-          mv libdragon-win.exe libdragon.exe
-          zip libdragon-win-x86_64.zip libdragon.exe
 
       - name: Release
         env:
