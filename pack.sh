@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+IFS=$'\n\t'
+
 npm run pack
 tar --transform='s/-linux//' -cvzf libdragon-linux-x86_64.tar.gz libdragon-linux
 tar --transform='s/-macos//' -cvzf libdragon-macos-x86_64.tar.gz libdragon-macos
