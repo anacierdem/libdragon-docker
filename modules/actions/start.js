@@ -11,11 +11,11 @@ const {
 
 /**
  * Create a new container
+ * @param {import('../project-info').LibdragonInfo} libdragonInfo
  */
 const initContainer = async (libdragonInfo) => {
   let newId;
   try {
-    // Create a new container
     log('Creating new container...');
     newId = (
       await spawnProcess('docker', [
@@ -75,6 +75,9 @@ const initContainer = async (libdragonInfo) => {
   return newId;
 };
 
+/**
+ * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ */
 const start = async (libdragonInfo) => {
   const running =
     libdragonInfo.containerId &&
@@ -99,14 +102,18 @@ const start = async (libdragonInfo) => {
   return id;
 };
 
-module.exports = {
+module.exports = /** @type {const} */ ({
   name: 'start',
+  /**
+   * @param {import('../project-info').LibdragonInfo} libdragonInfo
+   */
   fn: async (libdragonInfo) => {
     const containerId = await start(libdragonInfo);
     print(containerId);
     return { ...libdragonInfo, containerId };
   },
   start,
+  forwardsRestParams: false,
   usage: {
     name: 'start',
     summary: 'Start the container for current project.',
@@ -114,4 +121,4 @@ module.exports = {
 
       Must be run in an initialized libdragon project.`,
   },
-};
+});

@@ -6,31 +6,86 @@ const { spawn } = require('child_process');
 
 const { globals } = require('./globals');
 
-// An error caused by a command explicitly run by the user
+/**
+ * A structure to keep additional error information
+ * @typedef {Object} ErrorState
+ * @property {number} code
+ * @property {string} out
+ * @property {boolean} userCommand
+ */
+
+/**
+ * An error caused by a command exiting with a non-zero exit code
+ * @class
+ */
 class CommandError extends Error {
+  /**
+   * @param {string} message Error message to report
+   * @param {ErrorState} errorState
+   */
   constructor(message, { code, out, userCommand }) {
     super(message);
+
+    /**
+     * Exit code
+     * @type {number}
+     * @public
+     */
     this.code = code;
+
+    /**
+     * Error output as a single concatanated string
+     * @type {string}
+     * @public
+     */
     this.out = out;
+
+    /**
+     * true when the error caused by a command explicitly run by the end user
+     * @type {boolean}
+     * @public
+     */
     this.userCommand = userCommand;
   }
 }
 
-// The user provided an unexpected input
+/**
+ * An error caused by the user providing an unexpected input
+ * @class
+ */
 class ParameterError extends Error {
+  /**
+   * @param {string} message Error message to report
+   * @param {string} actionName
+   */
   constructor(message, actionName) {
     super(message);
+
+    /**
+     * true when the error caused by a command explicitly run by the end user
+     * @type {string}
+     * @public
+     */
     this.actionName = actionName;
   }
 }
 
-// Something was not as expected to continue the operation
+/**
+ * Something was not as expected to continue the operation
+ * @class
+ */
 class ValidationError extends Error {
+  /**
+   * @param {string} message
+   */
   constructor(message) {
     super(message);
   }
 }
 
+/**
+ * @param {string} path
+ */
 async function fileExists(path) {
   return fs
     .stat(path)
@@ -41,6 +96,9 @@ async function fileExists(path) {
     });
 }
 
+/**
+ * @param {string} path
+ */
 async function dirExists(path) {
   return fs
     .stat(path)
@@ -51,9 +109,27 @@ async function dirExists(path) {
     });
 }
 
+/**
+ * @typedef {{
+ *  userCommand?: boolean,
+ *  inheritStdin?: boolean,
+ *  inheritStdout?: boolean,
+ *  inheritStderr?: boolean,
+ *  spawnOptions?: import('child_process').SpawnOptions,
+ *  stdin?: fsClassic.ReadStream,
+ * }} SpawnOptions
+ */
+
 // A simple Promise wrapper for child_process.spawn. Return the err/out streams
 // from the process by default. Specify inheritStdout / inheritStderr to disable
 // this and inherit the parent process's stream, passing through the TTY if any.
+/**
+ *
+ * @param {string} cmd
+ * @param {string[]} params
+ * @param {SpawnOptions} options
+ * @returns {Promise<string>}
+ */
 function spawnProcess(
   cmd,
   params = [],
@@ -81,7 +157,10 @@ function spawnProcess(
   }
 ) {
   return new Promise((resolve, reject) => {
+    /** @type {Buffer[]} */
     const stdout = [];
+
+    /** @type {Buffer[]} */
     const stderr = [];
 
     log(chalk.grey(`Spawning: ${cmd} ${params.join(' ')}`), true);
@@ -102,6 +181,9 @@ function spawnProcess(
     // See a very old related issue: https://github.com/nodejs/node/issues/947
     // When the stream is not fully consumed by the pipe target and it exits,
     // an EPIPE or EOF is thrown. We don't care about those.
+    /**
+     * @param {Error & {code: string}} err
+     */
     const eatEpipe = (err) => {
       if (err.code !== 'EPIPE' && err.code !== 'EOF') {
         throw err;
@@ -140,11 +222,17 @@ function spawnProcess(
       });
     }
 
+    /**
+     * @param {Error} err
+     */
     const errorHandler = (err) => {
       command.off('close', closeHandler);
       reject(err);
     };
 
+    /**
+     * @param {number} code
+     */
     const closeHandler = function (code) {
       // The stream was fully consumed, if there is this an additional error on
       // stdout, it must be a legitimate error
@@ -170,9 +258,21 @@ function spawnProcess(
   });
 }
 
-function dockerExec(libdragonInfo, dockerParams, cmdWithParams, options) {
+/**
+ * @typedef {{
+ * (libdragonInfo: import('./project-info').LibdragonInfo, dockerParams: string[], cmdWithParams: string[], options?: SpawnOptions): Promise<string>;
+ * (libdragonInfo: import('./project-info').LibdragonInfo, cmdWithParams: string[], options?: SpawnOptions, unused?: unknown): Promise<string>;
+ * }} DockerExec
+ */
+const dockerExec = /** @type {DockerExec} */ function (
+  libdragonInfo,
+  dockerParams,
+  cmdWithParams,
+  /** @type {SpawnOptions} */
+  options
+) {
   assert(
-    libdragonInfo.containerId,
+    !!libdragonInfo.containerId,
     new Error('Trying to invoke dockerExec without a containerId.')
   );
 
@@ -181,7 +281,7 @@ function dockerExec(libdragonInfo, dockerParams, cmdWithParams, options) {
     Array.isArray(dockerParams) && Array.isArray(cmdWithParams);
 
   if (!haveDockerParams) {
-    options = cmdWithParams;
+    options = /** @type {SpawnOptions} */ (cmdWithParams);
   }
 
   const additionalParams = [];
@@ -215,10 +315,12 @@ function dockerExec(libdragonInfo, dockerParams, cmdWithParams, options) {
     ],
     options
   );
-}
+};
 
 /**
  * Recursively copies directories and files
+ * @param {string} src
+ * @param {string} dst
  */
 async function copyDirContents(src, dst) {
   log(`Copying from ${src} to ${dst}`, true);
@@ -269,14 +371,24 @@ async function copyDirContents(src, dst) {
   );
 }
 
+/**
+ * @param {string} p
+ */
 function toPosixPath(p) {
   return p.replace(new RegExp('\\' + path.sep, 'g'), path.posix.sep);
 }
 
+/**
+ * @param {string} p
+ */
 function toNativePath(p) {
   return p.replace(new RegExp('\\' + path.posix.sep, 'g'), path.sep);
 }
 
+/**
+ * @param {boolean} condition
+ * @param {Error} error
+ */
 function assert(condition, error) {
   if (!condition) {
     error.message = `[ASSERTION FAILED] ${error.message}`;
@@ -284,12 +396,19 @@ function assert(condition, error) {
   }
 }
 
+/**
+ * @param {string} text
+ */
 function print(text) {
   // eslint-disable-next-line no-console
   console.log(text);
   return;
 }
 
+/**
+ * @param {string} text
+ * @param {boolean} verboseOnly
+ */
 function log(text, verboseOnly = false) {
   if (!verboseOnly) {
     // eslint-disable-next-line no-console

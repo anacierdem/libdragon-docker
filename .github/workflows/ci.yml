@@ -19,6 +19,7 @@ jobs:
         run: |
           npm run format-check
           npm run lint-check
+          npm run tsc
 
   ci-basic:
     runs-on: ubuntu-latest

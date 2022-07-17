@@ -1,5 +1,8 @@
 const { fn: exec } = require('./exec');
 
+/**
+ * @param {import('../project-info').LibdragonInfo} info
+ */
 const make = async (info) => {
   return await exec({
     ...info,
@@ -10,7 +13,7 @@ const make = async (info) => {
   });
 };
 
-module.exports = {
+module.exports = /** @type {const} */ ({
   name: 'make',
   fn: make,
   forwardsRestParams: true,
@@ -21,4 +24,4 @@ module.exports = {
 
     Must be run in an initialized libdragon project. This action is a shortcut to the \`exec\` action under the hood.`,
   },
-};
+});

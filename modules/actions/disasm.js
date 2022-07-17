@@ -10,6 +10,11 @@ const {
   ParameterError,
 } = require('../helpers');
 
+/**
+ * @param {string} stop
+ * @param {string} start
+ * @return {Promise<string>}
+ */
 const findElf = async (stop, start = '.') => {
   start = path.resolve(start);
 
@@ -43,6 +48,9 @@ const findElf = async (stop, start = '.') => {
   }
 };
 
+/**
+ * @param {import('../project-info').LibdragonInfo} info
+ */
 const disasm = async (info) => {
   let elfPath;
   if (info.options.FILE) {
@@ -89,7 +97,7 @@ const disasm = async (info) => {
   });
 };
 
-module.exports = {
+module.exports = /** @type {const} */ ({
   name: 'disasm',
   fn: disasm,
   forwardsRestParams: true,
@@ -118,4 +126,4 @@ module.exports = {
       },
     ],
   },
-};
+});

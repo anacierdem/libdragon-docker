@@ -3,7 +3,6 @@ const path = require('path');
 
 const chalk = require('chalk').stderr;
 
-const { fn: install } = require('./install');
 const { start } = require('./start');
 const {
   installDependencies,
@@ -29,6 +28,9 @@ const {
 } = require('../helpers');
 const { syncImageAndStart } = require('./update-and-start');
 
+/**
+ * @param {import('../project-info').LibdragonInfo} info
+ */
 const autoDetect = async (info) => {
   const vendorTarget = path.relative(
     info.root,
@@ -69,6 +71,9 @@ const autoDetect = async (info) => {
   }
 };
 
+/**
+ * @param {import('../project-info').LibdragonInfo} info
+ */
 const autoVendor = async (info) => {
   // Update the strategy information for the project if the flag is provided
   if (info.options.VENDOR_STRAT) {
@@ -114,7 +119,9 @@ const autoVendor = async (info) => {
     );
     return {
       ...info,
-      vendorStrategy: detectedStrategy,
+      vendorStrategy: /** @type {import('../parameters').VendorStrategy} */ (
+        detectedStrategy
+      ),
     };
   }
 
@@ -168,6 +175,7 @@ const autoVendor = async (info) => {
 /**
  * Initialize a new libdragon project in current working directory
  * Also downloads the image
+ * @param {import('../project-info').LibdragonInfo} info
  */
 async function init(info) {
   log(`Initializing a libdragon project at ${info.root}`);
@@ -176,7 +184,7 @@ async function init(info) {
   const manifestPath = path.join(info.root, LIBDRAGON_PROJECT_MANIFEST);
   const manifestStats = await fs.stat(manifestPath).catch((e) => {
     if (e.code !== 'ENOENT') throw e;
-    return false;
+    return /** @type {const} */ (false);
   });
 
   if (manifestStats && !manifestStats.isDirectory()) {
@@ -233,10 +241,10 @@ async function init(info) {
   return info;
 }
 
-module.exports = {
+module.exports = /** @type {const} */ ({
   name: 'init',
   fn: init,
-  mustHaveProject: false,
+  forwardsRestParams: false,
   usage: {
     name: 'init',
     summary: 'Create a libdragon project in the current directory.',
@@ -249,4 +257,4 @@ module.exports = {
     If you have an existing project with an already vendored submodule or subtree libdragon copy, \`init\` will automatically detect it at the provided \`--directory\`.`,
     group: ['docker', 'vendoring'],
   },
-};
+});

@@ -14,6 +14,10 @@ const { start } = require('./start');
 const { dockerHostUserParams } = require('./docker-utils');
 const { installDependencies } = require('./utils');
 
+/**
+ * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ * @returns
+ */
 function dockerRelativeWorkdir(libdragonInfo) {
   return (
     CONTAINER_TARGET_PATH +
@@ -22,10 +26,20 @@ function dockerRelativeWorkdir(libdragonInfo) {
   );
 }
 
+/**
+ *
+ * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ * @returns
+ */
 function dockerRelativeWorkdirParams(libdragonInfo) {
   return ['--workdir', dockerRelativeWorkdir(libdragonInfo)];
 }
 
+/**
+ *
+ * @param {import('../project-info').LibdragonInfo} info
+ * @returns
+ */
 const exec = async (info) => {
   const parameters = info.options.EXTRA_PARAMS.slice(1);
   log(
@@ -37,6 +51,7 @@ const exec = async (info) => {
 
   const stdin = new PassThrough();
 
+  /** @type {string[]} */
   const paramsWithConvertedPaths = parameters.map((item) => {
     if (item.startsWith('-')) {
       return item;
@@ -49,9 +64,14 @@ const exec = async (info) => {
     return item;
   });
 
+  /**
+   *
+   * @param {import('../project-info').LibdragonInfo} libdragonInfo
+   * @param {import('../helpers').SpawnOptions} opts
+   * @returns
+   */
   const tryCmd = (libdragonInfo, opts = {}) => {
     const enableTTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
-
     return (
       libdragonInfo.containerId &&
       dockerExec(
@@ -80,6 +100,11 @@ const exec = async (info) => {
   };
 
   let started = false;
+  /**
+   *
+   * @param {import('fs').ReadStream=} stdin
+   * @returns
+   */
   const startOnceAndCmd = async (stdin) => {
     if (!started) {
       const newId = await start(info);
@@ -121,7 +146,11 @@ const exec = async (info) => {
       inheritStderr: false,
       // In the first run, pass the stdin to the process if it is not a TTY
       // o/w we loose a user input unnecesarily somehow.
-      stdin: !process.stdin.isTTY && process.stdin,
+      stdin:
+        !process.stdin.isTTY &&
+        /** @type {import('fs').ReadStream} */ (
+          /** @type {unknown} */ (process.stdin)
+        ),
     });
   } catch (e) {
     if (
@@ -131,12 +160,14 @@ const exec = async (info) => {
     ) {
       throw e;
     }
-    await startOnceAndCmd(stdin);
+    await startOnceAndCmd(
+      /** @type {import('fs').ReadStream} */ (/** @type {unknown} */ (stdin))
+    );
   }
   return info;
 };
 
-module.exports = {
+module.exports = /** @type {const} */ ({
   name: 'exec',
   fn: exec,
   forwardsRestParams: true,
@@ -152,4 +183,4 @@ module.exports = {
     
     Must be run in an initialized libdragon project.`,
   },
-};
+});

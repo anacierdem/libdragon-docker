@@ -18,7 +18,8 @@
     "format": "prettier **/*.js --write",
     "format-check": "prettier **/*.js --check",
     "lint": "eslint --fix **/*.js",
-    "lint-check": "eslint **/*.js"
+    "lint-check": "eslint **/*.js",
+    "tsc": "tsc"
   },
   "repository": {
     "type": "git",
@@ -43,13 +44,16 @@
     "@semantic-release/changelog": "^6.0.1",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
+    "@types/command-line-usage": "^5.0.2",
+    "@types/lodash": "^4.14.182",
     "commitizen": "^4.2.4",
     "cz-conventional-changelog": "^3.3.0",
     "ed64": "^2.0.4",
     "eslint": "^7.32.0",
     "pkg": "^5.5.2",
     "prettier": "^2.4.0",
-    "semantic-release": "^19.0.2"
+    "semantic-release": "^19.0.2",
+    "typescript": "^4.7.4"
   },
   "overrides": {
     "minimist": "1.2.6"

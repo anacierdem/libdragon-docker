@@ -1,4 +1,4 @@
-module.exports = {
+module.exports = /** @type {const} */ ({
   DOCKER_HUB_IMAGE: 'ghcr.io/dragonminded/libdragon:latest',
   LIBDRAGON_GIT: 'https://github.com/DragonMinded/libdragon',
   LIBDRAGON_BRANCH: 'trunk',
@@ -9,6 +9,8 @@ module.exports = {
   CONFIG_FILE: 'config.json',
   DEFAULT_STRATEGY: 'submodule',
 
+  ACCEPTED_STRATEGIES: ['submodule', 'subtree', 'manual'],
+
   // cli exit codes
   STATUS_OK: 0,
   STATUS_ERROR: 1,
@@ -16,4 +18,4 @@ module.exports = {
   STATUS_VALIDATION_ERROR: 4,
 
   IMAGE_FILE: 'docker-image', // deprecated
-};
+});

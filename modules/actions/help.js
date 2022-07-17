@@ -3,7 +3,10 @@ const commandLineUsage = require('command-line-usage');
 
 const { print } = require('../helpers');
 
-const printUsage = (info) => {
+/**
+ * @param {import('../project-info').CLIInfo} info
+ */
+const printUsage = async (info) => {
   const actions = require('./');
   const globalOptionDefinitions = [
     {
@@ -48,11 +51,12 @@ const printUsage = (info) => {
     },
   ];
 
-  const actionsToShow =
+  const actionsToShow = /** @type {(keyof actions)[]} */ (
     info?.options.EXTRA_PARAMS?.filter(
       (action) =>
         Object.keys(actions).includes(action) && !['help'].includes(action)
-    ) ?? (info ? [info.options.CURRENT_ACTION.name] : []);
+    ) ?? (info ? [info.options.CURRENT_ACTION.name] : [])
+  );
 
   const sections = [
     {
@@ -96,13 +100,12 @@ const printUsage = (info) => {
   print(usage);
 };
 
-module.exports = {
+module.exports = /** @type {const} */ ({
   name: 'help',
   fn: printUsage,
   forwardsRestParams: true,
-  mustHaveProject: false,
   usage: {
     name: 'help [action]',
     summary: 'Display this help information or details for the given action.',
   },
-};
+});

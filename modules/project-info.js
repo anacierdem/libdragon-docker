@@ -29,9 +29,36 @@ const {
   ParameterError,
 } = require('./helpers');
 
-const initAction = require('./actions/init');
-const destroyAction = require('./actions/destroy');
+// These do not need a project to exist.
+const NO_PROJECT_ACTIONS = /** @type {const} */ (['help', 'version']);
 
+/**
+ * @typedef { typeof NO_PROJECT_ACTIONS[number] } ActionsNoProject
+ * @typedef { Exclude<keyof import('./parameters').Actions, ActionsNoProject> } ActionsWithProject
+ * @typedef { import('./parameters').CommandlineOptions<ActionsNoProject> } ActionsNoProjectOptions
+ * @typedef { import('./parameters').CommandlineOptions<ActionsWithProject> } ActionsWithProjectOptions
+ *
+ * @typedef { {
+ *  options: ActionsNoProjectOptions
+ * } } CLIInfo
+ *
+ * @typedef { {
+ *  root: string;
+ *  userInfo: os.UserInfo<string>;
+ *  haveProjectConfig: boolean;
+ *  imageName: string;
+ *  vendorDirectory: string;
+ *  vendorStrategy: import('./parameters').VendorStrategy;
+ *  containerId: string
+ * } } ExtendedInfo
+ *
+ * @typedef { CLIInfo & Partial<ExtendedInfo> } LibdragonInfo
+ */
+
+/**
+ * @param {LibdragonInfo} libdragonInfo
+ * @returns string
+ */
 async function findContainerId(libdragonInfo) {
   const idFile = path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE);
   if (await fileExists(idFile)) {
@@ -79,6 +106,11 @@ async function findContainerId(libdragonInfo) {
   }
 }
 
+/**
+ * @param {string} start
+ * @param {string} relativeFile
+ * @return {Promise<string>}
+ */
 async function findLibdragonRoot(
   start = '.',
   relativeFile = path.join(LIBDRAGON_PROJECT_MANIFEST, CONFIG_FILE)
@@ -106,18 +138,19 @@ async function findGitRoot() {
   }
 }
 
-async function readProjectInfo(info) {
+/**
+ * @param {LibdragonInfo} optionInfo
+ */
+const readProjectInfo = async function (optionInfo) {
   // No need to do anything here if the action does not depend on the project
   // The only exception is the init and destroy actions, which do not need an
   // existing project but readProjectInfo must always run to analyze the situation
-  const forceReadProjectInfo = [initAction, destroyAction].includes(
-    info.options.CURRENT_ACTION
-  );
   if (
-    info.options.CURRENT_ACTION.mustHaveProject === false &&
-    !forceReadProjectInfo
+    NO_PROJECT_ACTIONS.includes(
+      /** @type {ActionsNoProject} */ (optionInfo.options.CURRENT_ACTION.name)
+    )
   ) {
-    return info;
+    return /** @type {CLIInfo} */ (optionInfo);
   }
 
   const migratedRoot = await findLibdragonRoot();
@@ -130,15 +163,19 @@ async function readProjectInfo(info) {
       path.join(LIBDRAGON_PROJECT_MANIFEST, IMAGE_FILE)
     ));
 
-  if (!projectRoot && !forceReadProjectInfo) {
+  if (
+    !projectRoot &&
+    !['init', 'destroy'].includes(optionInfo.options.CURRENT_ACTION.name)
+  ) {
     throw new ParameterError(
       'This is not a libdragon project. Initialize with `libdragon init` first.',
-      info.options.CURRENT_ACTION.name
+      optionInfo.options.CURRENT_ACTION.name
     );
   }
 
-  info = {
-    ...info,
+  /** @type {LibdragonInfo} */
+  let info = {
+    ...optionInfo,
     root: projectRoot ?? (await findNPMRoot()) ?? (await findGitRoot()),
     userInfo: os.userInfo(),
 
@@ -211,10 +248,10 @@ async function readProjectInfo(info) {
   log(`Active vendor strategy: ${info.vendorStrategy}`, true);
 
   return info;
-}
+};
 
 /**
- * @param info This is only the base info without options
+ * @param { LibdragonInfo | void } info This is only the base info without options
  * fn and command line options
  */
 async function writeProjectInfo(info) {

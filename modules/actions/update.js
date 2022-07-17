@@ -3,6 +3,9 @@ const { LIBDRAGON_GIT, LIBDRAGON_BRANCH } = require('../constants');
 const { runGitMaybeHost, installDependencies } = require('./utils');
 const { syncImageAndStart } = require('./update-and-start');
 
+/**
+ * @param {import('../project-info').LibdragonInfo} info
+ */
 const update = async (info) => {
   info = await syncImageAndStart(info);
 
@@ -33,9 +36,10 @@ const update = async (info) => {
   await installDependencies(info);
 };
 
-module.exports = {
+module.exports = /** @type {const} */ ({
   name: 'update',
   fn: update,
+  forwardsRestParams: false,
   usage: {
     name: 'update',
     summary: 'Update libdragon and do an install.',
@@ -44,4 +48,4 @@ module.exports = {
       Must be run in an initialized libdragon project.`,
     group: ['docker'],
   },
-};
+});

@@ -6,6 +6,9 @@ const { CONFIG_FILE, LIBDRAGON_PROJECT_MANIFEST } = require('../constants');
 const { fileExists, dirExists, log } = require('../helpers');
 const chalk = require('chalk');
 
+/**
+ * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ */
 const destroy = async (libdragonInfo) => {
   await destroyContainer(libdragonInfo);
 
@@ -22,13 +25,13 @@ const destroy = async (libdragonInfo) => {
   log(chalk.green('Done cleanup.'));
 };
 
-module.exports = {
+module.exports = /** @type {const} */ ({
   name: 'destroy',
   fn: destroy,
-  mustHaveProject: false,
+  forwardsRestParams: false,
   usage: {
     name: 'destroy',
     summary: 'Do clean-up for current project.',
     description: `Removes libdragon configuration from current project and removes any known containers but will not touch previously vendored files. \`libdragon\` will not work anymore for this project.`,
   },
-};
+});

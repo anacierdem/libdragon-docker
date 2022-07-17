@@ -2,10 +2,31 @@ const chalk = require('chalk').stderr;
 
 const { log } = require('./helpers');
 const actions = require('./actions');
-const { STATUS_BAD_PARAM } = require('./constants');
+const { STATUS_BAD_PARAM, ACCEPTED_STRATEGIES } = require('./constants');
 const { globals } = require('./globals');
 
+/** @typedef { import('./actions') } Actions */
+
+/** @typedef { typeof import('./constants').ACCEPTED_STRATEGIES[number] } VendorStrategy */
+
+/**
+ * @template {keyof Actions} [T=keyof Actions]
+ * @typedef {{
+ *  EXTRA_PARAMS: string[];
+ *  CURRENT_ACTION: Actions[T];
+ *  VERBOSE?: boolean;
+ *  DOCKER_IMAGE?: string;
+ *  VENDOR_DIR?: string;
+ *  VENDOR_STRAT?: VendorStrategy;
+ *  FILE?: string;
+ * }} CommandlineOptions
+ */
+
+/**
+ * @param {string[]} argv
+ */
 const parseParameters = async (argv) => {
+  /** @type CommandlineOptions */
   const options = {
     EXTRA_PARAMS: [],
     CURRENT_ACTION: undefined,
@@ -38,11 +59,18 @@ const parseParameters = async (argv) => {
     }
 
     if (['--strategy', '-s'].includes(val)) {
-      options.VENDOR_STRAT = argv[++i];
+      options.VENDOR_STRAT = /** @type VendorStrategy */ (argv[++i]);
       continue;
     } else if (val.indexOf('--strategy=') === 0) {
-      options.VENDOR_STRAT = val.split('=')[1];
+      options.VENDOR_STRAT = /** @type VendorStrategy */ (val.split('=')[1]);
       continue;
+    }
+    if (
+      options.VENDOR_STRAT &&
+      !ACCEPTED_STRATEGIES.includes(options.VENDOR_STRAT)
+    ) {
+      log(chalk.red(`Invalid strategy \`${options.VENDOR_STRAT}\``));
+      process.exit(STATUS_BAD_PARAM);
     }
 
     if (['--file', '-f'].includes(val)) {
@@ -63,7 +91,7 @@ const parseParameters = async (argv) => {
       process.exit(STATUS_BAD_PARAM);
     }
 
-    options.CURRENT_ACTION = actions[val];
+    options.CURRENT_ACTION = actions[/** @type {keyof Actions} */ (val)];
 
     if (!options.CURRENT_ACTION) {
       log(chalk.red(`Invalid action \`${val}\``));
@@ -90,8 +118,12 @@ const parseParameters = async (argv) => {
   }
 
   if (
-    ![actions.init, actions.install, actions.update].includes(
-      options.CURRENT_ACTION
+    !(
+      /** @type {typeof actions[keyof actions][]} */ ([
+        actions.init,
+        actions.install,
+        actions.update,
+      ]).includes(options.CURRENT_ACTION)
     ) &&
     options.DOCKER_IMAGE
   ) {
@@ -100,14 +132,13 @@ const parseParameters = async (argv) => {
   }
 
   if (
-    options.VENDOR_STRAT &&
-    !['submodule', 'subtree', 'manual'].includes(options.VENDOR_STRAT)
+    !(
+      /** @type {typeof actions[keyof actions][]} */ ([
+        actions.disasm,
+      ]).includes(options.CURRENT_ACTION)
+    ) &&
+    options.FILE
   ) {
-    log(chalk.red(`Invalid strategy \`${options.VENDOR_STRAT}\``));
-    process.exit(STATUS_BAD_PARAM);
-  }
-
-  if (![actions.disasm].includes(options.CURRENT_ACTION) && options.FILE) {
     log(chalk.red('Invalid flag: file'));
     process.exit(STATUS_BAD_PARAM);
   }

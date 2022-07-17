@@ -21,6 +21,9 @@ const {
 const { dockerHostUserParams } = require('./docker-utils');
 const { installNPMDependencies } = require('./npm-utils');
 
+/**
+ * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ */
 const installDependencies = async (libdragonInfo) => {
   const buildScriptPath = path.join(
     libdragonInfo.root,
@@ -51,9 +54,8 @@ const installDependencies = async (libdragonInfo) => {
 /**
  * Downloads the given docker image. Returns false if the local image is the
  * same, new image name otherwise.
- * @param libdragonInfo
- * @param newImageName
- * @returns false | string
+ * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ * @param {string} newImageName
  */
 const updateImage = async (libdragonInfo, newImageName) => {
   // Will not take too much time if already have the same
@@ -90,6 +92,9 @@ const updateImage = async (libdragonInfo, newImageName) => {
   return newImageName;
 };
 
+/**
+ * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ */
 const destroyContainer = async (libdragonInfo) => {
   if (libdragonInfo.containerId) {
     await spawnProcess('docker', [
@@ -109,6 +114,14 @@ const destroyContainer = async (libdragonInfo) => {
 /**
  * Invokes host git with provided params. If host does not have git, falls back
  * to the docker git, with the nix user set to the user running libdragon.
+ */
+
+/**
+ *
+ * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ * @param {string[]} params
+ * @param {import('../helpers').SpawnOptions} options
+ * @returns
  */
 async function runGitMaybeHost(libdragonInfo, params, options = {}) {
   assert(
@@ -143,6 +156,9 @@ async function runGitMaybeHost(libdragonInfo, params, options = {}) {
   }
 }
 
+/**
+ * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ */
 async function checkContainerAndClean(libdragonInfo) {
   const id =
     libdragonInfo.containerId &&
@@ -169,6 +185,9 @@ async function checkContainerAndClean(libdragonInfo) {
   return id ? libdragonInfo.containerId : undefined;
 }
 
+/**
+ * @param {string} containerId
+ */
 async function checkContainerRunning(containerId) {
   const running = (
     await spawnProcess('docker', [
@@ -181,6 +200,9 @@ async function checkContainerRunning(containerId) {
   return running ? containerId : undefined;
 }
 
+/**
+ * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ */
 async function initGitAndCacheContainerId(libdragonInfo) {
   // If there is managed vendoring, make sure we have a git repo. `git init` is
   // safe anyways...

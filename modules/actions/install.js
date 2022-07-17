@@ -9,12 +9,7 @@ const { log } = require('../helpers');
  * Updates the image if flag is provided and install vendors onto the container.
  * We should probably remove the image installation responsibility from this
  * action but it might be a breaking change.
- * @param libdragonInfo
- * @param skipUpdate This is added to skip the update when calling this from
- * the update action as it already does an update itself. install doing an image
- * update is pretty much a useless operation, but let's keep it in case someone
- * depends on it. It used to only update the image if the flag is provided and
- * we still keep that logic but with a deprecation warning.
+ * @param {import('../project-info').LibdragonInfo} libdragonInfo
  */
 const install = async (libdragonInfo) => {
   let updatedInfo = libdragonInfo;
@@ -41,9 +36,10 @@ const install = async (libdragonInfo) => {
   return updatedInfo;
 };
 
-module.exports = {
+module.exports = /** @type {const} */ ({
   name: 'install',
   fn: install,
+  forwardsRestParams: false,
   usage: {
     name: 'install',
     summary: 'Vendor libdragon as is.',
@@ -51,4 +47,4 @@ module.exports = {
 
     Must be run in an initialized libdragon project. This can be useful to recover from a half-baked container.`,
   },
-};
+});

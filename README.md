@@ -125,7 +125,10 @@ This is an experimental dependency management.
 
 ## TODOS
 
+- [ ] Include instructions for developing the tool.
+- [ ] Include instructions for different workflows. e.g doing changes in the library.
 - [ ] Skip CI checks for irrelevant changes.
+- [ ] Verify the NPM dependency mechanism is still working and add a test.
 
 ## Funding
 

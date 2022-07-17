@@ -27,7 +27,10 @@ async function findNPMRoot() {
   }
 }
 
-// Install other NPM dependencies if this is an NPM project
+/**
+ * Install other NPM dependencies if this is an NPM project
+ * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ */
 const installNPMDependencies = async (libdragonInfo) => {
   const npmRoot = await findNPMRoot();
   if (npmRoot) {
@@ -55,7 +58,7 @@ const installNPMDependencies = async (libdragonInfo) => {
         return new Promise((resolve, reject) => {
           fsClassic.access(
             path.join(paths[0], 'Makefile'),
-            fsClassic.F_OK,
+            fsClassic.constants.F_OK,
             async (e) => {
               if (e) {
                 // File does not exist - skip
@@ -110,6 +113,9 @@ const installNPMDependencies = async (libdragonInfo) => {
   }
 };
 
+/**
+ * @param {string[]} params
+ */
 function runNPM(params) {
   return spawnProcess(
     /^win/.test(process.platform) ? 'npm.cmd' : 'npm',
