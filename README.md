@@ -4,9 +4,62 @@
 
 This is a wrapper for a docker container to make managing the libdragon toolchain easier. It has the additional advantage that libdragon toolchain and library can be installed on a per-project basis instead of managing system-wide installations.
 
-## Quick Install
+## Prerequisites
 
-On a system with [docker](https://www.docker.com/products/docker-desktop) (`>= 18`), grab a [pre-built executable](https://github.com/anacierdem/libdragon-docker/releases/latest) and put it somewhere on your PATH. Then navigate to the folder you want to initialize your project and invoke libdragon;
+You should have [docker](https://www.docker.com/products/docker-desktop) (`>= 18`) installed on your system.
+
+`git` is not strictly required to use the tool. Still, it is highly recommended to have git on your host machine as it will be used instead of the one in the container.
+
+## Installation
+
+This is primarily a node.js script which is also packaged as an executable. You have two options:
+
+### pre-built
+
+Download the [pre-built executable](https://github.com/anacierdem/libdragon-docker/releases/latest) for your system and put it somewhere on your PATH. It is discouraged to put it in your project folder.
+
+<details>
+  <summary>Windows instructions</summary>
+
+  - Download the Windows executable and copy it to `C:\bin`
+  - Press `Windows + R` key combination and then enter `rundll32 sysdm.cpl,EditEnvironmentVariables`
+  - In the `Environment Variables` window find the `Path` variable under `User variables for <your user name>`
+  - Double click it and add a new entry as `C:\bin`
+  - Restart your computer.
+  - You should now be able to use the `libdragon` on a command line or PowerShell.
+  - To update it with a new version, just replace the file in `C:\bin`
+
+</details>
+
+<details>
+  <summary>MacOS instructions</summary>
+
+  - Download the MacOS executable and copy it to `/usr/local/bin`
+  - Right click it and choose `Open`.
+  - It will show a warning, approve it by clicking `Open` again. You can close the newly opened terminal window.
+  - You should now be able to use the `libdragon` command.
+  - To update it with a new version, replace the file in `/usr/local/bin` and repeat the other steps.
+
+</details>
+
+<details>
+  <summary>Linux instructions</summary>
+
+  - You should already know this :)
+
+</details>
+
+### via NPM
+
+Install [node.js](https://nodejs.org/en/download/) (`>= 14`) and install `libdragon` as a global NPM package;
+
+    npm install -g libdragon
+
+To update the tool to the latest, do `npm i -g libdragon@latest`.
+
+## Quick Guide
+
+Navigate to the folder you want to initialize your project and invoke libdragon;
 
     libdragon init
 
@@ -22,21 +75,12 @@ To update the library and rebuild/install all the artifacts;
 
     libdragon update
 
-`git` is not strictly required to use this tool as docker's git will be used instead. Still, it is highly recommended to have git on your host machine.
-
-## Overall usage
-
-This is primarily a node.js script which is also packaged as an executable. If you have [node.js](https://nodejs.org/en/download/) (`>= 14`), you can do a global install and use it as usual. To install `libdragon` as a global NPM package;
-
-    npm install -g libdragon
-
-To update the tool to the latest, do `npm i -g libdragon@latest`.
-
-You can invoke libdragon as follows;
+In general, you can invoke libdragon as follows;
 
     libdragon [flags] <action>
 
 Run `libdragon help [action]` for more details on individual actions.
+
 
 ## Working on this repository
 
