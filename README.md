@@ -244,9 +244,7 @@ This is an experimental dependency management.
 
 ## TODOS
 
-- [ ] Run CI checks before semantic release.
 - [ ] TS thinks nothing is undefined. This should be fixed.
-- [ ] Skip CI checks for irrelevant changes.
 - [ ] Verify the NPM dependency mechanism is still working and add a test.
 
 ## Funding
