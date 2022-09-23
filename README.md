@@ -1,6 +1,6 @@
 # Docker Libdragon
 
-[![Build](https://github.com/anacierdem/libdragon-docker/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/anacierdem/libdragon-docker/actions/workflows/ci.yml)
+[![Build](https://github.com/anacierdem/libdragon-docker/actions/workflows/release.yml/badge.svg?branch=master)](https://github.com/anacierdem/libdragon-docker/actions/workflows/release.yml)
 
 This is a wrapper for a docker container to make managing the libdragon toolchain easier. It has the additional advantage that libdragon toolchain and library can be installed on a per-project basis instead of managing system-wide installations.
 
@@ -191,7 +191,7 @@ When you are happy with your changes, you can verify you conform to the coding s
     npm run format-check
     npm run lint-check
 
-You can auto-fix applicable errors by running `format` and `lint` scripts instead. Additionally, typescript is used as the type system. To be able to get away with transpiling the code during development, jsDoc flavor of types are used instead of inline ones. To check if your types, run:
+You can auto-fix applicable errors by running `format` and `lint` scripts instead. Additionally, typescript is used as the type system. To be able to get away with transpiling the code during development, jsDoc flavor of types are used instead of inline ones. To check your types, run:
 
     npm run tsc
 
