@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/anacierdem/libdragon-docker/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/anacierdem/libdragon-docker/actions/workflows/ci.yml)
 
-This is a wrapper for a docker container to make managing the libdragon toolchain easier.
+This is a wrapper for a docker container to make managing the libdragon toolchain easier. It has the additional advantage that libdragon toolchain and library can be installed on a per-project basis instead of managing system-wide installations.
 
 ## Quick Install
 
@@ -86,6 +86,29 @@ This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can
 
 There are also additional vscode launch configurations to build libdragon examples and tests based on the currently built and installed libdragon in the docker container. Most of these will always rebuild so that they will use the latest if you made and installed an alternative libdragon. The test bench itself and a few examples (that use the new build system) will already rebuild and reinstall libdragon automatically. These will always produce a rom image using the latest libdragon code in the active repository via its make dependencies. You can clean everything with the `clean` task (open the command palette and choose `Run Task -> clean`).
 
+### Developing the tool itself
+
+For a quick development loop it really helps linking the code in this repository as the global libdragon installation. To do this run;
+
+    npm link
+
+in the root of the repository. Once you do this, running `libdragon` will use the code here rather than the actual npm installation. Then you can test your changes in the libdragon project here or elsewhere on your computer.
+
+When you are happy with your changes, you can verify you conform to the coding standards via:
+
+    npm run format-check
+    npm run lint-check
+
+You can auto-fix applicable errors by running `format` and `lint` scripts instead. Additionally, typescript is used as the type system. To be able to get away with transpiling the code during development, jsDoc flavor of types are used instead of inline ones. To check if your types, run:
+
+    npm run tsc
+
+This repository uses [`semantic-release`](https://github.com/semantic-release/semantic-release) and manages releases from specially formatted commit messages. To simplify creating them you can use:
+
+    npx cz
+
+It will create a `semantic-release` compatible commit from your current staged changes.
+
 ## As an NPM dependency
 
 You can install libdragon as an NPM dependency by `npm install libdragon --save` in order to use docker in your N64 projects. A `libdragon` command similar to global intallation is provided that can be used in your NPM scripts as follows;
@@ -125,7 +148,6 @@ This is an experimental dependency management.
 
 ## TODOS
 
-- [ ] Include instructions for developing the tool.
 - [ ] Include instructions for different workflows. e.g doing changes in the library.
 - [ ] Skip CI checks for irrelevant changes.
 - [ ] Verify the NPM dependency mechanism is still working and add a test.
