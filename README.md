@@ -81,6 +81,54 @@ In general, you can invoke libdragon as follows;
 
 Run `libdragon help [action]` for more details on individual actions.
 
+## Recipes
+
+### Using a different branch of libdragon
+
+Initialize your project as usual:
+
+    libdragon init
+
+Then switch the submodule to the desired branch:
+
+    cd ./libdragon
+    git checkout opengl
+    cd ..
+    libdragon install
+
+If your changes are on a different remote, then you will need to manage your git remotes as usual.
+
+### Testing changes on libdragon
+
+As libdragon is an actively developed library, you may find yourself at a position where you want to change a few things on it and see how it works. In general, if you modify the files in `libdragon` folder of your project, you can install that version to the docker container by simply running:
+
+    libdragon install
+
+This will update all the artifacts in your container and your new code will start linking against the new version when you re-build it via `libdragon make`. The build system should pick up the change in the library and re-compile the dependent files.
+
+Instead of depending on the above command, you can re-build the library by making it a make dependency in your project:
+
+```makefile
+libdragon-install: libdragon
+	$(MAKE) -C ./libdragon install
+
+libdragon:
+	$(MAKE) -C ./libdragon
+```
+
+If your build now depends on `libdragon-install`, it will force an install (which should be pretty quick if you don't have changes) and force the build system to rebuild your project when necessary.
+
+If you clone this repository, this setup is pretty much ready for you. Make sure you have a working libdragon setup and you get the submodules (e.g `git submodule update --init`). Then you can run `libdragon make bench` to execute the code in `./src` with your library changes. Also see [test bench](#local-test-bench).
+
+When managing your changes to the library, you have a few options:
+
+#### **Using `submodule` vendor strategy.**
+
+To be able to share your project with the library change, you would need to push it somewhere public and make sure it is cloned properly by your contributors. This is not recommended for keeping track of your changes but is very useful if you plan to contribute it back to upstream. In the latter case, you can push your submodule branch to your fork and easily open a PR.
+
+#### **Using `subtree` vendor strategy.**
+
+To be able to share your project with the library change, you just commit your changes. This is very useful for keeping track of your changes specific to your project. On the other hand this is not recommended if you plan to contribute it back to upstream because you will need to make sure your libdragon commits are isolated and do the juggling when pushing it somewhere via `git subtree push`.
 
 ## Working on this repository
 
@@ -157,11 +205,13 @@ It will create a `semantic-release` compatible commit from your current staged c
 
 You can install libdragon as an NPM dependency by `npm install libdragon --save` in order to use docker in your N64 projects. A `libdragon` command similar to global intallation is provided that can be used in your NPM scripts as follows;
 
-    "scripts": {
-        "prepare": "libdragon init"
-        "build": "libdragon make",
-        "clean": "libdragon make clean"
-    }
+```json
+"scripts": {
+    "prepare": "libdragon init"
+    "build": "libdragon make",
+    "clean": "libdragon make clean"
+}
+```
 
 See [here](https://github.com/anacierdem/ed64-example) for a full example.
 
@@ -171,20 +221,22 @@ You can make an NPM package that a `libdragon` project can depend on. Just inclu
 
 For example this `package.json` in the dependent project;
 
-    {
-        "name": "libdragonDependentProject",
-        "version": "1.0.0",
-        "description": "...",
-        "scripts": {
-            "build": "libdragon make",
-            "clean": "libdragon make clean",
-            "prepare": "libdragon init"
-        },
-        "dependencies": {
-            "libdragon": <version>,
-            "ed64": <version>
-        }
+```json
+{
+    "name": "libdragonDependentProject",
+    "version": "1.0.0",
+    "description": "...",
+    "scripts": {
+        "build": "libdragon make",
+        "clean": "libdragon make clean",
+        "prepare": "libdragon init"
+    },
+    "dependencies": {
+        "libdragon": <version>,
+        "ed64": <version>
     }
+}
+```
 
 will init the container for this project and run `make && make install` for `ed64` upon running `npm install`. To develop a dependency [this](https://github.com/anacierdem/libdragon-dependency) is a good starting point.
 
@@ -192,7 +244,6 @@ This is an experimental dependency management.
 
 ## TODOS
 
-- [ ] Include instructions for different workflows. e.g doing changes in the library.
 - [ ] Skip CI checks for irrelevant changes.
 - [ ] Verify the NPM dependency mechanism is still working and add a test.
 
