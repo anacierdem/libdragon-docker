@@ -30,6 +30,7 @@ const { syncImageAndStart } = require('./update-and-start');
 
 /**
  * @param {import('../project-info').LibdragonInfo} info
+ * @return {Promise<"submodule" | "subtree" | undefined>}
  */
 const autoDetect = async (info) => {
   const vendorTarget = path.relative(
@@ -62,9 +63,16 @@ const autoDetect = async (info) => {
       inheritStdin: false,
       inheritStdout: false,
       inheritStderr: false,
+    }).catch((e) => {
+      if (!(e instanceof CommandError)) {
+        throw e;
+      }
     });
 
-    if (gitLogs.includes(`git-subtree-dir: ${info.vendorDirectory}`)) {
+    if (
+      gitLogs &&
+      gitLogs.includes(`git-subtree-dir: ${info.vendorDirectory}`)
+    ) {
       log(`${info.vendorDirectory} is a subtree.`);
       return 'subtree';
     }
@@ -101,6 +109,8 @@ const autoVendor = async (info) => {
   }
 
   await runGitMaybeHost(info, ['init']);
+
+  // TODO: TS thinks this is already defined
   const detectedStrategy = await autoDetect(info);
 
   if (
