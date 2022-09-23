@@ -1,3 +1,16 @@
+## [10.8.1](https://github.com/anacierdem/libdragon-docker/compare/v10.8.0...v10.8.1) (2022-09-23)
+
+
+### Bug Fixes
+
+* **init.js:** prevent premature failure when the vendor target already exists ([9c76ece](https://github.com/anacierdem/libdragon-docker/commit/9c76eceb77b0e63effc8f6a2c8ca782eabd3f260))
+* **init.js:** show a custom error when the submodule operation fails ([bd40a9f](https://github.com/anacierdem/libdragon-docker/commit/bd40a9f38ef0e60e3c43e70b4d0e647a4db8a97a)), closes [#57](https://github.com/anacierdem/libdragon-docker/issues/57)
+
+
+### Reverts
+
+* revert changelog removal ([e34b21d](https://github.com/anacierdem/libdragon-docker/commit/e34b21db8b17f5cdcebfdd45404aa1270d773595))
+
 # [10.8.0](https://github.com/anacierdem/libdragon-docker/compare/v10.7.1...v10.8.0) (2022-05-14)
 
 
