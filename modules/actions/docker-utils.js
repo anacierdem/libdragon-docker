@@ -1,7 +1,6 @@
 /**
  *
  * @param {import('../project-info').LibdragonInfo} libdragonInfo
- * @returns
  */
 function dockerHostUserParams(libdragonInfo) {
   const { uid, gid } = libdragonInfo.userInfo;

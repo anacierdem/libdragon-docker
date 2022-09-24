@@ -8,6 +8,7 @@ const {
   toPosixPath,
   fileExists,
   dirExists,
+  CommandError,
 } = require('../helpers');
 
 const { start } = require('./start');
@@ -16,7 +17,6 @@ const { installDependencies } = require('./utils');
 
 /**
  * @param {import('../project-info').LibdragonInfo} libdragonInfo
- * @returns
  */
 function dockerRelativeWorkdir(libdragonInfo) {
   return (
@@ -27,18 +27,14 @@ function dockerRelativeWorkdir(libdragonInfo) {
 }
 
 /**
- *
  * @param {import('../project-info').LibdragonInfo} libdragonInfo
- * @returns
  */
 function dockerRelativeWorkdirParams(libdragonInfo) {
   return ['--workdir', dockerRelativeWorkdir(libdragonInfo)];
 }
 
 /**
- *
  * @param {import('../project-info').LibdragonInfo} info
- * @returns
  */
 const exec = async (info) => {
   const parameters = info.options.EXTRA_PARAMS.slice(1);
@@ -52,17 +48,22 @@ const exec = async (info) => {
   const stdin = new PassThrough();
 
   /** @type {string[]} */
-  const paramsWithConvertedPaths = parameters.map((item) => {
-    if (item.startsWith('-')) {
+  const paramsWithConvertedPaths = await Promise.all(
+    parameters.map(async (item) => {
+      if (item.startsWith('-')) {
+        return item;
+      }
+      if (
+        item.includes(path.sep) &&
+        ((await fileExists(item)) || (await dirExists(item)))
+      ) {
+        return toPosixPath(
+          path.isAbsolute(item) ? path.relative(process.cwd(), item) : item
+        );
+      }
       return item;
-    }
-    if (item.includes(path.sep) && (fileExists(item) || dirExists(item))) {
-      return toPosixPath(
-        path.isAbsolute(item) ? path.relative(process.cwd(), item) : item
-      );
-    }
-    return item;
-  });
+    })
+  );
 
   /**
    *
@@ -101,9 +102,7 @@ const exec = async (info) => {
 
   let started = false;
   /**
-   *
    * @param {import('fs').ReadStream=} stdin
-   * @returns
    */
   const startOnceAndCmd = async (stdin) => {
     if (!started) {
@@ -147,14 +146,16 @@ const exec = async (info) => {
       // In the first run, pass the stdin to the process if it is not a TTY
       // o/w we loose a user input unnecesarily somehow.
       stdin:
-        !process.stdin.isTTY &&
+        (!process.stdin.isTTY || undefined) &&
         /** @type {import('fs').ReadStream} */ (
           /** @type {unknown} */ (process.stdin)
         ),
     });
   } catch (e) {
+    if (!(e instanceof CommandError)) {
+      throw e;
+    }
     if (
-      !e.out ||
       // TODO: is there a better way?
       !e.out.toString().includes(info.containerId)
     ) {

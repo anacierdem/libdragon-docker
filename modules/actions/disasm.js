@@ -13,7 +13,7 @@ const {
 /**
  * @param {string} stop
  * @param {string} start
- * @return {Promise<string>}
+ * @returns {Promise<string>}
  */
 const findElf = async (stop, start = '.') => {
   start = path.resolve(start);

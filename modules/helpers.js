@@ -5,6 +5,7 @@ const chalk = require('chalk').stderr;
 const { spawn } = require('child_process');
 
 const { globals } = require('./globals');
+const { NO_PROJECT_ACTIONS } = require('./constants');
 
 /**
  * A structure to keep additional error information
@@ -197,26 +198,26 @@ function spawnProcess(
       resolve('');
     };
 
-    if (!enableInTTY && stdin) {
+    if (!enableInTTY && stdin && command.stdin) {
       stdin.pipe(command.stdin);
     }
 
-    if (!enableOutTTY && (globals.verbose || userCommand)) {
+    if (!enableOutTTY && (globals.verbose || userCommand) && command.stdout) {
       command.stdout.pipe(process.stdout);
       process.stdout.once('error', eatEpipe);
     }
 
-    if (!inheritStdout) {
+    if (!inheritStdout && command.stdout) {
       command.stdout.on('data', function (data) {
         stdout.push(Buffer.from(data));
       });
     }
 
-    if (!enableErrorTTY && (globals.verbose || userCommand)) {
+    if (!enableErrorTTY && (globals.verbose || userCommand) && command.stderr) {
       command.stderr.pipe(process.stderr);
     }
 
-    if (!inheritStderr) {
+    if (!inheritStderr && command.stderr) {
       command.stderr.on('data', function (data) {
         stderr.push(Buffer.from(data));
       });
@@ -264,58 +265,60 @@ function spawnProcess(
  * (libdragonInfo: import('./project-info').LibdragonInfo, cmdWithParams: string[], options?: SpawnOptions, unused?: unknown): Promise<string>;
  * }} DockerExec
  */
-const dockerExec = /** @type {DockerExec} */ function (
-  libdragonInfo,
-  dockerParams,
-  cmdWithParams,
-  /** @type {SpawnOptions} */
-  options
-) {
-  assert(
-    !!libdragonInfo.containerId,
-    new Error('Trying to invoke dockerExec without a containerId.')
-  );
-
-  // TODO: assert for invalid args
-  const haveDockerParams =
-    Array.isArray(dockerParams) && Array.isArray(cmdWithParams);
-
-  if (!haveDockerParams) {
-    options = /** @type {SpawnOptions} */ (cmdWithParams);
-  }
-
-  const additionalParams = [];
-
-  // Docker TTY wants in & out streams both to be a TTY
-  // If no options are provided, disable TTY as spawnProcess defaults to no
-  // inherit as well.
-  const enableTTY = options
-    ? options.inheritStdout && options.inheritStdin
-    : false;
-  const ttyEnabled = enableTTY && process.stdout.isTTY && process.stdin.isTTY;
-
-  if (ttyEnabled) {
-    additionalParams.push('-t');
-  }
-
-  // Always enable stdin, also see; https://github.com/anacierdem/libdragon-docker/issues/45
-  // Currently we run all exec commands in stdin mode even if the actual process
-  // does not need any input. This will eat any user input by default.
-  additionalParams.push('-i');
-
-  return spawnProcess(
-    'docker',
-    [
-      'exec',
-      ...(haveDockerParams
-        ? [...dockerParams, ...additionalParams]
-        : additionalParams),
-      libdragonInfo.containerId,
-      ...(haveDockerParams ? cmdWithParams : dockerParams),
-    ],
+const dockerExec = /** @type {DockerExec} */ (
+  function (
+    libdragonInfo,
+    dockerParams,
+    cmdWithParams,
+    /** @type {SpawnOptions | undefined} */
     options
-  );
-};
+  ) {
+    assert(
+      !!libdragonInfo.containerId,
+      new Error('Trying to invoke dockerExec without a containerId.')
+    );
+
+    // TODO: assert for invalid args
+    const haveDockerParams =
+      Array.isArray(dockerParams) && Array.isArray(cmdWithParams);
+
+    if (!haveDockerParams) {
+      options = /** @type {SpawnOptions} */ (cmdWithParams);
+    }
+
+    const additionalParams = [];
+
+    // Docker TTY wants in & out streams both to be a TTY
+    // If no options are provided, disable TTY as spawnProcess defaults to no
+    // inherit as well.
+    const enableTTY = options
+      ? options.inheritStdout && options.inheritStdin
+      : false;
+    const ttyEnabled = enableTTY && process.stdout.isTTY && process.stdin.isTTY;
+
+    if (ttyEnabled) {
+      additionalParams.push('-t');
+    }
+
+    // Always enable stdin, also see; https://github.com/anacierdem/libdragon-docker/issues/45
+    // Currently we run all exec commands in stdin mode even if the actual process
+    // does not need any input. This will eat any user input by default.
+    additionalParams.push('-i');
+
+    return spawnProcess(
+      'docker',
+      [
+        'exec',
+        ...(haveDockerParams
+          ? [...dockerParams, ...additionalParams]
+          : additionalParams),
+        libdragonInfo.containerId,
+        ...(haveDockerParams ? cmdWithParams : dockerParams),
+      ],
+      options
+    );
+  }
+);
 
 /**
  * Recursively copies directories and files
@@ -386,8 +389,9 @@ function toNativePath(p) {
 }
 
 /**
- * @param {boolean} condition
+ * @param {any} condition
  * @param {Error} error
+ * @returns {asserts condition}
  */
 function assert(condition, error) {
   if (!condition) {
@@ -422,6 +426,18 @@ function log(text, verboseOnly = false) {
   }
 }
 
+/**
+ * @param {import('./project-info').CLIInfo | import('./project-info').LibdragonInfo} info
+ * @returns {info is import('./project-info').LibdragonInfo}
+ */
+function isProjectAction(info) {
+  return !NO_PROJECT_ACTIONS.includes(
+    /** @type {import('./project-info').ActionsNoProject} */ (
+      info.options.CURRENT_ACTION.name
+    )
+  );
+}
+
 module.exports = {
   spawnProcess,
   toPosixPath,
@@ -436,4 +452,5 @@ module.exports = {
   CommandError,
   ParameterError,
   ValidationError,
+  isProjectAction,
 };

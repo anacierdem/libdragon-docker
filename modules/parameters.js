@@ -26,7 +26,7 @@ const { globals } = require('./globals');
  * @param {string[]} argv
  */
 const parseParameters = async (argv) => {
-  /** @type CommandlineOptions */
+  /** @type Partial<CommandlineOptions> & {EXTRA_PARAMS: string[] } */
   const options = {
     EXTRA_PARAMS: [],
     CURRENT_ACTION: undefined,
@@ -143,7 +143,7 @@ const parseParameters = async (argv) => {
     process.exit(STATUS_BAD_PARAM);
   }
 
-  return { options };
+  return { options: /** @type CommandlineOptions */ (options) };
 };
 
 module.exports = {

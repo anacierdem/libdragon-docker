@@ -18,9 +18,30 @@ const {
 const { parseParameters } = require('./modules/parameters');
 const { readProjectInfo, writeProjectInfo } = require('./modules/project-info');
 
+// Note: it is not possible to merge these type definitions in a single comment
+/**
+ * @template {any} [U=any]
+ * @typedef {(U extends any ? (k: U)=>void : never) extends ((k: infer I)=>void) ? I : never} UnionToIntersection
+ */
+/**
+ * @template {any} [K=any]
+ * never does not break the call `info.options.CURRENT_ACTION.fn`
+ * @typedef {[K] extends [UnionToIntersection<K>] ? any : unknown} NoUnion
+ * @typedef {NoUnion<Exclude<Parameters<import('./modules/parameters').Actions[import('./modules/project-info').ActionsNoProject]['fn']>[0], undefined>>} EitherCLIOrLibdragonInfo
+ */
+
 parseParameters(process.argv)
   .then(readProjectInfo)
-  .then((info) => info.options.CURRENT_ACTION.fn(info))
+  .then((info) => {
+    return info.options.CURRENT_ACTION.fn(
+      /** @type {EitherCLIOrLibdragonInfo} */ (info)
+    );
+    // This type make sure a similar restriction to this code block is enforced
+    // without adding unnecessary javascript.
+    // return isProjectAction(info)
+    //   ? info.options.CURRENT_ACTION.fn(info)
+    //   : info.options.CURRENT_ACTION.fn(info);
+  })
   .catch((e) => {
     if (e instanceof ParameterError) {
       log(chalk.red(e.message));

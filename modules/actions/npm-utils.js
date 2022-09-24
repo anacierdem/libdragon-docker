@@ -55,59 +55,61 @@ const installNPMDependencies = async (libdragonInfo) => {
 
     await Promise.all(
       deps.map(({ name, paths }) => {
-        return new Promise((resolve, reject) => {
-          fsClassic.access(
-            path.join(paths[0], 'Makefile'),
-            fsClassic.constants.F_OK,
-            async (e) => {
-              if (e) {
-                // File does not exist - skip
-                resolve();
-                return;
+        return /** @type Promise<void> */ (
+          new Promise((resolve, reject) => {
+            fsClassic.access(
+              path.join(paths[0], 'Makefile'),
+              fsClassic.constants.F_OK,
+              async (e) => {
+                if (e) {
+                  // File does not exist - skip
+                  resolve();
+                  return;
+                }
+
+                if (paths.length > 1) {
+                  reject(
+                    new ValidationError(
+                      `Using same dependency with different versions is not supported! ${name}`
+                    )
+                  );
+                  return;
+                }
+
+                try {
+                  const relativePath = toPosixPath(
+                    path.relative(libdragonInfo.root, paths[0])
+                  );
+                  const containerPath = path.posix.join(
+                    CONTAINER_TARGET_PATH,
+                    relativePath
+                  );
+                  const makePath = path.posix.join(containerPath, 'Makefile');
+
+                  await dockerExec(
+                    libdragonInfo,
+                    [...dockerHostUserParams(libdragonInfo)],
+                    [
+                      '/bin/bash',
+                      '-c',
+                      '[ -f ' +
+                        makePath +
+                        ' ] && make -C ' +
+                        containerPath +
+                        ' && make -C ' +
+                        containerPath +
+                        ' install',
+                    ]
+                  );
+
+                  resolve();
+                } catch (e) {
+                  reject(e);
+                }
               }
-
-              if (paths.length > 1) {
-                reject(
-                  new ValidationError(
-                    `Using same dependency with different versions is not supported! ${name}`
-                  )
-                );
-                return;
-              }
-
-              try {
-                const relativePath = toPosixPath(
-                  path.relative(libdragonInfo.root, paths[0])
-                );
-                const containerPath = path.posix.join(
-                  CONTAINER_TARGET_PATH,
-                  relativePath
-                );
-                const makePath = path.posix.join(containerPath, 'Makefile');
-
-                await dockerExec(
-                  libdragonInfo,
-                  [...dockerHostUserParams(libdragonInfo)],
-                  [
-                    '/bin/bash',
-                    '-c',
-                    '[ -f ' +
-                      makePath +
-                      ' ] && make -C ' +
-                      containerPath +
-                      ' && make -C ' +
-                      containerPath +
-                      ' install',
-                  ]
-                );
-
-                resolve();
-              } catch (e) {
-                reject(e);
-              }
-            }
-          );
-        });
+            );
+          })
+        );
       })
     );
   }

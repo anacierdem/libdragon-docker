@@ -27,37 +27,41 @@ const {
   toPosixPath,
   assert,
   ParameterError,
+  isProjectAction,
 } = require('./helpers');
 
-// These do not need a project to exist.
-const NO_PROJECT_ACTIONS = /** @type {const} */ (['help', 'version']);
-
 /**
- * @typedef { typeof NO_PROJECT_ACTIONS[number] } ActionsNoProject
+ * @typedef { typeof import('./constants').NO_PROJECT_ACTIONS[number] } ActionsNoProject
  * @typedef { Exclude<keyof import('./parameters').Actions, ActionsNoProject> } ActionsWithProject
  * @typedef { import('./parameters').CommandlineOptions<ActionsNoProject> } ActionsNoProjectOptions
  * @typedef { import('./parameters').CommandlineOptions<ActionsWithProject> } ActionsWithProjectOptions
  *
+ * This is all the potential CLI combinations
  * @typedef { {
- *  options: ActionsNoProjectOptions
+ *  options: import('./parameters').CommandlineOptions
  * } } CLIInfo
  *
+ * Then readProjectInfo creates two possible set of outputs. One is for actions
+ * that don't need a project and one with project. This setup forces the actions
+ * to not use detailed information if they are listed in NO_PROJECT_ACTIONS
  * @typedef { {
+ *  options: ActionsNoProjectOptions
+ * } } NoProjectInfo
+ *
+ * @typedef { {
+ *  options: ActionsWithProjectOptions
  *  root: string;
  *  userInfo: os.UserInfo<string>;
  *  haveProjectConfig: boolean;
  *  imageName: string;
  *  vendorDirectory: string;
  *  vendorStrategy: import('./parameters').VendorStrategy;
- *  containerId: string
- * } } ExtendedInfo
- *
- * @typedef { CLIInfo & Partial<ExtendedInfo> } LibdragonInfo
+ *  containerId?: string
+ * } } LibdragonInfo
  */
 
 /**
  * @param {LibdragonInfo} libdragonInfo
- * @returns string
  */
 async function findContainerId(libdragonInfo) {
   const idFile = path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE);
@@ -109,7 +113,7 @@ async function findContainerId(libdragonInfo) {
 /**
  * @param {string} start
  * @param {string} relativeFile
- * @return {Promise<string>}
+ * @returns {Promise<string | undefined>}
  */
 async function findLibdragonRoot(
   start = '.',
@@ -139,18 +143,15 @@ async function findGitRoot() {
 }
 
 /**
- * @param {LibdragonInfo} optionInfo
+ * @param {CLIInfo} optionInfo
+ * @returns {Promise<LibdragonInfo | NoProjectInfo>}
  */
 const readProjectInfo = async function (optionInfo) {
   // No need to do anything here if the action does not depend on the project
   // The only exception is the init and destroy actions, which do not need an
   // existing project but readProjectInfo must always run to analyze the situation
-  if (
-    NO_PROJECT_ACTIONS.includes(
-      /** @type {ActionsNoProject} */ (optionInfo.options.CURRENT_ACTION.name)
-    )
-  ) {
-    return /** @type {CLIInfo} */ (optionInfo);
+  if (!isProjectAction(optionInfo)) {
+    return /** @type {NoProjectInfo} */ (optionInfo);
   }
 
   const migratedRoot = await findLibdragonRoot();
@@ -173,10 +174,16 @@ const readProjectInfo = async function (optionInfo) {
     );
   }
 
+  const foundRoot =
+    projectRoot ?? (await findNPMRoot()) ?? (await findGitRoot());
+  if (!foundRoot) {
+    log('Could not find project root, set as cwd.', true);
+  }
+
   /** @type {LibdragonInfo} */
   let info = {
     ...optionInfo,
-    root: projectRoot ?? (await findNPMRoot()) ?? (await findGitRoot()),
+    root: foundRoot ?? process.cwd(),
     userInfo: os.userInfo(),
 
     // Use this to discriminate if there is a project when the command is run
@@ -189,11 +196,6 @@ const readProjectInfo = async function (optionInfo) {
     vendorDirectory: toPosixPath(path.join('.', LIBDRAGON_SUBMODULE)),
     vendorStrategy: DEFAULT_STRATEGY,
   };
-
-  if (!info.root) {
-    log('Could not find project root, set as cwd.', true);
-    info.root = process.cwd();
-  }
 
   log(`Project root: ${info.root}`, true);
 
@@ -231,7 +233,11 @@ const readProjectInfo = async function (optionInfo) {
   // As last option fallback to default value.
 
   // If still have the container, read the image name from it
-  if (!info.imageName && (await checkContainerAndClean(info))) {
+  if (
+    !info.imageName &&
+    info.containerId &&
+    (await checkContainerAndClean(info))
+  ) {
     info.imageName = (
       await spawnProcess('docker', [
         'container',

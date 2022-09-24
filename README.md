@@ -242,11 +242,6 @@ will init the container for this project and run `make && make install` for `ed6
 
 This is an experimental dependency management.
 
-## TODOS
-
-- [ ] TS thinks nothing is undefined. This should be fixed.
-- [ ] Verify the NPM dependency mechanism is still working and add a test.
-
 ## Funding
 
 If this tool helped you, consider supporting its development by sponsoring it!

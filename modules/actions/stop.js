@@ -4,6 +4,7 @@ const { checkContainerRunning } = require('./utils');
 
 /**
  * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ * @returns {Promise<import('../project-info').LibdragonInfo | void>}
  */
 const stop = async (libdragonInfo) => {
   const running =

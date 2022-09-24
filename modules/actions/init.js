@@ -30,7 +30,7 @@ const { syncImageAndStart } = require('./update-and-start');
 
 /**
  * @param {import('../project-info').LibdragonInfo} info
- * @return {Promise<"submodule" | "subtree" | undefined>}
+ * @returns {Promise<"submodule" | "subtree" | undefined>}
  */
 const autoDetect = async (info) => {
   const vendorTarget = path.relative(
@@ -188,6 +188,8 @@ const autoVendor = async (info) => {
     ]);
     return info;
   }
+
+  return info;
 };
 
 /**
@@ -242,7 +244,9 @@ async function init(info) {
   info.containerId = await start(info);
 
   // We have created a new container, save the new info ASAP
-  await initGitAndCacheContainerId(info);
+  await initGitAndCacheContainerId(
+    /** @type Parameters<initGitAndCacheContainerId>[0] */ (info)
+  );
 
   info = await autoVendor(info);
 

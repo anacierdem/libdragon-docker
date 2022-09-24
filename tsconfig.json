@@ -1,21 +1,16 @@
 {
   "compilerOptions": {
-    "target": "es5",
     "module": "commonjs",
-    "declaration": true,
     "noImplicitAny": true,
-    "removeComments": true,
     "experimentalDecorators": true,
     "rootDir": ".",
     "sourceMap": true,
     "listFiles": true,
-    "newLine": "LF",
-    "noEmitOnError": true,
     "allowJs": true,
     "checkJs": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    "strict": true
   },
-  "exclude": ["node_modules"]
+  "include": ["index.js", "modules/**/*"]
 }

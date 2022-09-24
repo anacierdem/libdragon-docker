@@ -11,6 +11,11 @@ module.exports = /** @type {const} */ ({
 
   ACCEPTED_STRATEGIES: ['submodule', 'subtree', 'manual'],
 
+  // These do not need a project to exist and their actions do not need the whole
+  // structure. Actions that need the full project information should not be
+  // listed here.
+  NO_PROJECT_ACTIONS: ['help', 'version'],
+
   // cli exit codes
   STATUS_OK: 0,
   STATUS_ERROR: 1,

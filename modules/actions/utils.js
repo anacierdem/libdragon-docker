@@ -121,7 +121,6 @@ const destroyContainer = async (libdragonInfo) => {
  * @param {import('../project-info').LibdragonInfo} libdragonInfo
  * @param {string[]} params
  * @param {import('../helpers').SpawnOptions} options
- * @returns
  */
 async function runGitMaybeHost(libdragonInfo, params, options = {}) {
   assert(
@@ -201,7 +200,7 @@ async function checkContainerRunning(containerId) {
 }
 
 /**
- * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ * @param {import('../project-info').LibdragonInfo & {containerId: string}} libdragonInfo
  */
 async function initGitAndCacheContainerId(libdragonInfo) {
   // If there is managed vendoring, make sure we have a git repo. `git init` is
