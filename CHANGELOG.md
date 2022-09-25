@@ -1,3 +1,10 @@
+## [10.8.2](https://github.com/anacierdem/libdragon-docker/compare/v10.8.1...v10.8.2) (2022-09-25)
+
+
+### Bug Fixes
+
+* make ts more stricter and fix potential edge cases ([5890be0](https://github.com/anacierdem/libdragon-docker/commit/5890be0346a736611a60cf6ac01166a9a3179a34))
+
 ## [10.8.1](https://github.com/anacierdem/libdragon-docker/compare/v10.8.0...v10.8.1) (2022-09-23)
 
 
