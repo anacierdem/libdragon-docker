@@ -53,7 +53,7 @@ const installDependencies = async (libdragonInfo) => {
 
 /**
  * Downloads the given docker image. Returns false if the local image is the
- * same, new image name otherwise.
+ * same, true otherwise.
  * @param {import('../project-info').LibdragonInfo} libdragonInfo
  * @param {string} newImageName
  */
@@ -89,7 +89,7 @@ const updateImage = async (libdragonInfo, newImageName) => {
   }
 
   log(`Image is different: ${newImageName}`, true);
-  return newImageName;
+  return true;
 };
 
 /**
