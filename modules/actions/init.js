@@ -221,11 +221,6 @@ async function init(info) {
       )} exists. This is already a libdragon project, starting it...`
     );
     if (info.options.DOCKER_IMAGE) {
-      log(
-        `Not changing docker image. Use the install action if you want to override the image.`
-      );
-    }
-    if (info.options.DOCKER_IMAGE) {
       info = await syncImageAndStart(info);
     } else {
       info = {
@@ -274,7 +269,7 @@ module.exports = /** @type {const} */ ({
 
     By default, a git repository and a submodule at \`./libdragon\` will be created to automatically update the vendored libdragon files on subsequent \`update\`s. If you intend to opt-out from this feature, see the \`--strategy manual\` flag to provide your self-managed libdragon copy. The default behaviour is intended for users who primarily want to consume libdragon as is.
 
-    If this is the first time you are creating a libdragon project at that location, this action will also create skeleton project files to kickstart things with the given image, if provided. For subsequent runs, it will act like \`start\` thus can be used to revive an existing project without modifying it.
+    If this is the first time you are creating a libdragon project at that location, this action will also create skeleton project files to kickstart things with the given image, if provided. For subsequent runs without any parameter, it will act like \`start\` thus can be used to revive an existing project without modifying it.
 
     If you have an existing project with an already vendored submodule or subtree libdragon copy, \`init\` will automatically detect it at the provided \`--directory\`.`,
     group: ['docker', 'vendoring'],
