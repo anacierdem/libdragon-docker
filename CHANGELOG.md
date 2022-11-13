@@ -1,3 +1,10 @@
+# [10.9.0](https://github.com/anacierdem/libdragon-docker/compare/v10.8.2...v10.9.0) (2022-11-13)
+
+
+### Features
+
+* add support for running inside a container ([ac9c80b](https://github.com/anacierdem/libdragon-docker/commit/ac9c80b9fa9edc1db5b58f64912add85fbfb369c))
+
 ## [10.8.2](https://github.com/anacierdem/libdragon-docker/compare/v10.8.1...v10.8.2) (2022-09-25)
 
 
