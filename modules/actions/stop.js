@@ -1,4 +1,4 @@
-const { spawnProcess } = require('../helpers');
+const { spawnProcess, ValidationError } = require('../helpers');
 
 const { checkContainerRunning } = require('./utils');
 
@@ -7,6 +7,12 @@ const { checkContainerRunning } = require('./utils');
  * @returns {Promise<import('../project-info').LibdragonInfo | void>}
  */
 const stop = async (libdragonInfo) => {
+  if (process.env.DOCKER_CONTAINER) {
+    throw new ValidationError(
+      `Not possible to stop the container from inside.`
+    );
+  }
+
   const running =
     libdragonInfo.containerId &&
     (await checkContainerRunning(libdragonInfo.containerId));

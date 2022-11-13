@@ -184,7 +184,7 @@ For a quick development loop it really helps linking the code in this repository
 
     npm link
 
-in the root of the repository. Once you do this, running `libdragon` will use the code here rather than the actual npm installation. Then you can test your changes in the libdragon project here or elsewhere on your computer.
+in the root of the repository. Once you do this, running `libdragon` will use the code here rather than the actual npm installation. Then you can test your changes in the libdragon project here or elsewhere on your computer. This setup is automatically done if you use the [devcontainer](#experimental-devcontainer-support).
 
 When you are happy with your changes, you can verify you conform to the coding standards via:
 
@@ -200,6 +200,29 @@ This repository uses [`semantic-release`](https://github.com/semantic-release/se
     npx cz
 
 It will create a `semantic-release` compatible commit from your current staged changes.
+
+### Experimental devcontainer support
+
+The repository provides a configuration (in `.devcontainer`) so that IDEs that support it can create and run the Docker container for you. Then, you can start working on it as if you are working on a machine with libdragon installed.
+
+With the provided setup, you can continue using the cli in the container and it will work for non-container specific actions like `install`, `disasm` etc. You don't have to use the cli in the container, but you can. In general it will be easier and faster to just run `make` in the container but this setup is included to ease developing the cli as well.
+
+To create your own dev container backed project, you can use the contents of the `.devcontainer` folder as reference. You don't need to include nodejs or the cli and you can just run `build.sh` as `postCreateCommand`. See the `devcontainer.json` for more details. As long as your container have the `DOCKER_CONTAINER` environment variable, the tool can work inside a container.
+
+#### Caveats
+
+- In the devcontainer, uploading via USB will not work.
+- Error matching is not yet tested.
+- Ideally the necessary extensions should be automatically installed. This is not configured yet.
+
+<details>
+  <summary>vscode instructions</summary>
+
+  - Make sure you have the [Dev container extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed and you fulfill its [requirements](https://code.visualstudio.com/docs/devcontainers/containers).
+  - Clone this repository with `--recurse-submodules` or run `git submodule update --init`.
+  - Open command palette and run `Dev Containers: Reopen in container`.
+  - It will prepare the container and open it in the editor.
+</details>
 
 ## As an NPM dependency
 

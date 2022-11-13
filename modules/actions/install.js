@@ -13,21 +13,24 @@ const { log } = require('../helpers');
  */
 const install = async (libdragonInfo) => {
   let updatedInfo = libdragonInfo;
-  const imageName = libdragonInfo.options.DOCKER_IMAGE;
-  // If an image is provided, attempt to install
-  if (imageName) {
-    log(
-      chalk.yellow(
-        'Using `install` action to update the docker image is deprecated. Use the `update` action instead.'
-      )
-    );
-    updatedInfo = await syncImageAndStart(libdragonInfo);
-  } else {
-    // Make sure existing one is running
-    updatedInfo = {
-      ...updatedInfo,
-      containerId: await start(libdragonInfo),
-    };
+
+  if (!process.env.DOCKER_CONTAINER) {
+    const imageName = libdragonInfo.options.DOCKER_IMAGE;
+    // If an image is provided, attempt to install
+    if (imageName) {
+      log(
+        chalk.yellow(
+          'Using `install` action to update the docker image is deprecated. Use the `update` action instead.'
+        )
+      );
+      updatedInfo = await syncImageAndStart(libdragonInfo);
+    } else {
+      // Make sure existing one is running
+      updatedInfo = {
+        ...updatedInfo,
+        containerId: await start(libdragonInfo),
+      };
+    }
   }
 
   // Re-install vendors on new image

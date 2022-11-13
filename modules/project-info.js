@@ -64,6 +64,11 @@ const {
  * @param {LibdragonInfo} libdragonInfo
  */
 async function findContainerId(libdragonInfo) {
+  assert(
+    !process.env.DOCKER_CONTAINER,
+    new Error('[findContainerId] We should already know we are in a container.')
+  );
+
   const idFile = path.join(libdragonInfo.root, '.git', CACHED_CONTAINER_FILE);
   if (await fileExists(idFile)) {
     const id = (await fs.readFile(idFile, { encoding: 'utf8' })).trim();
@@ -225,15 +230,19 @@ const readProjectInfo = async function (optionInfo) {
     }
   }
 
-  info.containerId = await findContainerId(info);
-  log(`Active container id: ${info.containerId}`, true);
+  if (!process.env.DOCKER_CONTAINER) {
+    info.containerId = await findContainerId(info);
+    log(`Active container id: ${info.containerId}`, true);
+  }
 
   // For imageName, flag has the highest priority followed by the one read from
   // the file and then if there is any matching container, name is read from it.
   // As last option fallback to default value.
 
   // If still have the container, read the image name from it
+  // No need to do anything if we are in a container
   if (
+    !process.env.DOCKER_CONTAINER &&
     !info.imageName &&
     info.containerId &&
     (await checkContainerAndClean(info))

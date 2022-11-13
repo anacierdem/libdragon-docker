@@ -1,4 +1,4 @@
-const { log } = require('../helpers');
+const { log, assert } = require('../helpers');
 const { updateImage, destroyContainer } = require('./utils');
 const { start } = require('./start');
 
@@ -6,6 +6,13 @@ const { start } = require('./start');
  * @param {import('../project-info').LibdragonInfo} libdragonInfo
  */
 async function syncImageAndStart(libdragonInfo) {
+  assert(
+    !process.env.DOCKER_CONTAINER,
+    new Error(
+      '[syncImageAndStart] We should already know we are in a container.'
+    )
+  );
+
   const oldImageName = libdragonInfo.imageName;
   const imageName = libdragonInfo.options.DOCKER_IMAGE ?? oldImageName;
   // If an image is provided, always attempt to install it

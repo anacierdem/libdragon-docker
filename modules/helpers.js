@@ -157,6 +157,10 @@ function spawnProcess(
     spawnOptions: {},
   }
 ) {
+  assert(
+    cmd !== 'docker' || !process.env.DOCKER_CONTAINER,
+    new Error('Trying to invoke docker inside a container.')
+  );
   return new Promise((resolve, reject) => {
     /** @type {Buffer[]} */
     const stdout = [];
@@ -273,11 +277,6 @@ const dockerExec = /** @type {DockerExec} */ (
     /** @type {SpawnOptions | undefined} */
     options
   ) {
-    assert(
-      !!libdragonInfo.containerId,
-      new Error('Trying to invoke dockerExec without a containerId.')
-    );
-
     // TODO: assert for invalid args
     const haveDockerParams =
       Array.isArray(dockerParams) && Array.isArray(cmdWithParams);
@@ -286,6 +285,35 @@ const dockerExec = /** @type {DockerExec} */ (
       options = /** @type {SpawnOptions} */ (cmdWithParams);
     }
 
+    const finalCmdWithParams = haveDockerParams ? cmdWithParams : dockerParams;
+    const finalDockerParams = haveDockerParams ? dockerParams : [];
+
+    assert(
+      finalDockerParams.findIndex(
+        (val) => val === '--workdir=' || val === '-w='
+      ) === -1,
+      new Error('Do not use `=` syntax when setting working dir')
+    );
+
+    // Convert docker execs into regular commands in the correct cwd
+    if (process.env.DOCKER_CONTAINER) {
+      const workDirIndex = finalDockerParams.findIndex(
+        (val) => val === '--workdir' || val === '-w'
+      );
+      const workDir =
+        workDirIndex >= 0 ? finalDockerParams[workDirIndex + 1] : undefined;
+      return spawnProcess(finalCmdWithParams[0], finalCmdWithParams.slice(1), {
+        ...options,
+        spawnOptions: { cwd: workDir, ...options?.spawnOptions },
+      });
+    }
+
+    assert(
+      !!libdragonInfo.containerId,
+      new Error('Trying to invoke dockerExec without a containerId.')
+    );
+
+    /** @type string[] */
     const additionalParams = [];
 
     // Docker TTY wants in & out streams both to be a TTY
@@ -309,11 +337,10 @@ const dockerExec = /** @type {DockerExec} */ (
       'docker',
       [
         'exec',
-        ...(haveDockerParams
-          ? [...dockerParams, ...additionalParams]
-          : additionalParams),
+        ...finalDockerParams,
+        ...additionalParams,
         libdragonInfo.containerId,
-        ...(haveDockerParams ? cmdWithParams : dockerParams),
+        ...finalCmdWithParams,
       ],
       options
     );

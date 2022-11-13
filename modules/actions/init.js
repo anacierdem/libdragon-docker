@@ -108,7 +108,11 @@ const autoVendor = async (info) => {
     return info;
   }
 
-  await runGitMaybeHost(info, ['init']);
+  // Container re-init breaks file modes assume there is git for this case.
+  // TODO: we should remove the unnecessary inits in the future.
+  if (!process.env.DOCKER_CONTAINER) {
+    await runGitMaybeHost(info, ['init']);
+  }
 
   // TODO: TS thinks this is already defined
   const detectedStrategy = await autoDetect(info);
@@ -220,28 +224,33 @@ async function init(info) {
         LIBDRAGON_PROJECT_MANIFEST
       )} exists. This is already a libdragon project, starting it...`
     );
-    if (info.options.DOCKER_IMAGE) {
-      info = await syncImageAndStart(info);
-    } else {
-      info = {
-        ...info,
-        containerId: await start(info),
-      };
+    if (!process.env.DOCKER_CONTAINER) {
+      if (info.options.DOCKER_IMAGE) {
+        info = await syncImageAndStart(info);
+      } else {
+        info = {
+          ...info,
+          containerId: await start(info),
+        };
+      }
     }
+
     info = await autoVendor(info);
     await installDependencies(info);
     return info;
   }
 
-  await updateImage(info, info.imageName);
-
-  // Download image and start it
-  info.containerId = await start(info);
-
-  // We have created a new container, save the new info ASAP
-  await initGitAndCacheContainerId(
-    /** @type Parameters<initGitAndCacheContainerId>[0] */ (info)
-  );
+  if (!process.env.DOCKER_CONTAINER) {
+    // Download image and start it
+    await updateImage(info, info.imageName);
+    info.containerId = await start(info);
+    // We have created a new container, save the new info ASAP
+    // When in a container, we should already have git
+    // Re-initing breaks file modes anyways
+    await initGitAndCacheContainerId(
+      /** @type Parameters<initGitAndCacheContainerId>[0] */ (info)
+    );
+  }
 
   info = await autoVendor(info);
 

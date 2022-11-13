@@ -58,6 +58,11 @@ const installDependencies = async (libdragonInfo) => {
  * @param {string} newImageName
  */
 const updateImage = async (libdragonInfo, newImageName) => {
+  assert(
+    !process.env.DOCKER_CONTAINER,
+    new Error('[updateImage] should not be called in a container')
+  );
+
   // Will not take too much time if already have the same
   const download = async () => {
     log(`Downloading docker image: ${newImageName}`);
@@ -96,6 +101,11 @@ const updateImage = async (libdragonInfo, newImageName) => {
  * @param {import('../project-info').LibdragonInfo} libdragonInfo
  */
 const destroyContainer = async (libdragonInfo) => {
+  assert(
+    !process.env.DOCKER_CONTAINER,
+    new Error('[destroyContainer] should not be called in a container')
+  );
+
   if (libdragonInfo.containerId) {
     await spawnProcess('docker', [
       'container',
@@ -144,6 +154,11 @@ async function runGitMaybeHost(libdragonInfo, params, options = {}) {
       throw e;
     }
 
+    assert(
+      !process.env.DOCKER_CONTAINER,
+      new Error('[runGitMaybeHost] Native git should exist in a container.')
+    );
+
     return await dockerExec(
       libdragonInfo,
       // Use the host user when initializing git as we will need access
@@ -159,6 +174,13 @@ async function runGitMaybeHost(libdragonInfo, params, options = {}) {
  * @param {import('../project-info').LibdragonInfo} libdragonInfo
  */
 async function checkContainerAndClean(libdragonInfo) {
+  assert(
+    !process.env.DOCKER_CONTAINER,
+    new Error(
+      '[checkContainerAndClean] We should already know we are in a container.'
+    )
+  );
+
   const id =
     libdragonInfo.containerId &&
     (
@@ -188,6 +210,13 @@ async function checkContainerAndClean(libdragonInfo) {
  * @param {string} containerId
  */
 async function checkContainerRunning(containerId) {
+  assert(
+    !process.env.DOCKER_CONTAINER,
+    new Error(
+      '[checkContainerRunning] We should already know we are in a container.'
+    )
+  );
+
   const running = (
     await spawnProcess('docker', [
       'container',
@@ -203,11 +232,16 @@ async function checkContainerRunning(containerId) {
  * @param {import('../project-info').LibdragonInfo & {containerId: string}} libdragonInfo
  */
 async function initGitAndCacheContainerId(libdragonInfo) {
+  if (!libdragonInfo.containerId) {
+    return;
+  }
+
   // If there is managed vendoring, make sure we have a git repo. `git init` is
   // safe anyways...
   if (libdragonInfo.vendorStrategy !== 'manual') {
     await runGitMaybeHost(libdragonInfo, ['init']);
   }
+
   const gitFolder = path.join(libdragonInfo.root, '.git');
   if (await dirExists(gitFolder)) {
     await fs.writeFile(

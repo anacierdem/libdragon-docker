@@ -9,6 +9,7 @@ const {
   fileExists,
   dirExists,
   CommandError,
+  spawnProcess,
 } = require('../helpers');
 
 const { start } = require('./start');
@@ -44,6 +45,23 @@ const exec = async (info) => {
     )} with [${parameters}]`,
     true
   );
+
+  // Don't even bother here, we are already in a container.
+  if (process.env.DOCKER_CONTAINER) {
+    const enableTTY = Boolean(process.stdout.isTTY && process.stdin.isTTY);
+    await spawnProcess(info.options.EXTRA_PARAMS[0], parameters, {
+      userCommand: true,
+      // Inherit stdin/out in tandem if we are going to disable TTY o/w the input
+      // stream remains inherited by the node process while the output pipe is
+      // waiting data from stdout and it behaves like we are still controlling
+      // the spawned process while the terminal is actually displaying say for
+      // example `less`.
+      inheritStdout: enableTTY,
+      inheritStdin: enableTTY,
+      inheritStderr: true,
+    });
+    return info;
+  }
 
   const stdin = new PassThrough();
 

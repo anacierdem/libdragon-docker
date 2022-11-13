@@ -1,7 +1,14 @@
 const chalk = require('chalk').stderr;
 
 const { CONTAINER_TARGET_PATH } = require('../constants');
-const { spawnProcess, log, print, dockerExec } = require('../helpers');
+const {
+  spawnProcess,
+  log,
+  print,
+  dockerExec,
+  assert,
+  ValidationError,
+} = require('../helpers');
 
 const {
   checkContainerAndClean,
@@ -14,6 +21,11 @@ const {
  * @param {import('../project-info').LibdragonInfo} libdragonInfo
  */
 const initContainer = async (libdragonInfo) => {
+  assert(
+    !process.env.DOCKER_CONTAINER,
+    new Error('initContainer does not make sense in a container')
+  );
+
   let newId;
   try {
     log('Creating new container...');
@@ -79,6 +91,11 @@ const initContainer = async (libdragonInfo) => {
  * @param {import('../project-info').LibdragonInfo} libdragonInfo
  */
 const start = async (libdragonInfo) => {
+  assert(
+    !process.env.DOCKER_CONTAINER,
+    new Error('Cannot start a container when we are already in a container.')
+  );
+
   const running =
     libdragonInfo.containerId &&
     (await checkContainerRunning(libdragonInfo.containerId));
@@ -108,6 +125,10 @@ module.exports = /** @type {const} */ ({
    * @param {import('../project-info').LibdragonInfo} libdragonInfo
    */
   fn: async (libdragonInfo) => {
+    if (process.env.DOCKER_CONTAINER) {
+      throw new ValidationError(`We are already in a container.`);
+    }
+
     const containerId = await start(libdragonInfo);
     print(containerId);
     return { ...libdragonInfo, containerId };
