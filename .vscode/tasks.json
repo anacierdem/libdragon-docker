@@ -19,6 +19,7 @@
       },
       "problemMatcher": {
         "base": "$gcc",
+        "owner": "cpp",
         "fileLocation": ["relative", "${workspaceFolder}/libdragon"]
       }
     },
@@ -26,9 +27,10 @@
       "label": "buildTests",
       "type": "shell",
       "group": "test",
-      "command": "npm run libdragon -- make tests",
+      "command": "npm run libdragon -- make tests -j8",
       "problemMatcher": [
         {
+          "owner": "cpp",
           "fileLocation": ["relative", "${workspaceFolder}/libdragon"],
           // libdragon does not accept SOURCE_DIR override so we have to explicitly
           // filter here
@@ -42,6 +44,7 @@
           }
         },
         {
+          "owner": "cpp",
           "fileLocation": ["relative", "${workspaceFolder}"],
           "pattern": {
             "regexp": "^\\/libdragon(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
@@ -62,6 +65,7 @@
       // TODO: only way to prevent this repetition is having a custom extension
       "problemMatcher": [
         {
+          "owner": "cpp",
           "fileLocation": ["relative", "${workspaceFolder}/libdragon"],
           // libdragon does not accept SOURCE_DIR override so we have to explicitly
           // filter here
@@ -75,6 +79,7 @@
           }
         },
         {
+          "owner": "cpp",
           "fileLocation": ["relative", "${workspaceFolder}"],
           "pattern": {
             "regexp": "^\\/libdragon(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
