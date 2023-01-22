@@ -1,13 +1,15 @@
 {
   "configurations": [
     {
-      "name": "N64",
-      "includePath": ["${workspaceFolder}/**"],
-      "defines": [],
-      "cStandard": "c99",
-      "cppStandard": "c++11",
-      "intelliSenseMode": "gcc-x64",
-      "forcedInclude": ["${workspaceFolder}/libdragon/tests/testrom.c"]
+      "name": "N64 Generic",
+      "includePath": ["${workspaceFolder}/libdragon/include/**"],
+      "defines": ["N64"],
+      "cStandard": "gnu99",
+      "cppStandard": "c++14",
+      "intelliSenseMode": "gcc-x86",
+      // By default we use the container, so querying it is not possible from
+      // the host.
+      "compilerPath": ""
     }
   ],
   "version": 4
