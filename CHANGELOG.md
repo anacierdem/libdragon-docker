@@ -1,3 +1,10 @@
+## [10.9.1](https://github.com/anacierdem/libdragon-docker/compare/v10.9.0...v10.9.1) (2023-06-01)
+
+
+### Bug Fixes
+
+* release with the updated dependencies ([af7a8fb](https://github.com/anacierdem/libdragon-docker/commit/af7a8fb4eed767de37dcd98efc89e4ec584f77c4))
+
 # [10.9.0](https://github.com/anacierdem/libdragon-docker/compare/v10.8.2...v10.9.0) (2022-11-13)
 
 
