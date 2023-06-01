@@ -6,7 +6,7 @@ This is a wrapper for a docker container to make managing the libdragon toolchai
 
 ## Prerequisites
 
-You should have [docker](https://www.docker.com/products/docker-desktop) (`>= 18`) installed on your system.
+You should have [docker](https://www.docker.com/products/docker-desktop) (`>= 24`) installed on your system.
 
 `git` is not strictly required to use the tool. Still, it is highly recommended to have git on your host machine as it will be used instead of the one in the container.
 
@@ -51,7 +51,7 @@ Download the [pre-built executable](https://github.com/anacierdem/libdragon-dock
 
 ### via NPM
 
-Install [node.js](https://nodejs.org/en/download/) (`>= 14`) and install `libdragon` as a global NPM package;
+Install [node.js](https://nodejs.org/en/download/) (`>= 18`) and install `libdragon` as a global NPM package;
 
     npm install -g libdragon
 
@@ -132,7 +132,7 @@ To be able to share your project with the library change, you just commit your c
 
 ## Working on this repository
 
-After cloning this repository on a system with node.js (`>= 14`) & docker (`>= 18`), in this repository's root do;
+After cloning this repository on a system with node.js (`>= 18`) & docker (`>= 24`), in this repository's root do;
 
     npm install
 
