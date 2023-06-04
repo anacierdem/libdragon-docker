@@ -91,9 +91,7 @@ Initialize your project as usual:
 
 Then switch the submodule to the desired branch:
 
-    cd ./libdragon
-    git checkout opengl
-    cd ..
+    git -C ./libdragon checkout opengl
     libdragon install
 
 If your changes are on a different remote, then you will need to manage your git remotes as usual.
