@@ -195,6 +195,10 @@ You can auto-fix applicable errors by running `format` and `lint` scripts instea
 
     npm run tsc
 
+To run the test suite:
+
+    npm run test
+
 This repository uses [`semantic-release`](https://github.com/semantic-release/semantic-release) and manages releases from specially formatted commit messages. To simplify creating them you can use:
 
     npx cz
