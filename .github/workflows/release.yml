@@ -25,6 +25,7 @@ jobs:
           # Do not include registy url here, it creates a .npmrc which prevents
           # semantic-release from authenticating with npm
           node-version: '18'
+          cache: 'npm'
 
       - name: Install
         run: npm ci
@@ -34,3 +35,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
+
+      - uses: actions/cache@v3
+        id: package-cache
+        with:
+          path: |
+            ${{ github.workspace }}/node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
