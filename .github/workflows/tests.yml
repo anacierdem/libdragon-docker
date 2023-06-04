@@ -19,6 +19,8 @@ jobs:
           npm run format-check
           npm run lint-check
           npm run tsc
+          git config --global user.name "libdragon-cli"
+          git config --global user.email "cli@libdragon.dev"
           npm run test
 
   ci-pack:

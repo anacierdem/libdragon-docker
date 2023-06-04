@@ -45,14 +45,6 @@ beforeAll(async () => {
   // Inside the project, the local cli is also inserted into the path
   // so we need to link it as well
   await $`npm link libdragon`;
-
-  // These are required for subtree strategy
-  if (!(await $`git config --global user.name`)) {
-    await $`git config --global user.name "libdragon-cli"`;
-  }
-  if (!(await $`git config --global user.email`)) {
-    await $`git config --global user.email "cli@libdragon.dev"`;
-  }
 }, 60000);
 
 let projectDir;
