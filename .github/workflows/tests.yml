@@ -12,15 +12,6 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
-      - uses: actions/cache@v3
-        id: package-cache
-        with:
-          path: |
-            ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
-
       - name: Install
         run: npm ci
 
@@ -30,7 +21,7 @@ jobs:
           npm run lint-check
           npm run tsc
 
-  ci-tests-1:
+  ci-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -42,15 +33,6 @@ jobs:
           node-version: '18'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
-
-      - uses: actions/cache@v3
-        id: package-cache
-        with:
-          path: |
-            ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
 
       - name: Install
         run: npm ci
@@ -59,38 +41,7 @@ jobs:
         run: |
           git config --global user.name "libdragon-cli"
           git config --global user.email "cli@libdragon.dev"
-          npm run test -- --shard=1/2
-
-  ci-tests-2:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-          fetch-depth: 1
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
-
-      - uses: actions/cache@v3
-        id: package-cache
-        with:
-          path: |
-            ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
-
-      - name: Install
-        run: npm ci
-
-      - name: Tests 2
-        run: |
-          git config --global user.name "libdragon-cli"
-          git config --global user.email "cli@libdragon.dev"
-          npm run test -- --shard=2/2
+          npm run test
 
   ci-pack:
     runs-on: ubuntu-latest
@@ -101,15 +52,6 @@ jobs:
           node-version: '18'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
-
-      - uses: actions/cache@v3
-        id: package-cache
-        with:
-          path: |
-            ${{ github.workspace }}/node_modules
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
 
       - name: Install
         run: npm ci
