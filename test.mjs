@@ -103,7 +103,7 @@ beforeEach(async () => {
   // compatible with the other paths that we use for relative comparison
   if (kernel32) {
     const bufferSize = 260; // MAX_PATH as defined by windows incl. null terminator
-    const longPath = ref.allocCString(new Array(bufferSize).join(' '));
+    const longPath = ref.allocCString(new Array(bufferSize - 1).join(' '));
     const written = kernel32.GetLongPathNameA(projectDir, longPath, bufferSize);
 
     if (written === 0) {
