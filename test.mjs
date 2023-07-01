@@ -26,13 +26,28 @@ if (process.platform === 'win32') {
 
   // Prepare the ffi bindings for GetLongPathNameA
   const DWORD = ref.types.ulong;
+  const LPCVOID = ref.refType(ref.types.void);
+  // TODO: verify this is const
+  const LPCSTR = ref.types.CString;
+  const LPSTR = ref.types.CString;
   kernel32 = ffi.Library('kernel32', {
     // DWORD GetLongPathNameA(
     //   [in]  LPCSTR lpszShortPath,
     //   [out] LPSTR  lpszLongPath,
     //   [in]  DWORD  cchBuffer
     // );
-    GetLongPathNameA: [DWORD, [ref.types.CString, ref.types.CString, DWORD]],
+    GetLongPathNameA: [DWORD, [LPCSTR, LPSTR, DWORD]],
+    GetLastError: [DWORD, []],
+    // DWORD FormatMessageA(
+    //   [in]           DWORD   dwFlags,
+    //   [in, optional] LPCVOID lpSource,
+    //   [in]           DWORD   dwMessageId,
+    //   [in]           DWORD   dwLanguageId,
+    //   [out]          LPSTR   lpBuffer,
+    //   [in]           DWORD   nSize,
+    //   [in, optional] va_list *Arguments
+    // );
+    FormatMessageA: [DWORD, [DWORD, LPCVOID, DWORD, DWORD, LPSTR, DWORD]],
   });
 }
 
@@ -88,8 +103,38 @@ beforeEach(async () => {
   // compatible with the other paths that we use for relative comparison
   if (kernel32) {
     const bufferSize = 260; // MAX_PATH as defined by windows incl. null terminator
-    const longPath = ref.allocCString(new Array(bufferSize + 1).join(' '));
+    const longPath = ref.allocCString(new Array(bufferSize).join(' '));
     const written = kernel32.GetLongPathNameA(projectDir, longPath, bufferSize);
+
+    if (written === 0) {
+      const errorCode = kernel32.GetLastError();
+      const messageSize = 1024;
+      const errorMessage = ref.allocCString(new Array(messageSize).join(' '));
+
+      const FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000;
+      const FORMAT_MESSAGE_IGNORE_INSERTS = 0x00000200;
+
+      // Read the system message from the error code
+      const result = kernel32.FormatMessageA(
+        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        null,
+        errorCode,
+        0,
+        errorMessage,
+        messageSize
+      );
+
+      if (result === 0) {
+        throw new Error(`Error reading message, code: ${errorCode}`);
+      }
+
+      if (errorCode === 2) {
+        throw new Error(
+          `Pathname maybe ASCII incompatible. Original error: ${errorMessage.readCString()}`
+        );
+      }
+      throw new Error(`System error: ${errorMessage.readCString()}`);
+    }
 
     // written bytes should be less than bufferSize as there will also be an
     // additional terminating null character
