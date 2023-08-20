@@ -56,7 +56,7 @@
     "pkg": "^5.5.2",
     "prettier": "^2.4.0",
     "ref-napi": "^3.0.3",
-    "semantic-release": "^19.0.2",
+    "semantic-release": "^21.0.9",
     "typescript": "^4.7.4",
     "zx": "^7.2.2"
   },
