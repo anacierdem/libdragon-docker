@@ -121,7 +121,6 @@ const parseParameters = async (argv) => {
     !(
       /** @type {typeof actions[keyof actions][]} */ ([
         actions.init,
-        actions.install,
         actions.update,
       ]).includes(options.CURRENT_ACTION)
     ) &&
