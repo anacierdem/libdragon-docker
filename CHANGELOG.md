@@ -1,3 +1,18 @@
+# [11.0.0](https://github.com/anacierdem/libdragon-docker/compare/v10.9.1...v11.0.0) (2023-11-11)
+
+
+### Code Refactoring
+
+* **install.js:** remove docker image update support from install action ([8c768fd](https://github.com/anacierdem/libdragon-docker/commit/8c768fd1ec74e381a59acd28a6d1a69f75ed5de4))
+* **project-info.js:** drop support for legacy configuation file ([880f38d](https://github.com/anacierdem/libdragon-docker/commit/880f38da71aa0876cb04785e7c05814c406a4dbd))
+
+
+### BREAKING CHANGES
+
+* **project-info.js:** The cli will no longer migrate the `.libdragon/docker-image` Either make sure you
+run the 10.x version once for your project or remove the file manually.
+* **install.js:** Providing --image/-i flag to the install action will now error out.
+
 ## [10.9.1](https://github.com/anacierdem/libdragon-docker/compare/v10.9.0...v10.9.1) (2023-06-01)
 
 
