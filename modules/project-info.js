@@ -14,7 +14,6 @@ const {
   CONFIG_FILE,
   DOCKER_HUB_IMAGE,
   DEFAULT_STRATEGY,
-  IMAGE_FILE,
   LIBDRAGON_SUBMODULE,
   CACHED_CONTAINER_FILE,
   CONTAINER_TARGET_PATH,
@@ -159,15 +158,7 @@ const readProjectInfo = async function (optionInfo) {
     return /** @type {NoProjectInfo} */ (optionInfo);
   }
 
-  const migratedRoot = await findLibdragonRoot();
-
-  // Look for old one for backwards compatibility
-  const projectRoot =
-    migratedRoot ??
-    (await findLibdragonRoot(
-      '.',
-      path.join(LIBDRAGON_PROJECT_MANIFEST, IMAGE_FILE)
-    ));
+  const projectRoot = await findLibdragonRoot();
 
   if (
     !projectRoot &&
@@ -204,7 +195,7 @@ const readProjectInfo = async function (optionInfo) {
 
   log(`Project root: ${info.root}`, true);
 
-  if (migratedRoot) {
+  if (projectRoot) {
     info = {
       ...info,
       ...JSON.parse(
@@ -214,20 +205,6 @@ const readProjectInfo = async function (optionInfo) {
         )
       ),
     };
-  } else {
-    // Cleanup old files and migrate to the new config file
-    const imageFile = path.join(
-      info.root,
-      LIBDRAGON_PROJECT_MANIFEST,
-      IMAGE_FILE
-    );
-    if (await fileExists(imageFile)) {
-      info.imageName = (
-        await fs.readFile(imageFile, { encoding: 'utf8' })
-      ).trim();
-      // Immediately update the config as this is the first migration
-      await Promise.all([writeProjectInfo(info), fs.rm(imageFile)]);
-    }
   }
 
   if (!process.env.DOCKER_CONTAINER) {
