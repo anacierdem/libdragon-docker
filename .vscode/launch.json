@@ -16,6 +16,17 @@
     },
 
     {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Test Bench (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/src/test_bench.z64"],
+      "preLaunchTask": "build",
+      "console": "integratedTerminal"
+    },
+
+    {
       "type": "node",
       "request": "launch",
       "name": "Tests",
@@ -27,6 +38,17 @@
       "preLaunchTask": "buildTests",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Tests (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/tests/testrom_emu.z64"],
+      "preLaunchTask": "buildTests",
+      "console": "integratedTerminal"
     },
 
     {
@@ -43,6 +65,18 @@
       "internalConsoleOptions": "openOnSessionStart"
     },
 
+    {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Audio Player Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/audioplayer/audioplayer.z64"
+      ],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
+    },
 
     {
       "type": "node",
@@ -56,6 +90,17 @@
       "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "C++ Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/cpptest/cpptest.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
     },
 
     {
@@ -73,6 +118,17 @@
     },
 
     {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Controller Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/ctest/ctest.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
+    },
+
+    {
       "type": "node",
       "request": "launch",
       "name": "Custom Font Example",
@@ -86,6 +142,18 @@
       "internalConsoleOptions": "openOnSessionStart"
     },
 
+    {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Custom Font Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/customfont/customfont.z64"
+      ],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
+    },
 
     {
       "type": "node",
@@ -99,6 +167,17 @@
       "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "DFS Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/dfsdemo/dfsdemo.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
     },
 
     {
@@ -116,6 +195,19 @@
     },
 
     {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "EEPROM FS Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/eepromfstest/eepromfstest.z64"
+      ],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
+    },
+
+    {
       "type": "node",
       "request": "launch",
       "name": "SD Card Sprite Load Example",
@@ -127,6 +219,19 @@
       "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "SD Card Sprite Load Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/loadspritefromsd/loadspritefromsd.z64"
+      ],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
     },
 
     {
@@ -144,6 +249,17 @@
     },
 
     {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Mixer Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/mixertest/mixertest.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
+    },
+
+    {
       "type": "node",
       "request": "launch",
       "name": "Mempak Example",
@@ -155,6 +271,17 @@
       "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Mempak Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/mptest/mptest.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
     },
 
     {
@@ -172,6 +299,17 @@
     },
 
     {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Mempak Example 2 (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/mputest/mputest.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
+    },
+
+    {
       "type": "node",
       "request": "launch",
       "name": "RSPQ Example",
@@ -185,6 +323,16 @@
       "internalConsoleOptions": "openOnSessionStart"
     },
 
+    {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "RSPQ Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/rspqdemo/rspqdemo.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
+    },
 
     {
       "type": "node",
@@ -200,6 +348,16 @@
       "internalConsoleOptions": "openOnSessionStart"
     },
 
+    {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "RTC Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/rspqdemo/rspqdemo.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
+    },
 
     {
       "type": "node",
@@ -216,14 +374,39 @@
     },
 
     {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Spritemap Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/spritemap/spritemap.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
+    },
+
+    {
       "type": "node",
       "request": "launch",
       "name": "Video Test Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
-      "args": ["${workspaceFolder}/libdragon/examples/test/test.z64", "--keep-alive"],
+      "args": [
+        "${workspaceFolder}/libdragon/examples/test/test.z64",
+        "--keep-alive"
+      ],
       "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Video Test Example(emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/test/test.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
     },
 
     {
@@ -241,6 +424,17 @@
     },
 
     {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Timers Example(emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/timers/timers.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
+    },
+
+    {
       "type": "node",
       "request": "launch",
       "name": "uCode Example",
@@ -252,6 +446,17 @@
       "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "uCode Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/ucodetest/ucodetest.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
     },
 
     {
@@ -269,6 +474,17 @@
     },
 
     {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "VRU Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/vrutest/vrutest.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
+    },
+
+    {
       "type": "node",
       "request": "launch",
       "name": "Video Resolution Example",
@@ -280,6 +496,17 @@
       "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "name": "Video Resolution Example (emu)",
+      "program": "${env:N64_EMU}",
+      "args": ["${workspaceFolder}/libdragon/examples/vtest/vtest.z64"],
+      "preLaunchTask": "buildExamples",
+      "console": "integratedTerminal"
     }
   ]
 }

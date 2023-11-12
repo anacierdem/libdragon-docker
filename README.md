@@ -200,9 +200,13 @@ To update the submodule and re-build everything;
 
 ### Local test bench
 
-This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can just hit F5 on vscode (The `Test Bench` launch configuration) to run the test code in `src` folder to develop libdragon itself quicker if you have an everdrive.
+The root `bench` recipe is for building the code in root `src` folder. This is a quick way of testing your libdragon changes or a sample code built around libdragon, and is called the test bench. This recipe together with `examples` and `tests` recipes will build and install libdragon automatically as necessary. Thus, they will always produce a rom image using the libdragon code in the repository via their make dependencies, which is ideal for experimenting with libdragon itself. 
 
-There are also additional vscode launch configurations to build libdragon examples and tests based on the currently built and installed libdragon in the docker container. The test bench itself and examples will already rebuild and reinstall libdragon automatically. These will always produce a rom image using the latest libdragon code in the active repository via its make dependencies. You can clean everything with the `clean` task (open the command palette and choose `Run Task -> clean`).
+There are also vscode launch configurations to quickly build the examples, tests and the bench. If you have the `N64_EMU` environment variable set pointing at your favourite emulator ([ares](https://ares-emu.net/) is highly recommended), the launch configurations ending in `(emu)` will kick your emulator with the selected example/code. You can also just hit F5 to launch the selected configuration.
+
+This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can use the launch configurations without `(emu)` to run the code if you have an everdrive plugged in and your active configuration will just boot up.
+
+You can clean everything with the `clean` recipe/task (open the command palette and choose `Run Task -> clean`).
 
 ### Developing the tool itself
 
