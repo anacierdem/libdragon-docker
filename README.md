@@ -54,7 +54,7 @@ Download the [pre-built executable](https://github.com/anacierdem/libdragon-dock
 Install [node.js](https://nodejs.org/en/download/) (`>= 18`) and install `libdragon` as a global NPM package;
 
 ```bash
-    npm install -g libdragon
+npm install -g libdragon
 ```
 
 To update the tool to the latest, do `npm i -g libdragon@latest`.
@@ -64,7 +64,7 @@ To update the tool to the latest, do `npm i -g libdragon@latest`.
 Navigate to the folder you want to initialize your project and invoke libdragon;
 
 ```bash
-    libdragon init
+libdragon init
 ```
 
 On first `init` an example project will be created, the container will be downloaded, started and latest libdragon will get installed on it with all the example ROMs built. You can find all the example ROMs in the `libdragon/examples` folder.
@@ -72,7 +72,7 @@ On first `init` an example project will be created, the container will be downlo
 The container's `make` can be invoked on your current working directory via;
 
 ```bash
-    libdragon make
+libdragon make
 ```
 
 Any additonal parameters are passed down to the actual make command. You can work on the files simultaneously with the docker container and any built artifacts will be available in project directory as it is mounted on the container.
@@ -80,7 +80,7 @@ Any additonal parameters are passed down to the actual make command. You can wor
 To update the library and rebuild/install all the artifacts;
 
 ```bash
-    libdragon update
+libdragon update
 ```
 
 In general, you can invoke libdragon as follows;
@@ -96,20 +96,20 @@ Run `libdragon help [action]` for more details on individual actions.
 Initialize your project as usual:
 
 ```bash
-    libdragon init
+libdragon init
 ```
 
 Then switch the submodule to the desired branch:
 
 ```bash
-    git -C ./libdragon checkout opengl
-    libdragon install
+git -C ./libdragon checkout opengl
+libdragon install
 ```
 
 If your changes are on a different remote, then you will need to manage your git remotes as usual. If you also want to update the remote tracking branch for the submodule, run:
 
 ```bash
-    git submodule set-branch -b opengl libdragon
+git submodule set-branch -b opengl libdragon
 ```
 
 This will update the branch on `.gitmodules` and if you commit that change, subsequent initializations will use the `opengl` branch by default.
@@ -119,7 +119,7 @@ This will update the branch on `.gitmodules` and if you commit that change, subs
 As libdragon is an actively developed library, you may find yourself at a position where you want to change a few things on it and see how it works. In general, if you modify the files in `libdragon` folder of your project, you can install that version to the docker container by simply running:
 
 ```bash
-    libdragon install
+libdragon install
 ```
 
 This will update all the artifacts in your container and your new code will start linking against the new version when you re-build it via `libdragon make`. The build system should pick up the change in the library and re-compile the dependent files.
@@ -150,19 +150,19 @@ To be able to share your project with the library change, you just commit your c
 After cloning this repository on a system with node.js (`>= 18`) & docker (`>= 24`), in this repository's root do;
 
 ```bash
-    npm install
+npm install
 ```
 
 This will install all necessary NPM dependencies. Now it is time to get the original libdragon repository. (you can also clone this repository with `--recurse-submodules`)
 
 ```bash
-    git submodule update --init
+git submodule update --init
 ```
 
 Then run;
 
 ```bash
-    npm run libdragon -- init
+npm run libdragon -- init
 ```
 
 to download the pre-built toolchain image, start and initialize it. This will also install [test bench](#local-test-bench) dependencies into the container if any.
@@ -181,13 +181,13 @@ There is a root `Makefile` making deeper makefiles easier with these recipes;
 For example, to re-build the original libdragon examples do;
 
 ```bash
-    npm run libdragon -- make examples
+npm run libdragon -- make examples
 ```
 
 Similarly to run the `clean` recipe, run;
 
 ```bash
-    npm run libdragon -- make clean
+npm run libdragon -- make clean
 ```
 
 Keep in mind that `--` is necessary for actual arguments when using npm scripts.
@@ -195,7 +195,7 @@ Keep in mind that `--` is necessary for actual arguments when using npm scripts.
 To update the submodule and re-build everything;
 
 ```bash
-    npm run libdragon -- update
+npm run libdragon -- update
 ```
 
 ### Local test bench
@@ -213,7 +213,7 @@ You can clean everything with the `clean` recipe/task (open the command palette 
 For a quick development loop it really helps linking the code in this repository as the global libdragon installation. To do this run;
 
 ```bash
-    npm link
+npm link
 ```
 
 in the root of the repository. Once you do this, running `libdragon` will use the code here rather than the actual npm installation. Then you can test your changes in the libdragon project here or elsewhere on your computer. This setup is automatically done if you use the [devcontainer](#experimental-devcontainer-support).
@@ -221,26 +221,26 @@ in the root of the repository. Once you do this, running `libdragon` will use th
 When you are happy with your changes, you can verify you conform to the coding standards via:
 
 ```bash
-    npm run format-check
-    npm run lint-check
+npm run format-check
+npm run lint-check
 ```
 
 You can auto-fix applicable errors by running `format` and `lint` scripts instead. Additionally, typescript is used as the type system. To be able to get away with transpiling the code during development, jsDoc flavor of types are used instead of inline ones. To check your types, run:
 
 ```bash
-    npm run tsc
+npm run tsc
 ```
 
 To run the test suite:
 
 ```bash
-    npm run test
+npm run test
 ```
 
 This repository uses [`semantic-release`](https://github.com/semantic-release/semantic-release) and manages releases from specially formatted commit messages. To simplify creating them you can use:
 
 ```bash
-    npx cz
+npx cz
 ```
 
 It will create a `semantic-release` compatible commit from your current staged changes.
