@@ -67,11 +67,11 @@ Navigate to the folder you want to initialize your project and invoke libdragon;
     libdragon init
 ```
 
-On first `init` an example project will be created, the container will be downloaded, started and latest libdragon will get installed on it with all the example ROMs built. You can find all the example ROMs in the `libdragon` folder.
+On first `init` an example project will be created, the container will be downloaded, started and latest libdragon will get installed on it with all the example ROMs built. You can find all the example ROMs in the `libdragon/examples` folder.
 
 The container's `make` can be invoked on your current working directory via;
 
-```
+```bash
     libdragon make
 ```
 
@@ -79,7 +79,7 @@ Any additonal parameters are passed down to the actual make command. You can wor
 
 To update the library and rebuild/install all the artifacts;
 
-```
+```bash
     libdragon update
 ```
 
@@ -124,14 +124,11 @@ As libdragon is an actively developed library, you may find yourself at a positi
 
 This will update all the artifacts in your container and your new code will start linking against the new version when you re-build it via `libdragon make`. The build system should pick up the change in the library and re-compile the dependent files.
 
-Instead of depending on the above command, you can re-build the library by making it a make dependency in your project:
+Instead of depending on the above command, you can automatically re-build the library by making it a make dependency in your project:
 
 ```makefile
-libdragon-install: libdragon
+libdragon-install:
 	$(MAKE) -C ./libdragon install
-
-libdragon:
-	$(MAKE) -C ./libdragon
 ```
 
 If your build now depends on `libdragon-install`, it will force an install (which should be pretty quick if you don't have changes) and force the build system to rebuild your project when necessary.
@@ -175,10 +172,9 @@ Now you will be able to work on the files simultaneously with the docker contain
 There is a root `Makefile` making deeper makefiles easier with these recipes;
 
     bench: build the test bench (see below)
-    examples: re-build libdragon examples
-    tests: re-build the test ROM
-    libdragon: build libdragon itself
-    libdragon-install: install libdragon
+    examples: build libdragon examples
+    tests: build the test ROM
+    libdragon-install: build and install libdragon
     clean-bench: clean the test bench (see below)
     clean: clean everything and start from scratch
 
@@ -204,9 +200,9 @@ To update the submodule and re-build everything;
 
 ### Local test bench
 
-This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can just hit F5 on vscode (The `Run Test Bench` launch configuration) to run the test code in `src` folder to develop libdragon itself quicker if you have an everdrive.
+This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can just hit F5 on vscode (The `Test Bench` launch configuration) to run the test code in `src` folder to develop libdragon itself quicker if you have an everdrive.
 
-There are also additional vscode launch configurations to build libdragon examples and tests based on the currently built and installed libdragon in the docker container. Most of these will always rebuild so that they will use the latest if you made and installed an alternative libdragon. The test bench itself and a few examples (that use the new build system) will already rebuild and reinstall libdragon automatically. These will always produce a rom image using the latest libdragon code in the active repository via its make dependencies. You can clean everything with the `clean` task (open the command palette and choose `Run Task -> clean`).
+There are also additional vscode launch configurations to build libdragon examples and tests based on the currently built and installed libdragon in the docker container. The test bench itself and examples will already rebuild and reinstall libdragon automatically. These will always produce a rom image using the latest libdragon code in the active repository via its make dependencies. You can clean everything with the `clean` task (open the command palette and choose `Run Task -> clean`).
 
 ### Developing the tool itself
 

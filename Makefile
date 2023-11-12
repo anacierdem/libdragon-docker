@@ -31,9 +31,16 @@ ctest: libdragon-install
 ctest-clean:
 	$(MAKE) -C ./libdragon/examples/ctest clean
 
+.PHONY: customfont
+customfont: libdragon-install
+	$(MAKE) -C ./libdragon/examples/customfont SOURCE_DIR=$(CURDIR)/libdragon/examples/customfont
+.PHONY: customfont-clean
+customfont-clean:
+	$(MAKE) -C ./libdragon/examples/customfont clean
+
 .PHONY: dfsdemo
 dfsdemo: libdragon-install
-	$(MAKE) -BC ./libdragon/examples/dfsdemo
+	$(MAKE) -C ./libdragon/examples/dfsdemo SOURCE_DIR=$(CURDIR)/libdragon/examples/dfsdemo
 .PHONY: dfsdemo-clean
 dfsdemo-clean:
 	$(MAKE) -C ./libdragon/examples/dfsdemo clean
@@ -45,6 +52,13 @@ eepromfstest: libdragon-install
 eepromfstest-clean:
 	$(MAKE) -C ./libdragon/examples/eepromfstest clean
 
+.PHONY: loadspritefromsd
+loadspritefromsd: libdragon-install
+	$(MAKE) -C ./libdragon/examples/loadspritefromsd SOURCE_DIR=$(CURDIR)/libdragon/examples/loadspritefromsd
+.PHONY: loadspritefromsd-clean
+loadspritefromsd-clean:
+	$(MAKE) -C ./libdragon/examples/loadspritefromsd clean
+
 .PHONY: mixertest
 mixertest: libdragon-install
 	$(MAKE) -C ./libdragon/examples/mixertest SOURCE_DIR=$(CURDIR)/libdragon/examples/mixertest
@@ -54,17 +68,24 @@ mixertest-clean:
 
 .PHONY: mptest
 mptest: libdragon-install
-	$(MAKE) -BC ./libdragon/examples/mptest
+	$(MAKE) -C ./libdragon/examples/mptest SOURCE_DIR=$(CURDIR)/libdragon/examples/mptest
 .PHONY: mptest-clean
 mptest-clean:
 	$(MAKE) -C ./libdragon/examples/mptest clean
 
 .PHONY: mputest
 mputest: libdragon-install
-	$(MAKE) -BC ./libdragon/examples/mputest
+	$(MAKE) -C ./libdragon/examples/mputest SOURCE_DIR=$(CURDIR)/libdragon/examples/mputest
 .PHONY: mputest-clean
 mputest-clean:
 	$(MAKE) -C ./libdragon/examples/mputest clean
+
+.PHONY: rspqdemo
+rspqdemo: libdragon-install
+	$(MAKE) -C ./libdragon/examples/rspqdemo SOURCE_DIR=$(CURDIR)/libdragon/examples/rspqdemo
+.PHONY: rspqdemo-clean
+rspqdemo-clean:
+	$(MAKE) -C ./libdragon/examples/rspqdemo clean
 
 .PHONY: rtc-test
 rtctest: libdragon-install
@@ -103,22 +124,27 @@ ucodetest-clean:
 
 .PHONY: vrutest
 vrutest: libdragon-install
-	$(MAKE) -BC ./libdragon/examples/vrutest
+	$(MAKE) -C ./libdragon/examples/vrutest SOURCE_DIR=$(CURDIR)/libdragon/examples/vrutest
 .PHONY: vrutest-clean
 vrutest-clean:
 	$(MAKE) -C ./libdragon/examples/vrutest clean
 
 .PHONY: vtest
 vtest: libdragon-install
-	$(MAKE) -BC ./libdragon/examples/vtest
+	$(MAKE) -C ./libdragon/examples/vtest SOURCE_DIR=$(CURDIR)/libdragon/examples/vtest
 .PHONY: vtest-clean
 vtest-clean:
 	$(MAKE) -C ./libdragon/examples/vtest clean
 # END Examples
 
 .PHONY: examples
-examples: audioplayer cpptest ctest dfsdemo eepromfstest mixertest mptest mputest
-examples: rtctest spritemap test timers vrutest vtest ucodetest
+examples: audioplayer cpptest ctest customfont dfsdemo eepromfstest loadspritefromsd 
+examples: mixertest mptest mputest rspqdemo rtctest spritemap test timers ucodetest
+examples: vrutest vtest 
+
+# TODO: enable this when libdragon examples supports BASE_DIR
+# examples: libdragon-install
+# 	$(MAKE) -C ./libdragon/examples BASE_DIR=$(CURDIR)/libdragon/examples
 
 .PHONY: tests
 tests: libdragon-install
@@ -128,7 +154,7 @@ tests: libdragon-install
 # even if we move that step here also
 .PHONY: libdragon-install
 libdragon-install:
-	$(MAKE) -C ./libdragon install
+	$(MAKE) -C ./libdragon install SOURCE_DIR=$(CURDIR)/libdragon/src
 
 .PHONY: clean
 clean: clean-bench

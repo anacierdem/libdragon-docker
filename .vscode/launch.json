@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run Test Bench",
+      "name": "Test Bench",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": ["${workspaceFolder}/src/test_bench.z64", "--keep-alive"],
       "preLaunchTask": "build",
@@ -18,7 +18,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run Tests",
+      "name": "Tests",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
         "${workspaceFolder}/libdragon/tests/testrom.z64",
@@ -32,7 +32,22 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run C++ Example",
+      "name": "Audio Player Example",
+      "program": "${workspaceFolder}/node_modules/ed64/loader.js",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/audioplayer/audioplayer.z64",
+        "--keep-alive"
+      ],
+      "preLaunchTask": "buildExamples",
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "C++ Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
         "${workspaceFolder}/libdragon/examples/cpptest/cpptest.z64",
@@ -46,7 +61,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run Controller Example",
+      "name": "Controller Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
         "${workspaceFolder}/libdragon/examples/ctest/ctest.z64",
@@ -60,7 +75,22 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run DFS Example",
+      "name": "Custom Font Example",
+      "program": "${workspaceFolder}/node_modules/ed64/loader.js",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/customfont/customfont.z64",
+        "--keep-alive"
+      ],
+      "preLaunchTask": "buildExamples",
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "DFS Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
         "${workspaceFolder}/libdragon/examples/dfsdemo/dfsdemo.z64",
@@ -74,7 +104,35 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run Mixer Example",
+      "name": "EEPROM FS Example",
+      "program": "${workspaceFolder}/node_modules/ed64/loader.js",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/eepromfstest/eepromfstest.z64",
+        "--keep-alive"
+      ],
+      "preLaunchTask": "buildExamples",
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "SD Card Sprite Load Example",
+      "program": "${workspaceFolder}/node_modules/ed64/loader.js",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/loadspritefromsd/loadspritefromsd.z64",
+        "--keep-alive"
+      ],
+      "preLaunchTask": "buildExamples",
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Mixer Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
         "${workspaceFolder}/libdragon/examples/mixertest/mixertest.z64",
@@ -88,35 +146,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run Audio Player Example",
-      "program": "${workspaceFolder}/node_modules/ed64/loader.js",
-      "args": [
-        "${workspaceFolder}/libdragon/examples/audioplayer/audioplayer.z64",
-        "--keep-alive"
-      ],
-      "preLaunchTask": "buildExamples",
-      "outputCapture": "std",
-      "internalConsoleOptions": "openOnSessionStart"
-    },
-
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Run RTC Example",
-      "program": "${workspaceFolder}/node_modules/ed64/loader.js",
-      "args": [
-        "${workspaceFolder}/libdragon/examples/rtctest/rtctest.z64",
-        "--keep-alive"
-      ],
-      "preLaunchTask": "buildExamples",
-      "outputCapture": "std",
-      "internalConsoleOptions": "openOnSessionStart"
-    },
-
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Run Mempak Example",
+      "name": "Mempak Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
         "${workspaceFolder}/libdragon/examples/mptest/mptest.z64",
@@ -130,7 +160,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run Mempak Example 2",
+      "name": "Mempak Example 2",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
         "${workspaceFolder}/libdragon/examples/mputest/mputest.z64",
@@ -144,7 +174,37 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run Spritemap Example",
+      "name": "RSPQ Example",
+      "program": "${workspaceFolder}/node_modules/ed64/loader.js",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/rspqdemo/rspqdemo.z64",
+        "--keep-alive"
+      ],
+      "preLaunchTask": "buildExamples",
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "RTC Example",
+      "program": "${workspaceFolder}/node_modules/ed64/loader.js",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/rtctest/rtctest.z64",
+        "--keep-alive"
+      ],
+      "preLaunchTask": "buildExamples",
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Spritemap Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
         "${workspaceFolder}/libdragon/examples/spritemap/spritemap.z64",
@@ -158,12 +218,9 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run Video Test Example",
+      "name": "Video Test Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
-      "args": [
-        "${workspaceFolder}/libdragon/examples/test/test.z64",
-        "--keep-alive"
-      ],
+      "args": ["${workspaceFolder}/libdragon/examples/test/test.z64", "--keep-alive"],
       "preLaunchTask": "buildExamples",
       "outputCapture": "std",
       "internalConsoleOptions": "openOnSessionStart"
@@ -172,7 +229,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run Timers Example",
+      "name": "Timers Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
         "${workspaceFolder}/libdragon/examples/timers/timers.z64",
@@ -186,24 +243,10 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run VRU Example",
+      "name": "uCode Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon/examples/vrutest/vrutest.z64",
-        "--keep-alive"
-      ],
-      "preLaunchTask": "buildVRUTest",
-      "outputCapture": "std",
-      "internalConsoleOptions": "openOnSessionStart"
-    },
-
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Run Video Resolution Example",
-      "program": "${workspaceFolder}/node_modules/ed64/loader.js",
-      "args": [
-        "${workspaceFolder}/libdragon/examples/vtest/VidResTest.z64",
+        "${workspaceFolder}/libdragon/examples/ucodetest/ucodetest.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildExamples",
@@ -214,10 +257,24 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Run uCode Example",
+      "name": "VRU Example",
       "program": "${workspaceFolder}/node_modules/ed64/loader.js",
       "args": [
-        "${workspaceFolder}/libdragon/examples/ucodetest/ucodetest.z64",
+        "${workspaceFolder}/libdragon/examples/vrutest/vrutest.z64",
+        "--keep-alive"
+      ],
+      "preLaunchTask": "buildExamples",
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Video Resolution Example",
+      "program": "${workspaceFolder}/node_modules/ed64/loader.js",
+      "args": [
+        "${workspaceFolder}/libdragon/examples/vtest/vtest.z64",
         "--keep-alive"
       ],
       "preLaunchTask": "buildExamples",

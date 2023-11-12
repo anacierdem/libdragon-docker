@@ -31,20 +31,6 @@
       "problemMatcher": [
         {
           "owner": "cpp",
-          "fileLocation": ["relative", "${workspaceFolder}/libdragon"],
-          // libdragon does not accept SOURCE_DIR override so we have to explicitly
-          // filter here
-          "pattern": {
-            "regexp": "^(src\\/.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
-            "file": 1,
-            "line": 2,
-            "column": 3,
-            "severity": 4,
-            "message": 5
-          }
-        },
-        {
-          "owner": "cpp",
           "fileLocation": ["relative", "${workspaceFolder}"],
           "pattern": {
             "regexp": "^\\/libdragon(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
@@ -62,22 +48,7 @@
       "type": "shell",
       "group": "build",
       "command": "npm run libdragon -- make examples",
-      // TODO: only way to prevent this repetition is having a custom extension
       "problemMatcher": [
-        {
-          "owner": "cpp",
-          "fileLocation": ["relative", "${workspaceFolder}/libdragon"],
-          // libdragon does not accept SOURCE_DIR override so we have to explicitly
-          // filter here
-          "pattern": {
-            "regexp": "^(src\\/.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
-            "file": 1,
-            "line": 2,
-            "column": 3,
-            "severity": 4,
-            "message": 5
-          }
-        },
         {
           "owner": "cpp",
           "fileLocation": ["relative", "${workspaceFolder}"],
