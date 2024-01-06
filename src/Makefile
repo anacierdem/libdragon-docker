@@ -1,6 +1,6 @@
 V=1
 D=1
-BUILD_DIR=build
+BUILD_DIR=$(CURDIR)/build
 include $(N64_INST)/include/n64.mk
 
 all: test_bench.z64
