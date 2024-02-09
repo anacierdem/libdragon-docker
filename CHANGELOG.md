@@ -1,3 +1,10 @@
+## [11.0.1](https://github.com/anacierdem/libdragon-docker/compare/v11.0.0...v11.0.1) (2024-02-09)
+
+
+### Bug Fixes
+
+* **init.js:** make sure providing --image flag uses the provided image ([965fe41](https://github.com/anacierdem/libdragon-docker/commit/965fe416322562a153bab9c5bf2f8c994fae562e)), closes [#66](https://github.com/anacierdem/libdragon-docker/issues/66)
+
 # [11.0.0](https://github.com/anacierdem/libdragon-docker/compare/v10.9.1...v11.0.0) (2023-11-11)
 
 
