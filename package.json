@@ -12,6 +12,7 @@
   },
   "scripts": {
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch",
     "libdragon": "node index.js",
     "start": "node index.js start",
     "stop": "node index.js stop",

@@ -9,6 +9,7 @@ const {
   initGitAndCacheContainerId,
   updateImage,
   runGitMaybeHost,
+  destroyContainer,
 } = require('./utils');
 
 const {
@@ -26,7 +27,6 @@ const {
   toPosixPath,
   toNativePath,
 } = require('../helpers');
-const { syncImageAndStart } = require('./update-and-start');
 
 /**
  * @param {import('../project-info').LibdragonInfo} info
@@ -226,13 +226,22 @@ async function init(info) {
     );
     if (!process.env.DOCKER_CONTAINER) {
       if (info.options.DOCKER_IMAGE) {
-        info = await syncImageAndStart(info);
-      } else {
+        // The logic here resembles syncImageAndStart but it aims at being idempotent
+        // w.r.t the container when called without any additional flag.
+        // Download the new image and if it is different, re-create the container
+        if (await updateImage(info, info.options.DOCKER_IMAGE)) {
+          await destroyContainer(info);
+        }
+
         info = {
           ...info,
-          containerId: await start(info),
+          imageName: info.options.DOCKER_IMAGE,
         };
       }
+      info = {
+        ...info,
+        containerId: await start(info),
+      };
     }
 
     info = await autoVendor(info);
@@ -241,6 +250,12 @@ async function init(info) {
   }
 
   if (!process.env.DOCKER_CONTAINER) {
+    // We don't have a config yet, this is a fresh project, override with the
+    // image flag if provided. Also see https://github.com/anacierdem/libdragon-docker/issues/66
+    info = {
+      ...info,
+      imageName: info.options.DOCKER_IMAGE ?? info.imageName,
+    };
     // Download image and start it
     await updateImage(info, info.imageName);
     info.containerId = await start(info);

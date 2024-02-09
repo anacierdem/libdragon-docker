@@ -12,6 +12,13 @@ import ffi from 'ffi-napi';
 
 let kernel32;
 if (process.platform === 'win32') {
+  // ADDITONAL Windows weirdness: docker is not found in the PATH when running
+  // tests. I fixed this by moving the docker bin path to one up in the list.
+  // Either there is a limit on path with this jest+zx setup or something else
+  // was messing with the path. The other path was:
+  // C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\
+  // and it is definitely not the only one with spaces in it.
+
   // Default to cmd.exe on windows. o/w zx will try to use wsl etc. which the
   // user may not have node installed. Theorerically, we could use the node from
   // the wsl container but if it is on the host system you'd need to include the
@@ -21,7 +28,8 @@ if (process.platform === 'win32') {
   // installed locally via @semantic-release. It is introduced in node_modules\.bin
   // and that path is added to the child process' PATH causing it to take precedence
   // on powershell. Also see https://github.com/npm/cli/issues/3136
-  $.shell = 'cmd.exe';
+  $.shell = true;
+  // Defaults to "set -euo pipefail;" o/w
   $.prefix = '';
 
   // Prepare the ffi bindings for GetLongPathNameA
@@ -200,6 +208,7 @@ describe('Smoke tests', () => {
     ]);
   }, 240000);
 
+  // TODO: this will fail if the image is not compatible with the local libdragon
   test('Can run a standard set of commands with a manual libdragon vendor', async () => {
     // Copy the libdragon files to the project directory with a non-standard name
     await fsp.cp(path.join(repositoryDir, 'libdragon'), './libdragon_test', {
@@ -213,4 +222,36 @@ describe('Smoke tests', () => {
       'init -s manual -d ./libdragon_test',
     ]);
   }, 240000);
+
+  test('should not start a new docker container on a second init', async () => {
+    await $`libdragon init`;
+    const { stdout: containerId } = await $`libdragon start`;
+    // Ideally this second init should not re-install libdragon file if they exist
+    await $`libdragon init`;
+    // TODO: Actually this should hold even when the actual image is different
+    expect((await $`libdragon start`).stdout.trim()).toEqual(
+      containerId.trim()
+    );
+  }, 200000);
+
+  // TODO: find a better way to test such stuff. Integration is good but makes
+  // these really difficult to test. Or maybe we can have a flag to skip the build
+  // step
+  test('should update image when --image flag is presetn', async () => {
+    await $`libdragon init`;
+    const { stdout: containerId } = await $`libdragon start`;
+    const { stdout: image } =
+      await $`docker container inspect ${containerId.trim()} --format "{{.Config.Image}}"`;
+
+    expect(image.trim()).toEqual('ghcr.io/dragonminded/libdragon:latest');
+
+    await $`libdragon init --image="ghcr.io/dragonminded/libdragon:unstable"`;
+    const { stdout: newContainerId } = await $`libdragon start`;
+    expect(newContainerId.trim()).not.toEqual(containerId);
+    expect(
+      (
+        await $`docker container inspect ${newContainerId.trim()} --format "{{.Config.Image}}"`
+      ).stdout.trim()
+    ).toBe('ghcr.io/dragonminded/libdragon:unstable');
+  }, 200000);
 });

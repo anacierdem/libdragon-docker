@@ -75,6 +75,8 @@ async function findContainerId(libdragonInfo) {
     return id;
   }
 
+  // TODO: use docker container ls -a --format "{{.Labels}}" instead
+  // from what I remember this used to not work (i.e the property was not exposed before)
   const candidates = (
     await spawnProcess('docker', [
       'container',
@@ -186,9 +188,6 @@ const readProjectInfo = async function (optionInfo) {
     // Only used for the init action ATM, and it is not ideal to have this here
     haveProjectConfig: !!projectRoot,
 
-    // Set the defaults immediately, these should be present at all times even
-    // if we are migrating from the old config because they did not exist before
-    imageName: DOCKER_HUB_IMAGE,
     vendorDirectory: toPosixPath(path.join('.', LIBDRAGON_SUBMODULE)),
     vendorStrategy: DEFAULT_STRATEGY,
   };
@@ -212,10 +211,6 @@ const readProjectInfo = async function (optionInfo) {
     log(`Active container id: ${info.containerId}`, true);
   }
 
-  // For imageName, flag has the highest priority followed by the one read from
-  // the file and then if there is any matching container, name is read from it.
-  // As last option fallback to default value.
-
   // If still have the container, read the image name from it
   // No need to do anything if we are in a container
   if (
@@ -234,6 +229,14 @@ const readProjectInfo = async function (optionInfo) {
       ])
     ).trim();
   }
+
+  // For imageName, flag has the highest priority followed by the one read from
+  // the file and then if there is any matching container, name is read from it.
+  // As last option fallback to default value.
+  // This represents the current value, so the flag should be processed later.
+  // If we were to update it here, it would be impossible to know the change
+  // with how we structure the code right now.
+  info.imageName = info.imageName ?? DOCKER_HUB_IMAGE;
 
   log(`Active image name: ${info.imageName}`, true);
   log(`Active vendor directory: ${info.vendorDirectory}`, true);
