@@ -1,3 +1,10 @@
+## [11.0.2](https://github.com/anacierdem/libdragon-docker/compare/v11.0.1...v11.0.2) (2024-02-13)
+
+
+### Bug Fixes
+
+* find parent git root in case running in a submodule ([e34c30b](https://github.com/anacierdem/libdragon-docker/commit/e34c30baea57cbd51e5330443dc54d5443662384))
+
 ## [11.0.1](https://github.com/anacierdem/libdragon-docker/compare/v11.0.0...v11.0.1) (2024-02-09)
 
 
