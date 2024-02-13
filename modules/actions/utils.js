@@ -242,7 +242,19 @@ async function initGitAndCacheContainerId(libdragonInfo) {
     await runGitMaybeHost(libdragonInfo, ['init']);
   }
 
-  const gitFolder = path.join(libdragonInfo.root, '.git');
+  const rootGitFolder = (
+    await spawnProcess('git', [
+      'rev-parse',
+      '--show-superproject-working-tree',
+    ]).catch(() => {
+      // Probably host does not have git, can ignore
+      return '';
+    })
+  ).trim();
+
+  // Fallback to the potential git root on the project root if there is no parent
+  // git project.
+  const gitFolder = path.join(rootGitFolder || libdragonInfo.root, '.git');
   if (await dirExists(gitFolder)) {
     await fs.writeFile(
       path.join(gitFolder, CACHED_CONTAINER_FILE),
