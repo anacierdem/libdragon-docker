@@ -1,7 +1,7 @@
 const fs = require('fs/promises');
 const path = require('path');
 
-const { destroyContainer } = require('./utils');
+const { destroyContainer } = require('../utils');
 const { CONFIG_FILE, LIBDRAGON_PROJECT_MANIFEST } = require('../constants');
 const { fileExists, dirExists, log, ValidationError } = require('../helpers');
 const chalk = require('chalk');

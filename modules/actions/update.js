@@ -5,7 +5,7 @@ const {
   installDependencies,
   updateImage,
   destroyContainer,
-} = require('./utils');
+} = require('../utils');
 const { start } = require('./start');
 
 /**

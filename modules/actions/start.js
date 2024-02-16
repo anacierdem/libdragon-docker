@@ -14,7 +14,7 @@ const {
   checkContainerAndClean,
   checkContainerRunning,
   destroyContainer,
-} = require('./utils');
+} = require('../utils');
 
 /**
  * Create a new container

@@ -1,4 +1,4 @@
-const { installDependencies } = require('./utils');
+const { installDependencies } = require('../utils');
 const { start } = require('./start');
 
 /**

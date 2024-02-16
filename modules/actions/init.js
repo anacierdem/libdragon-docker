@@ -10,7 +10,8 @@ const {
   updateImage,
   runGitMaybeHost,
   destroyContainer,
-} = require('./utils');
+  ensureGit,
+} = require('../utils');
 
 const {
   LIBDRAGON_PROJECT_MANIFEST,
@@ -109,9 +110,8 @@ const autoVendor = async (info) => {
   }
 
   // Container re-init breaks file modes assume there is git for this case.
-  // TODO: we should remove the unnecessary inits in the future.
   if (!process.env.DOCKER_CONTAINER) {
-    await runGitMaybeHost(info, ['init']);
+    await ensureGit(info);
   }
 
   // TODO: TS thinks this is already defined
@@ -172,6 +172,8 @@ const autoVendor = async (info) => {
       // This will throw if git user name/email is not set up. Let's not assume
       // anything for now. This means subtree is not supported for someone without
       // git on the host machine.
+      // TODO: this is probably creating an unnecessary commit for someone who
+      // just created a git repo and knows what they are doing.
       await runGitMaybeHost(info, [
         'commit',
         '--allow-empty',
@@ -262,6 +264,7 @@ async function init(info) {
     // We have created a new container, save the new info ASAP
     // When in a container, we should already have git
     // Re-initing breaks file modes anyways
+    // TODO: if this fails, we leave the project in a bad state
     await initGitAndCacheContainerId(
       /** @type Parameters<initGitAndCacheContainerId>[0] */ (info)
     );

@@ -5,14 +5,14 @@ const _ = require('lodash');
 
 const { dockerHostUserParams } = require('./docker-utils');
 
-const { CONTAINER_TARGET_PATH } = require('../constants');
+const { CONTAINER_TARGET_PATH } = require('./constants');
 const {
   fileExists,
   toPosixPath,
   spawnProcess,
   dockerExec,
   ValidationError,
-} = require('../helpers');
+} = require('./helpers');
 
 async function findNPMRoot() {
   try {
@@ -29,7 +29,7 @@ async function findNPMRoot() {
 
 /**
  * Install other NPM dependencies if this is an NPM project
- * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ * @param {import('./project-info').LibdragonInfo} libdragonInfo
  */
 const installNPMDependencies = async (libdragonInfo) => {
   const npmRoot = await findNPMRoot();

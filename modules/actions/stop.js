@@ -1,6 +1,6 @@
 const { spawnProcess, ValidationError } = require('../helpers');
 
-const { checkContainerRunning } = require('./utils');
+const { checkContainerRunning } = require('../utils');
 
 /**
  * @param {import('../project-info').LibdragonInfo} libdragonInfo

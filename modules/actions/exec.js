@@ -13,8 +13,8 @@ const {
 } = require('../helpers');
 
 const { start } = require('./start');
-const { dockerHostUserParams } = require('./docker-utils');
-const { installDependencies } = require('./utils');
+const { dockerHostUserParams } = require('../docker-utils');
+const { installDependencies } = require('../utils');
 
 /**
  * @param {import('../project-info').LibdragonInfo} libdragonInfo

@@ -1,10 +1,7 @@
 const path = require('path');
 const fs = require('fs/promises');
 
-const {
-  CONTAINER_TARGET_PATH,
-  CACHED_CONTAINER_FILE,
-} = require('../constants');
+const { CONTAINER_TARGET_PATH, CACHED_CONTAINER_FILE } = require('./constants');
 
 const {
   fileExists,
@@ -16,13 +13,13 @@ const {
   CommandError,
   ValidationError,
   toNativePath,
-} = require('../helpers');
+} = require('./helpers');
 
 const { dockerHostUserParams } = require('./docker-utils');
 const { installNPMDependencies } = require('./npm-utils');
 
 /**
- * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ * @param {import('./project-info').LibdragonInfo} libdragonInfo
  */
 const installDependencies = async (libdragonInfo) => {
   const buildScriptPath = path.join(
@@ -54,7 +51,7 @@ const installDependencies = async (libdragonInfo) => {
 /**
  * Downloads the given docker image. Returns false if the local image is the
  * same, true otherwise.
- * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ * @param {import('./project-info').LibdragonInfo} libdragonInfo
  * @param {string} newImageName
  */
 const updateImage = async (libdragonInfo, newImageName) => {
@@ -98,7 +95,7 @@ const updateImage = async (libdragonInfo, newImageName) => {
 };
 
 /**
- * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ * @param {import('./project-info').LibdragonInfo} libdragonInfo
  */
 const destroyContainer = async (libdragonInfo) => {
   assert(
@@ -128,9 +125,9 @@ const destroyContainer = async (libdragonInfo) => {
 
 /**
  *
- * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ * @param {import('./project-info').LibdragonInfo} libdragonInfo
  * @param {string[]} params
- * @param {import('../helpers').SpawnOptions} options
+ * @param {import('./helpers').SpawnOptions} options
  */
 async function runGitMaybeHost(libdragonInfo, params, options = {}) {
   assert(
@@ -139,9 +136,30 @@ async function runGitMaybeHost(libdragonInfo, params, options = {}) {
   );
   try {
     const isWin = /^win/.test(process.platform);
+
+    // When using host's git the actual top level can be higher in the tree
+    // rather that at the root of the project. We need to find it to run some
+    // git operations like subtree.
+    const gitRoot = (
+      await spawnProcess(
+        'git',
+        ['-C', libdragonInfo.root, 'rev-parse', '--show-toplevel'],
+        { inheritStdin: false }
+      ).catch(() => {
+        // Either this is not a git repo or the host does not have git
+        // We might also screw something up but we can live with it for now
+        return '';
+      })
+    ).trim();
+
     return await spawnProcess(
       'git',
-      ['-C', libdragonInfo.root, ...params],
+      [
+        '-C',
+        libdragonInfo.root,
+        ...(gitRoot ? ['--git-dir', `${gitRoot}/.git`] : []),
+        ...params,
+      ],
       // Windows git is breaking the TTY somehow - disable TTY for now
       // We are not able to display progress for the initial clone b/c of this
       // Enable progress otherwise.
@@ -171,7 +189,7 @@ async function runGitMaybeHost(libdragonInfo, params, options = {}) {
 }
 
 /**
- * @param {import('../project-info').LibdragonInfo} libdragonInfo
+ * @param {import('./project-info').LibdragonInfo} libdragonInfo
  */
 async function checkContainerAndClean(libdragonInfo) {
   assert(
@@ -229,17 +247,16 @@ async function checkContainerRunning(containerId) {
 }
 
 /**
- * @param {import('../project-info').LibdragonInfo & {containerId: string}} libdragonInfo
+ * @param {import('./project-info').LibdragonInfo & {containerId: string}} libdragonInfo
  */
 async function initGitAndCacheContainerId(libdragonInfo) {
   if (!libdragonInfo.containerId) {
     return;
   }
 
-  // If there is managed vendoring, make sure we have a git repo. `git init` is
-  // safe anyways...
+  // If there is managed vendoring, make sure we have a git repo.
   if (libdragonInfo.vendorStrategy !== 'manual') {
-    await runGitMaybeHost(libdragonInfo, ['init']);
+    await ensureGit(libdragonInfo);
   }
 
   const rootGitFolder = (
@@ -263,6 +280,29 @@ async function initGitAndCacheContainerId(libdragonInfo) {
   }
 }
 
+/**
+ * Makes sure there is a parent git repository. If not, it will create one at
+ * project root.
+ * @param {import('./project-info').LibdragonInfo} info
+ */
+async function ensureGit(info) {
+  const gitRoot = (
+    await runGitMaybeHost(info, ['rev-parse', '--show-toplevel']).catch(() => {
+      // Probably host does not have git, can ignore
+      return '';
+    })
+  ).trim();
+
+  // If the host does not have git installed, this will not run unless we
+  // have already initialized it via the container, in which case we would
+  // have it as the git root. This is not expected to mess with host git flows
+  // where there is a git working tree higher in the host filesystem, which
+  // the container does not have access to.
+  if (!gitRoot) {
+    await runGitMaybeHost(info, ['init']);
+  }
+}
+
 module.exports = {
   installDependencies,
   updateImage,
@@ -271,4 +311,5 @@ module.exports = {
   checkContainerAndClean,
   initGitAndCacheContainerId,
   runGitMaybeHost,
+  ensureGit,
 };

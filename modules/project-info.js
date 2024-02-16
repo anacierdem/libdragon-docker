@@ -5,9 +5,9 @@ const fs = require('fs/promises');
 const {
   checkContainerAndClean,
   initGitAndCacheContainerId,
-} = require('./actions/utils');
+} = require('./utils');
 
-const { findNPMRoot } = require('./actions/npm-utils');
+const { findNPMRoot } = require('./npm-utils');
 
 const {
   LIBDRAGON_PROJECT_MANIFEST,
@@ -105,8 +105,7 @@ async function findContainerId(libdragonInfo) {
     if (longId.length === 64) {
       // This shouldn't happen but if the user somehow deleted the .git folder
       // (we don't have the container id file at this point) we can recover the
-      // project. `git init` is safe anyways and it is not executed if strategy
-      // is `manual`
+      // project. This is safe and it is not executed if strategy is `manual`
       await initGitAndCacheContainerId({
         ...libdragonInfo,
         containerId: longId,
