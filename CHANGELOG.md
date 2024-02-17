@@ -1,3 +1,10 @@
+## [11.0.3-beta.1](https://github.com/anacierdem/libdragon-docker/compare/v11.0.2...v11.0.3-beta.1) (2024-02-17)
+
+
+### Bug Fixes
+
+* **init.js:** do not run git init unnecessarily ([0a5688f](https://github.com/anacierdem/libdragon-docker/commit/0a5688f45ce0eb0ed91e5f5daedac24d24099afd)), closes [#69](https://github.com/anacierdem/libdragon-docker/issues/69)
+
 ## [11.0.2](https://github.com/anacierdem/libdragon-docker/compare/v11.0.1...v11.0.2) (2024-02-13)
 
 
