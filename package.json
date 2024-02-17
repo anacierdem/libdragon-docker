@@ -4,8 +4,8 @@
   "description": "This is a docker wrapper for libdragon",
   "main": "index.js",
   "engines": {
-    "node": ">=18",
-    "npm": ">=8"
+    "node": ">=20.11.0",
+    "npm": ">=10"
   },
   "bin": {
     "libdragon": "./index.js"
@@ -16,7 +16,8 @@
     "libdragon": "node index.js",
     "start": "node index.js start",
     "stop": "node index.js stop",
-    "pack": "echo temporarily disabled",
+    "pack": "node pack.mjs",
+    "sea": "node --experimental-vm-modules ./pack.mjs",
     "format": "prettier **/*.js --write",
     "format-check": "prettier **/*.js --check",
     "lint": "eslint --fix **/*.js",
@@ -51,9 +52,11 @@
     "commitizen": "^4.2.4",
     "cz-conventional-changelog": "^3.3.0",
     "ed64": "^2.0.4",
+    "esbuild": "^0.20.0",
     "eslint": "^7.32.0",
     "ffi-napi": "^4.0.3",
     "jest": "^29.5.0",
+    "postject": "^1.0.0-alpha.6",
     "prettier": "^2.4.0",
     "ref-napi": "^3.0.3",
     "semantic-release": "^21.0.9",

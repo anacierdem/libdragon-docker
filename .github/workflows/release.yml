@@ -1,18 +1,19 @@
-name: Build
+name: Build and release
 on:
   push:
     branches:
-      - master
+      - 'beta'
+      - 'master'
 
 jobs:
-  run-tests:
-    name: Run Tests
-    uses: ./.github/workflows/tests.yml
+  verify:
+    name: Verify and build
+    uses: ./.github/workflows/build.yml
 
   release:
     name: Release
     runs-on: ubuntu-latest
-    needs: Run-Tests
+    needs: verify
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -24,11 +25,17 @@ jobs:
         with:
           # Do not include registy url here, it creates a .npmrc which prevents
           # semantic-release from authenticating with npm
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install
         run: npm ci
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: executable-*
+          merge-multiple: true
 
       - name: Release
         env:
