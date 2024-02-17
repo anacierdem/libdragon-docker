@@ -16,7 +16,7 @@
     "libdragon": "node index.js",
     "start": "node index.js start",
     "stop": "node index.js stop",
-    "pack": "pkg ./",
+    "pack": "echo temporarily disabled",
     "format": "prettier **/*.js --write",
     "format-check": "prettier **/*.js --check",
     "lint": "eslint --fix **/*.js",
@@ -54,7 +54,6 @@
     "eslint": "^7.32.0",
     "ffi-napi": "^4.0.3",
     "jest": "^29.5.0",
-    "pkg": "^5.5.2",
     "prettier": "^2.4.0",
     "ref-napi": "^3.0.3",
     "semantic-release": "^21.0.9",
@@ -63,16 +62,6 @@
   },
   "overrides": {
     "minimist": "1.2.6"
-  },
-  "pkg": {
-    "targets": [
-      "node14-win-x64",
-      "node14-linux-x64",
-      "node14-macos-x64"
-    ],
-    "assets": [
-      "skeleton/**"
-    ]
   },
   "release": {
     "plugins": [
