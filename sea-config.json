@@ -1,0 +1,5 @@
+{
+  "main": "build/main.js",
+  "output": "build/sea-prep.blob",
+  "useCodeCache": true
+}

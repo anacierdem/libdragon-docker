@@ -5,8 +5,9 @@ on:
     branches:
       - '*'
       - '!master'
+      - '!beta'
   pull_request:
 
 jobs:
-  Run-Tests:
-    uses: ./.github/workflows/tests.yml
+  Verify:
+    uses: ./.github/workflows/build.yml
