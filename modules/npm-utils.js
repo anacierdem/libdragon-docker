@@ -1,6 +1,7 @@
 const path = require('path');
 const fsClassic = require('fs');
 
+// TODO: stop using lodash just for a simple uniq function
 const _ = require('lodash');
 
 const { dockerHostUserParams } = require('./docker-utils');

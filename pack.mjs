@@ -30,6 +30,7 @@ await esbuild.build({
   platform: 'node',
   target: 'node20',
   outfile: path.join('build', 'main.js'),
+  minify: true,
 });
 
 await $`node --experimental-sea-config sea-config.json`;
