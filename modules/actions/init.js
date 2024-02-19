@@ -21,13 +21,17 @@ const {
 } = require('../constants');
 const {
   log,
-  copyDirContents,
   CommandError,
   ParameterError,
   ValidationError,
   toPosixPath,
   toNativePath,
 } = require('../helpers');
+
+// @ts-ignore-next-line
+const main_c = /** @type {string} */ (require('../../skeleton/src/main.c'));
+// @ts-ignore-next-line
+const makefile = /** @type {string} */ (require('../../skeleton/Makefile.mk'));
 
 /**
  * @param {import('../project-info').LibdragonInfo} info
@@ -199,6 +203,47 @@ const autoVendor = async (info) => {
 };
 
 /**
+ * @param {import('../project-info').LibdragonInfo} info
+ */
+async function copyFiles(info) {
+  // TODO: make use of VFS
+  const srcPath = path.join(info.root, 'src');
+
+  const srcStat = await fs.stat(srcPath).catch((e) => {
+    if (e.code !== 'ENOENT') throw e;
+    return null;
+  });
+
+  if (srcStat && !srcStat.isDirectory()) {
+    log(`${srcPath} is not a directory, skipping.`);
+    return;
+  }
+
+  if (!srcStat) {
+    log(`Creating a directory at ${srcPath}.`, true);
+    await fs.mkdir(srcPath);
+  }
+
+  const makefilePath = path.join(info.root, 'Makefile');
+  await fs
+    .writeFile(makefilePath, makefile, {
+      flag: 'wx',
+    })
+    .catch(() => {
+      log(`${makefilePath} already exists, skipping.`);
+    });
+
+  const mainPath = path.join(info.root, 'src', 'main.c');
+  await fs
+    .writeFile(mainPath, main_c, {
+      flag: 'wx',
+    })
+    .catch(() => {
+      log(`${mainPath} already exists, skipping.`);
+    });
+}
+
+/**
  * Initialize a new libdragon project in current working directory
  * Also downloads the image
  * @param {import('../project-info').LibdragonInfo} info
@@ -273,13 +318,8 @@ async function init(info) {
   info = await autoVendor(info);
 
   log(`Preparing project files...`);
-  const skeletonFolder = path.join(__dirname, '../../skeleton');
 
-  await Promise.all([
-    installDependencies(info),
-    // node copy functions does not work with pkg
-    copyDirContents(skeletonFolder, info.root),
-  ]);
+  await Promise.all([installDependencies(info), copyFiles(info)]);
 
   log(chalk.green(`libdragon ready at \`${info.root}\`.`));
   return info;

@@ -31,6 +31,10 @@ await esbuild.build({
   target: 'node20',
   outfile: path.join('build', 'main.js'),
   minify: true,
+  loader: {
+    '.c': 'text',
+    '.mk': 'text',
+  },
 });
 
 await $`node --experimental-sea-config sea-config.json`;
