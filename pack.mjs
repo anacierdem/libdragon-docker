@@ -35,6 +35,9 @@ await esbuild.build({
     '.c': 'text',
     '.mk': 'text',
   },
+  define: {
+    PACKAGED: 'sea',
+  },
 });
 
 await $`node --experimental-sea-config sea-config.json`;

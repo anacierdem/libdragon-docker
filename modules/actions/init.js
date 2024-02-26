@@ -1,4 +1,7 @@
+/// <reference path="../../globals.d.ts" />
+
 const fs = require('fs/promises');
+const _fs = require('fs');
 const path = require('path');
 
 const chalk = require('chalk').stderr;
@@ -28,10 +31,18 @@ const {
   toNativePath,
 } = require('../helpers');
 
-// @ts-ignore-next-line
-const main_c = /** @type {string} */ (require('../../skeleton/src/main.c'));
-// @ts-ignore-next-line
-const makefile = /** @type {string} */ (require('../../skeleton/Makefile.mk'));
+const main_c = globalThis.PACKAGED
+  ? // @ts-ignore-next-line
+    /** @type {string} */ (require('../../skeleton/src/main.c'))
+  : _fs.readFileSync(path.join(__dirname, '../../skeleton/src/main.c'), 'utf8');
+
+const makefile = globalThis.PACKAGED
+  ? // @ts-ignore-next-line
+    /** @type {string} */ require('../../skeleton/Makefile.mk')
+  : _fs.readFileSync(
+      path.join(__dirname, '../../skeleton/Makefile.mk'),
+      'utf8'
+    );
 
 /**
  * @param {import('../project-info').LibdragonInfo} info
@@ -206,7 +217,7 @@ const autoVendor = async (info) => {
  * @param {import('../project-info').LibdragonInfo} info
  */
 async function copyFiles(info) {
-  // TODO: make use of VFS
+  // TODO: make use of VFS, this is far from ideal
   const srcPath = path.join(info.root, 'src');
 
   const srcStat = await fs.stat(srcPath).catch((e) => {
