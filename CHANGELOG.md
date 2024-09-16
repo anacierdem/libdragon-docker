@@ -1,3 +1,10 @@
+# [11.1.0](https://github.com/anacierdem/libdragon-docker/compare/v11.0.3...v11.1.0) (2024-09-16)
+
+
+### Features
+
+* add experimental Windows installer ([83aab64](https://github.com/anacierdem/libdragon-docker/commit/83aab64f040eafc48f27c282e95de7477362f53c))
+
 ## [11.0.3](https://github.com/anacierdem/libdragon-docker/compare/v11.0.2...v11.0.3) (2024-02-16)
 
 
