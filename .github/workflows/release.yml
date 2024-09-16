@@ -31,22 +31,20 @@ jobs:
           npm run pack
           mv libdragon-win.exe libdragon.exe
           npx semantic-release --dry-run --no-ci
-          echo "::set-output name=nextVersion::`cat .VERSION`"
+          echo NEXT_VERSION=$(gc .VERSION) >> "$GITHUB_OUTPUT"
 
       - name: Compile .ISS to .EXE Installer
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
           path: ./setup.iss
-          options: /dMyAppVersion=${{ steps.prepare-installer.outputs.nextVersion }}
+          options: /dMyAppVersion=${{ steps.prepare-installer.outputs.NEXT_VERSION }}
 
       - name: Upload installer
         uses: actions/upload-artifact@v3
         with:
           name: installer-artifact
           include-hidden-files: true
-          path: |
-            ./Output/libdragon-installer.exe
-            ./.VERSION
+          path: ./Output/libdragon-installer.exe
 
   release:
     name: Release
