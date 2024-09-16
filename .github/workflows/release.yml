@@ -7,6 +7,7 @@ on:
 jobs:
   run-tests:
     name: Run Tests
+    needs: Run-Tests
     uses: ./.github/workflows/tests.yml
 
   installer:
