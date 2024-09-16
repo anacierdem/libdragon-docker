@@ -83,7 +83,8 @@
       [
         "@semantic-release/exec",
         {
-          "prepareCmd": "./pack.sh"
+          "prepareCmd": "./pack.sh",
+          "verifyReleaseCmd": "echo ${nextRelease.version} > .VERSION"
         }
       ],
       [
@@ -101,6 +102,10 @@
             {
               "path": "libdragon-win-x86_64.zip",
               "label": "Windows executable"
+            },
+            {
+              "path": "libdragon-installer.exe",
+              "label": "Windows installer"
             }
           ]
         }
