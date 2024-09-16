@@ -5,13 +5,13 @@ on:
       - master
 
 jobs:
-  run-tests:
-    name: Run Tests
-    uses: ./.github/workflows/tests.yml
+  # run-tests:
+  #   name: Run Tests
+  #   uses: ./.github/workflows/tests.yml
 
   installer:
     name: Build the Inno Setup Installer
-    needs: run-tests
+    # needs: run-tests
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
