@@ -12,24 +12,28 @@ You should have [docker](https://www.docker.com/products/docker-desktop) (`>= 24
 
 ## Installation
 
-This is primarily a node.js script which is also packaged as an executable. You have two options:
+This is primarily a node.js script which is also packaged as an executable. You have a few options:
 
-### pre-built
+### installer
 
-Download the [pre-built executable](https://github.com/anacierdem/libdragon-docker/releases/latest) for your system and put it somewhere on your PATH. It is discouraged to put it in your project folder.
+Download the [windows installer](https://github.com/anacierdem/libdragon-docker/releases/latest) and run it. This option is currently only available on Windows.
 
 <details>
-  <summary>Windows instructions</summary>
+  <summary>Detailed instructions</summary>
 
   - Download the Windows installer and run it
-  - It can show a "Windows protected your PC" warning. In that case click "More info" and "Run anyway".
+  - It can show a "Windows protected your PC" warning. Click "More info" and "Run anyway".
   - You should now be able to use the `libdragon` on a command line or PowerShell.
   - To update it with a new version, download a newer installer and repeat the steps above.
 
 </details>
 
+### pre-built executable
+
+Download the [pre-built executable](https://github.com/anacierdem/libdragon-docker/releases/latest) for your system and put it somewhere on your PATH. It is discouraged to put it in your project folder.
+
 <details>
-  <summary>Windows instructions (manual)</summary>
+  <summary>Windows instructions</summary>
 
   - Download the Windows executable and copy it to `C:\bin`
   - Press `Windows + R` key combination and then enter `rundll32 sysdm.cpl,EditEnvironmentVariables`
