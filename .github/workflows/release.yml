@@ -23,7 +23,7 @@ jobs:
         with:
           # Do not include registy url here, it creates a .npmrc which prevents
           # semantic-release from authenticating with npm
-          node-version: '18'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install
@@ -33,4 +33,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        shell: pwsh
         run: npx semantic-release
