@@ -1,3 +1,10 @@
+## [11.1.2](https://github.com/anacierdem/libdragon-docker/compare/v11.1.1...v11.1.2) (2024-09-17)
+
+
+### Bug Fixes
+
+* include the installer in the release ([46299ba](https://github.com/anacierdem/libdragon-docker/commit/46299ba0c635227e363c23b3b58738ca8b01bad4))
+
 ## [11.1.1](https://github.com/anacierdem/libdragon-docker/compare/v11.1.0...v11.1.1) (2024-09-17)
 
 
