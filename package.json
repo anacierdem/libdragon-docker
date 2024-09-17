@@ -82,7 +82,7 @@
       [
         "@semantic-release/exec",
         {
-          "prepareCmd": "./pack.ps1 ${nextRelease.version}"
+          "prepareCmd": "powershell.exe ./pack.ps1 ${nextRelease.version}"
         }
       ],
       [
