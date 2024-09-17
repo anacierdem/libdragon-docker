@@ -21,6 +21,16 @@ Download the [pre-built executable](https://github.com/anacierdem/libdragon-dock
 <details>
   <summary>Windows instructions</summary>
 
+  - Download the Windows installer and run it
+  - It can show a "Windows protected your PC" warning. In that case click "More info" and "Run anyway".
+  - You should now be able to use the `libdragon` on a command line or PowerShell.
+  - To update it with a new version, download a newer installer and repeat the steps above.
+
+</details>
+
+<details>
+  <summary>Windows instructions (manual)</summary>
+
   - Download the Windows executable and copy it to `C:\bin`
   - Press `Windows + R` key combination and then enter `rundll32 sysdm.cpl,EditEnvironmentVariables`
   - In the `Environment Variables` window find the `Path` variable under `User variables for <your user name>`

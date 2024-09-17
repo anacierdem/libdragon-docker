@@ -102,7 +102,7 @@
               "label": "Windows executable"
             },
             {
-              "path": "libdragon-installer.exe",
+              "path": "Output/libdragon-installer.exe",
               "label": "Windows installer"
             }
           ]
