@@ -9,49 +9,9 @@ jobs:
   #   name: Run Tests
   #   uses: ./.github/workflows/tests.yml
 
-  installer:
-    name: Build the Inno Setup Installer
-    # needs: run-tests
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Prepare
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install
-        run: npm ci
-
-      - name: Build
-        id: prepare-installer
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          npm run pack
-          mv libdragon-win.exe libdragon.exe
-          npx semantic-release --dry-run --no-ci
-          echo NEXT_VERSION=$(gc .VERSION) >> "$GITHUB_OUTPUT"
-
-      - name: Compile .ISS to .EXE Installer
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
-        with:
-          path: ./setup.iss
-          options: /dMyAppVersion=${{ steps.prepare-installer.outputs.NEXT_VERSION }}
-
-      - name: Upload installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: installer-artifact
-          include-hidden-files: true
-          path: ./Output/libdragon-installer.exe
-
   release:
     name: Release
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: installer
     steps:
       - name: Checkout

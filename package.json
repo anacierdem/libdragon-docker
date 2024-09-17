@@ -82,8 +82,7 @@
       [
         "@semantic-release/exec",
         {
-          "prepareCmd": "./pack.sh",
-          "verifyReleaseCmd": "echo ${nextRelease.version} > .VERSION"
+          "prepareCmd": "./pack.ps ${nextRelease.version}"
         }
       ],
       [

@@ -2,10 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "libdragon"
-#define MyAppVersion "none"
 #define MyAppPublisher "Libdragon"
 #define MyAppURL "https://libdragon.dev/"
-#define MyAppExeName "libdragon.exe"
+#define MyAppExeName "./tmp/libdragon.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -13,7 +12,7 @@
 AppId={{B9EE00C4-986A-4E99-BE51-2730EFB899FF}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
-;AppVerName={#MyAppName} {#MyAppVersion}
+AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
@@ -29,17 +28,19 @@ WizardStyle=modern
 ChangesEnvironment=yes
 ; TODO: It is possible to enable this if the executable itself does the 
 ; PrivilegesRequiredOverridesAllowed=dialog
+SetupIconFile=libdragon.ico
+UninstallDisplayIcon=libdragon.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 Source: ".\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\libdragon.ico"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
+Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"; IconFilename: "{app}libdragon.ico"
 
 [Registry]
 Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; \
