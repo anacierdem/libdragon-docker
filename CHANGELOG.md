@@ -1,3 +1,10 @@
+## [11.1.3](https://github.com/anacierdem/libdragon-docker/compare/v11.1.2...v11.1.3) (2024-09-17)
+
+
+### Bug Fixes
+
+* streamline dependencies ([49aa08e](https://github.com/anacierdem/libdragon-docker/commit/49aa08e827febb612189989ba99fa5683a6f927b))
+
 ## [11.1.2](https://github.com/anacierdem/libdragon-docker/compare/v11.1.1...v11.1.2) (2024-09-17)
 
 
