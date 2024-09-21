@@ -59,11 +59,11 @@ afterEach(async () => {
     // ignore
   }
   try {
-    // await fsp.rm(projectDir, {
-    //   recursive: true,
-    //   maxRetries: 3,
-    //   retryDelay: 1000,
-    // });
+    await fsp.rm(projectDir, {
+      recursive: true,
+      maxRetries: 3,
+      retryDelay: 1000,
+    });
   } catch (e) {
     // ignore
   }
@@ -73,9 +73,12 @@ afterEach(async () => {
 beforeEach(async () => {
   stopped = false;
 
-  projectDir = await fsp.mkdtemp(
-    path.join(repositoryDir, '..', 'libdragon-test-project-')
-  );
+  // Windows' tmpdir returns a short path which is not compatible when doing one
+  // of the internal comparisons in the libdragon cli. So we use the parent
+  // directory instead.
+  const tmpDir =
+    process.platform === 'win32' ? path.join(repositoryDir, '..') : os.tmpdir();
+  projectDir = await fsp.mkdtemp(path.join(tmpDir, 'libdragon-test-project-'));
 
   await cd(projectDir);
 });
