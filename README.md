@@ -6,7 +6,7 @@ This is a wrapper for a docker container to make managing the libdragon toolchai
 
 ## Prerequisites
 
-You should have [docker](https://www.docker.com/products/docker-desktop) (`>= 24`) installed on your system.
+You should have [docker](https://www.docker.com/products/docker-desktop) (`>= 27.2.0`) installed on your system.
 
 `git` is not strictly required to use the tool. Still, it is highly recommended to have git on your host machine as it will be used instead of the one in the container.
 
@@ -161,7 +161,7 @@ To be able to share your project with the library change, you just commit your c
 
 ## Working on this repository
 
-After cloning this repository on a system with node.js (`>= 18`) & docker (`>= 24`), in this repository's root do;
+After cloning this repository on a system with node.js (`>= 18`) & docker (`>= 27.2.0`), in this repository's root do;
 
 ```bash
 npm install
@@ -204,7 +204,9 @@ Similarly to run the `clean` recipe, run;
 npm run libdragon -- make clean
 ```
 
-Keep in mind that `--` is necessary for actual arguments when using npm scripts.
+> [!IMPORTANT]
+> Keep in mind that `--` is necessary for actual arguments when using npm scripts.
+
 
 To update the submodule and re-build everything;
 
@@ -218,7 +220,8 @@ The root `bench` recipe is for building the code in root `src` folder. This is a
 
 There are also vscode launch configurations to quickly build the examples, tests and the bench. If you have the `N64_EMU` environment variable set pointing at your favourite emulator ([ares](https://ares-emu.net/) is highly recommended), the launch configurations ending in `(emu)` will kick your emulator with the selected example/code. You can also just hit F5 to launch the selected configuration.
 
-This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can use the launch configurations without `(emu)` to run the code if you have an everdrive plugged in and your active configuration will just boot up.
+> [!NOTE]
+> This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can use the launch configurations without `(emu)` to run the code if you have an everdrive plugged in and your active configuration will just boot up.
 
 You can clean everything with the `clean` recipe/task (open the command palette and choose `Run Task -> clean`).
 
@@ -282,7 +285,12 @@ To create your own dev container backed project, you can use the contents of the
   - It will prepare the container and open it in the editor.
 </details>
 
-## As an NPM dependency
+## Dependency management
+
+> [!WARNING]
+> This is an experimental feature.
+
+### As an NPM dependency
 
 You can install libdragon as an NPM dependency by `npm install libdragon --save` in order to use docker in your N64 projects. A `libdragon` command similar to global intallation is provided that can be used in your NPM scripts as follows;
 
@@ -296,7 +304,7 @@ You can install libdragon as an NPM dependency by `npm install libdragon --save`
 
 See [here](https://github.com/anacierdem/ed64-example) for a full example.
 
-## Developing a dependency
+### Developing a dependency
 
 You can make an NPM package that a `libdragon` project can depend on. Just include a `Makefile` on the repository root with a default recipe and an `install` recipe. On the depending project, after installing libdragon and the dependency with `npm install <dep name> --save`, one can install libdragon dependencies on the current docker container using `package.json` scripts.
 
@@ -320,8 +328,6 @@ For example this `package.json` in the dependent project;
 ```
 
 will init the container for this project and run `make && make install` for `ed64` upon running `npm install`. To develop a dependency [this](https://github.com/anacierdem/libdragon-dependency) is a good starting point.
-
-This is an experimental dependency management.
 
 ## Funding
 
