@@ -392,7 +392,7 @@ async function copyDirContents(src, dst) {
           await fs.writeFile(dest, content, {
             flag: 'wx',
           });
-        } catch (e) {
+        } catch {
           log(`${dest} already exists, skipping.`);
           return;
         }
