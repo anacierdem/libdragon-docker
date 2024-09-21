@@ -156,6 +156,9 @@ const autoVendor = async (info) => {
       if (!(e instanceof CommandError)) throw e;
       // We speculate this is caused by the user, so replace it with a more useful error message.
       e.message = `Unable to create submodule. If you have copied the executable in your project folder or you have a file named ${info.vendorDirectory}, removing it might solve this issue. Original error:\n${e.message}`;
+      if (e.out) {
+        e.message += `\n${e.out}`;
+      }
       throw e;
     }
 
