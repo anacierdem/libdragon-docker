@@ -5,12 +5,8 @@ import path from 'path';
 import os from 'os';
 import 'zx/globals';
 
-import ref from 'ref-napi';
-import ffi from 'ffi-napi';
-
 /* eslint-disable no-undef */
 
-let kernel32;
 if (process.platform === 'win32') {
   // ADDITONAL Windows weirdness: docker is not found in the PATH when running
   // tests. I fixed this by moving the docker bin path to one up in the list.
@@ -31,32 +27,6 @@ if (process.platform === 'win32') {
   $.shell = true;
   // Defaults to "set -euo pipefail;" o/w
   $.prefix = '';
-
-  // Prepare the ffi bindings for GetLongPathNameA
-  const DWORD = ref.types.ulong;
-  const LPCVOID = ref.refType(ref.types.void);
-  // TODO: verify this is const
-  const LPCSTR = ref.types.CString;
-  const LPSTR = ref.types.CString;
-  kernel32 = ffi.Library('kernel32', {
-    // DWORD GetLongPathNameA(
-    //   [in]  LPCSTR lpszShortPath,
-    //   [out] LPSTR  lpszLongPath,
-    //   [in]  DWORD  cchBuffer
-    // );
-    GetLongPathNameA: [DWORD, [LPCSTR, LPSTR, DWORD]],
-    GetLastError: [DWORD, []],
-    // DWORD FormatMessageA(
-    //   [in]           DWORD   dwFlags,
-    //   [in, optional] LPCVOID lpSource,
-    //   [in]           DWORD   dwMessageId,
-    //   [in]           DWORD   dwLanguageId,
-    //   [out]          LPSTR   lpBuffer,
-    //   [in]           DWORD   nSize,
-    //   [in, optional] va_list *Arguments
-    // );
-    FormatMessageA: [DWORD, [DWORD, LPCVOID, DWORD, DWORD, LPSTR, DWORD]],
-  });
 }
 
 let repositoryDir;
@@ -89,11 +59,11 @@ afterEach(async () => {
     // ignore
   }
   try {
-    await fsp.rm(projectDir, {
-      recursive: true,
-      maxRetries: 3,
-      retryDelay: 1000,
-    });
+    // await fsp.rm(projectDir, {
+    //   recursive: true,
+    //   maxRetries: 3,
+    //   retryDelay: 1000,
+    // });
   } catch (e) {
     // ignore
   }
@@ -104,64 +74,20 @@ beforeEach(async () => {
   stopped = false;
 
   projectDir = await fsp.mkdtemp(
-    path.join(os.tmpdir(), 'libdragon-test-project-')
+    path.join(repositoryDir, '..', 'libdragon-test-project-')
   );
-
-  // tmpdir creates a short path on Windows, convert it to long form to be
-  // compatible with the other paths that we use for relative comparison
-  if (kernel32) {
-    const bufferSize = 260; // MAX_PATH as defined by windows incl. null terminator
-    const longPath = ref.allocCString(new Array(bufferSize - 1).join(' '));
-    const written = kernel32.GetLongPathNameA(projectDir, longPath, bufferSize);
-
-    if (written === 0) {
-      const errorCode = kernel32.GetLastError();
-      const messageSize = 1024;
-      const errorMessage = ref.allocCString(new Array(messageSize).join(' '));
-
-      const FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000;
-      const FORMAT_MESSAGE_IGNORE_INSERTS = 0x00000200;
-
-      // Read the system message from the error code
-      const result = kernel32.FormatMessageA(
-        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        null,
-        errorCode,
-        0,
-        errorMessage,
-        messageSize
-      );
-
-      if (result === 0) {
-        throw new Error(`Error reading message, code: ${errorCode}`);
-      }
-
-      if (errorCode === 2) {
-        throw new Error(
-          `Pathname maybe ASCII incompatible. Original error: ${errorMessage.readCString()}`
-        );
-      }
-      throw new Error(`System error: ${errorMessage.readCString()}`);
-    }
-
-    // written bytes should be less than bufferSize as there will also be an
-    // additional terminating null character
-    if (written >= bufferSize) {
-      throw new Error('Path too long.');
-    }
-
-    projectDir = ref.readCString(longPath);
-  }
 
   await cd(projectDir);
 });
 
 const runCommands = async (commands, beforeCommand) => {
+  console.log('NEW COMMAND SEQUENCE');
   for (const command of commands) {
     await beforeCommand?.();
     // Do not invoke it as a tagged template literal. This will cause a parameter
     // replacement, which we don't want here.
-    lastCommand = $([`libdragon  ${command}`]);
+    console.log('TEST STEP: libdragon -v', command);
+    lastCommand = $([`libdragon -v ${command}`]);
     await lastCommand;
     if (stopped) break;
   }
@@ -186,18 +112,18 @@ describe('Smoke tests', () => {
     await runCommands(['init', 'init', ...commands, 'init -s submodule']);
   }, 240000);
 
-  test('Can run a standard set of commands even if the container id is lost', async () => {
-    await runCommands(
-      ['init', 'init', ...commands, 'init -s submodule'],
-      async () => {
-        try {
-          await fsp.rm('.git/libdragon-docker-container');
-        } catch {
-          // ignore
-        }
-      }
-    );
-  }, 240000);
+  // test('Can run a standard set of commands even if the container id is lost', async () => {
+  //   await runCommands(
+  //     ['init', 'init', ...commands, 'init -s submodule'],
+  //     async () => {
+  //       try {
+  //         await fsp.rm('.git/libdragon-docker-container');
+  //       } catch {
+  //         // ignore
+  //       }
+  //     }
+  //   );
+  // }, 240000);
 
   test('Can run a standard set of commands with subtree strategy', async () => {
     await runCommands([

@@ -40,7 +40,8 @@
   "dependencies": {
     "chalk": "^4.1.0",
     "command-line-usage": "^6.1.1",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.20",
+    "zx": "^8.1.8"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^6.0.1",

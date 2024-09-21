@@ -5,13 +5,14 @@ on:
       - master
 
 jobs:
-  # run-tests:
-  #   name: Run Tests
-  #   uses: ./.github/workflows/tests.yml
+  run-tests:
+    name: Run Tests
+    uses: ./.github/workflows/tests.yml
 
   release:
     name: Release
     runs-on: windows-latest
+    needs: run-tests
     steps:
       - name: Checkout
         uses: actions/checkout@v2
