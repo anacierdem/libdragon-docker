@@ -268,7 +268,7 @@ async function init(info) {
           'HEAD',
         ]);
         activeBranchName = existingBranchName.trim();
-        shouldOverrideBranch = true;
+        shouldOverrideBranch = !!activeBranchName;
       } catch {
         // If we can't get the branch name, we will use the default
       }
