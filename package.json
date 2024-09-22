@@ -17,10 +17,10 @@
     "start": "node index.js start",
     "stop": "node index.js stop",
     "pack": "pkg ./",
-    "format": "prettier **/*.js --write",
-    "format-check": "prettier **/*.js --check",
-    "lint": "eslint --fix **/*.js",
-    "lint-check": "eslint **/*.js",
+    "format": "prettier **/*.js **/*.mjs **/*.cjs --write",
+    "format-check": "prettier **/*.js **/*.mjs **/*.cjs --check",
+    "lint": "eslint --fix modules/**/*.js *.js *.mjs *.cjs",
+    "lint-check": "eslint modules/**/*.js *.js *.mjs *.cjs",
     "tsc": "tsc"
   },
   "repository": {

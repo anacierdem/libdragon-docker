@@ -55,7 +55,7 @@ afterEach(async () => {
   }
   try {
     await $`libdragon --verbose destroy`;
-  } catch (e) {
+  } catch {
     // ignore
   }
   try {
@@ -64,7 +64,7 @@ afterEach(async () => {
       maxRetries: 3,
       retryDelay: 1000,
     });
-  } catch (e) {
+  } catch {
     // ignore
   }
   lastCommand = undefined;
@@ -84,12 +84,10 @@ beforeEach(async () => {
 });
 
 const runCommands = async (commands, beforeCommand) => {
-  console.log('NEW COMMAND SEQUENCE');
   for (const command of commands) {
     await beforeCommand?.();
     // Do not invoke it as a tagged template literal. This will cause a parameter
     // replacement, which we don't want here.
-    console.log('TEST STEP: libdragon -v', command);
     lastCommand = $([`libdragon -v ${command}`]);
     await lastCommand;
     if (stopped) break;
