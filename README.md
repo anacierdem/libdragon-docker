@@ -105,15 +105,19 @@ Run `libdragon help [action]` for more details on individual actions.
 
 ## Recipes
 
-### Using a different branch of libdragon
+### Using a different libdragon branch
 
-Initialize your project as usual:
+Use the `--branch` flag to set up a custom libdragon branch when initializing your project:
 
 ```bash
-libdragon init
+libdragon init --branch unstable
 ```
 
-Then switch the submodule to the desired branch:
+This will use the `unstable` toolchain and code.
+
+### Switching to a different branch of libdragon
+
+On an already initialized project, switch the submodule to the desired branch:
 
 ```bash
 git -C ./libdragon checkout opengl

@@ -5,7 +5,11 @@ const chalk = require('chalk').stderr;
 const { spawn } = require('child_process');
 
 const { globals } = require('./globals');
-const { NO_PROJECT_ACTIONS } = require('./constants');
+const {
+  NO_PROJECT_ACTIONS,
+  LIBDRAGON_BRANCH,
+  DOCKER_HUB_IMAGE,
+} = require('./constants');
 
 /**
  * A structure to keep additional error information
@@ -454,14 +458,26 @@ function log(text, verboseOnly = false) {
 }
 
 /**
- * @param {import('./project-info').CLIInfo | import('./project-info').LibdragonInfo} info
- * @returns {info is import('./project-info').LibdragonInfo}
+ * @param {import('./project-info').CLIInfo} info
+ * @returns {info is import('./project-info').ProjectInfo}
  */
 function isProjectAction(info) {
   return !NO_PROJECT_ACTIONS.includes(
     /** @type {import('./project-info').ActionsNoProject} */ (
       info.options.CURRENT_ACTION.name
     )
+  );
+}
+
+/**
+ * @param {string} branchName
+ * @returns {string}
+ */
+function getImageName(branchName) {
+  return (
+    DOCKER_HUB_IMAGE +
+    ':' +
+    (branchName === LIBDRAGON_BRANCH ? 'latest' : branchName)
   );
 }
 
@@ -480,4 +496,5 @@ module.exports = {
   ParameterError,
   ValidationError,
   isProjectAction,
+  getImageName,
 };

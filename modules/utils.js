@@ -137,29 +137,9 @@ async function runGitMaybeHost(libdragonInfo, params, options = {}) {
   try {
     const isWin = /^win/.test(process.platform);
 
-    // When using host's git the actual top level can be higher in the tree
-    // rather that at the root of the project. We need to find it to run some
-    // git operations like subtree.
-    const gitRoot = (
-      await spawnProcess(
-        'git',
-        ['-C', libdragonInfo.root, 'rev-parse', '--show-toplevel'],
-        { inheritStdin: false }
-      ).catch(() => {
-        // Either this is not a git repo or the host does not have git
-        // We might also screw something up but we can live with it for now
-        return '';
-      })
-    ).trim();
-
     return await spawnProcess(
       'git',
-      [
-        '-C',
-        libdragonInfo.root,
-        ...(gitRoot ? ['--git-dir', `${gitRoot}/.git`] : []),
-        ...params,
-      ],
+      ['-C', libdragonInfo.root, ...params],
       // Windows git is breaking the TTY somehow - disable TTY for now
       // We are not able to display progress for the initial clone b/c of this
       // Enable progress otherwise.

@@ -166,21 +166,54 @@ describe('Smoke tests', () => {
   // TODO: find a better way to test such stuff. Integration is good but makes
   // these really difficult to test. Or maybe we can have a flag to skip the build
   // step
-  test('should update image when --image flag is presetn', async () => {
+  test('should update only the image when --image flag is present', async () => {
     await $`libdragon init`;
     const { stdout: containerId } = await $`libdragon start`;
     const { stdout: image } =
       await $`docker container inspect ${containerId.trim()} --format "{{.Config.Image}}"`;
+    const { stdout: branch } =
+      await $`git -C ./libdragon rev-parse --abbrev-ref HEAD`;
 
+    expect(branch.trim()).toEqual('trunk');
     expect(image.trim()).toEqual('ghcr.io/dragonminded/libdragon:latest');
 
     await $`libdragon init --image="ghcr.io/dragonminded/libdragon:unstable"`;
     const { stdout: newContainerId } = await $`libdragon start`;
+    const { stdout: newBranch } =
+      await $`git -C ./libdragon rev-parse --abbrev-ref HEAD`;
+
+    expect(newBranch.trim()).toEqual('trunk');
+
     expect(newContainerId.trim()).not.toEqual(containerId);
     expect(
       (
         await $`docker container inspect ${newContainerId.trim()} --format "{{.Config.Image}}"`
       ).stdout.trim()
     ).toBe('ghcr.io/dragonminded/libdragon:unstable');
+  }, 200000);
+
+  test('should use the provided branch', async () => {
+    await $`libdragon init --branch=unstable`;
+    const { stdout: branch } =
+      await $`git -C ./libdragon rev-parse --abbrev-ref HEAD`;
+
+    expect(branch.trim()).toEqual('unstable');
+  }, 120000);
+
+  test('should recover the submodule branch after a destroy', async () => {
+    await $`libdragon init --branch=unstable`;
+    await $`libdragon destroy`;
+    await $`libdragon init`;
+    const { stdout: newContainerId } = await $`libdragon start`;
+    const { stdout: branch } =
+      await $`git -C ./libdragon rev-parse --abbrev-ref HEAD`;
+
+    expect(
+      (
+        await $`docker container inspect ${newContainerId.trim()} --format "{{.Config.Image}}"`
+      ).stdout.trim()
+    ).toBe('ghcr.io/dragonminded/libdragon:unstable');
+
+    expect(branch.trim()).toEqual('unstable');
   }, 200000);
 });
