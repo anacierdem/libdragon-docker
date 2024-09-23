@@ -1,3 +1,19 @@
+# [11.2.0](https://github.com/anacierdem/libdragon-docker/compare/v11.1.3...v11.2.0) (2024-09-23)
+
+
+### Bug Fixes
+
+* enable CVE-2024-27980 compatibility ([73bd360](https://github.com/anacierdem/libdragon-docker/commit/73bd360820236fdcbd70f3ce275e415c22b1e0d3))
+* fix --branch flag wasn't working on a non-Windows system ([dfc4be0](https://github.com/anacierdem/libdragon-docker/commit/dfc4be0bbfc9e9f667724528f20a94b86a465f73))
+* fix a potential condition causing an empty branch name ([ff86777](https://github.com/anacierdem/libdragon-docker/commit/ff8677748f679aa2cdbbc250c505980f46b5cf97))
+* output stderr of a command failure for better context for submodule creation ([17867e6](https://github.com/anacierdem/libdragon-docker/commit/17867e69a1bea517d8c3c5c1b6ea061117130a4b))
+* recover the branch only if the new project is initiated as a submodule ([c8cfd7a](https://github.com/anacierdem/libdragon-docker/commit/c8cfd7add01a70b658c49ff0deed5f3480f2ef29))
+
+
+### Features
+
+* **init.js:** add a new --branch flag to override the libdragon branch ([20cd675](https://github.com/anacierdem/libdragon-docker/commit/20cd675621c8e57668dc4330db7cc7964d0dd1fa)), closes [#75](https://github.com/anacierdem/libdragon-docker/issues/75)
+
 ## [11.1.3](https://github.com/anacierdem/libdragon-docker/compare/v11.1.2...v11.1.3) (2024-09-17)
 
 
