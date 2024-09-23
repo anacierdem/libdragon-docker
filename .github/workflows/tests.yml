@@ -4,6 +4,8 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v3
@@ -23,6 +25,8 @@ jobs:
 
   ci-tests:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
     steps:
       - uses: actions/checkout@v2
         with:

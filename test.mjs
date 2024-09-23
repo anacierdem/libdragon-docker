@@ -113,19 +113,6 @@ describe('Smoke tests', () => {
     await runCommands(['init', 'init', ...commands, 'init -s submodule']);
   }, 240000);
 
-  // test('Can run a standard set of commands even if the container id is lost', async () => {
-  //   await runCommands(
-  //     ['init', 'init', ...commands, 'init -s submodule'],
-  //     async () => {
-  //       try {
-  //         await fsp.rm('.git/libdragon-docker-container');
-  //       } catch {
-  //         // ignore
-  //       }
-  //     }
-  //   );
-  // }, 240000);
-
   test('Can run a standard set of commands with subtree strategy', async () => {
     await runCommands([
       'init -s subtree -d ./libdragon',
@@ -150,20 +137,37 @@ describe('Smoke tests', () => {
     ]);
   }, 240000);
 
+  test('Can still run make even if stopped', async () => {
+    await $`libdragon init`;
+    await $`libdragon stop`;
+    await $`libdragon make`;
+  }, 120000);
+});
+
+describe('Additional verification', () => {
+  // TODO: find a better way to test such stuff. Integration is good but makes
+  // these really difficult to test. Or maybe we can have a flag to skip the build
+  // step
+
+  // TODO: this is the critical path, the performance can also be tested
+  test('Can still start same container even if the container id is lost', async () => {
+    await $`libdragon init`;
+    const { stdout: containerId } = await $`libdragon start`;
+    await fsp.rm('.git/libdragon-docker-container');
+    const { stdout: newContainerId } = await $`libdragon start`;
+    expect(newContainerId.trim()).toEqual(containerId.trim());
+  }, 240000);
+
   test('should not start a new docker container on a second init', async () => {
     await $`libdragon init`;
     const { stdout: containerId } = await $`libdragon start`;
     // Ideally this second init should not re-install libdragon file if they exist
     await $`libdragon init`;
-    // TODO: Actually this should hold even when the actual image is different
     expect((await $`libdragon start`).stdout.trim()).toEqual(
       containerId.trim()
     );
   }, 200000);
 
-  // TODO: find a better way to test such stuff. Integration is good but makes
-  // these really difficult to test. Or maybe we can have a flag to skip the build
-  // step
   test('should update only the image when --image flag is present', async () => {
     await $`libdragon init`;
     const { stdout: containerId } = await $`libdragon start`;
