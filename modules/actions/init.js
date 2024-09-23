@@ -254,13 +254,14 @@ async function init(info) {
     return info;
   }
 
+  console.log('about to log', process.env.DOCKER_CONTAINER);
+
   if (!process.env.DOCKER_CONTAINER) {
     let activeBranchName = info.options.BRANCH ?? info.activeBranchName;
     let shouldOverrideBranch = !!info.options.BRANCH;
 
-    console.log({
-      autoDetect: await autoDetect(info),
-    });
+    const test = await autoDetect(info);
+    console.log('autoDetect', test);
 
     if ((await autoDetect(info)) === 'submodule') {
       try {
