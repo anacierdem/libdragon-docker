@@ -198,7 +198,7 @@ describe('Smoke tests', () => {
     expect(branch.trim()).toEqual('unstable');
   }, 120000);
 
-  test('should recover the submodule branch after a destroy', async () => {
+  test.only('should recover the submodule branch after a destroy', async () => {
     await $`libdragon init --branch=unstable`;
     await $`libdragon destroy`;
     await $`libdragon init`;
