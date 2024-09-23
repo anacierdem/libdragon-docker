@@ -201,6 +201,9 @@ describe('Smoke tests', () => {
   }, 120000);
 
   test.only('should recover the submodule branch after a destroy', async () => {
+    const { stdout: version } = await $`libdragon version`;
+    console.log('version', version);
+
     await $`libdragon init -v --branch=unstable`;
     await $`libdragon destroy -v`;
 
