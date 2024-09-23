@@ -199,9 +199,9 @@ describe('Smoke tests', () => {
   }, 120000);
 
   test.only('should recover the submodule branch after a destroy', async () => {
-    await $`libdragon init --branch=unstable`;
-    await $`libdragon destroy`;
-    await $`libdragon init`;
+    await $`libdragon init -v --branch=unstable`;
+    await $`libdragon destroy -v`;
+    await $`libdragon init -v`;
     const { stdout: newContainerId } = await $`libdragon start`;
     const { stdout: branch } =
       await $`git -C ./libdragon rev-parse --abbrev-ref HEAD`;
