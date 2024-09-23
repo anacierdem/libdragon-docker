@@ -269,6 +269,12 @@ async function init(info) {
         ]);
         activeBranchName = existingBranchName.trim();
         shouldOverrideBranch = !!activeBranchName;
+
+        console.log({
+          activeBranchName,
+          shouldOverrideBranch,
+          autoDetect: await autoDetect(info),
+        });
       } catch {
         // If we can't get the branch name, we will use the default
       }
