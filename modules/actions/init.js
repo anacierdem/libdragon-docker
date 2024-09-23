@@ -43,19 +43,20 @@ const autoDetect = async (info) => {
     return false;
   });
 
-  if (
-    vendorTargetExists &&
-    (await runGitMaybeHost(info, [
-      'submodule',
-      'status',
-      info.vendorDirectory,
-    ]).catch((e) => {
-      if (!(e instanceof CommandError)) {
-        throw e;
-      }
-      console.error('submodule check', e);
-    }))
-  ) {
+  const tmp = await runGitMaybeHost(info, [
+    'submodule',
+    'status',
+    info.vendorDirectory,
+  ]).catch((e) => {
+    if (!(e instanceof CommandError)) {
+      throw e;
+    }
+    console.error('submodule check', e);
+  });
+
+  console.error('tmp', tmp);
+
+  if (vendorTargetExists && tmp) {
     log(`${info.vendorDirectory} is a submodule.`);
     return 'submodule';
   }
