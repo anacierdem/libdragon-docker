@@ -201,16 +201,26 @@ describe('Smoke tests', () => {
   test.only('should recover the submodule branch after a destroy', async () => {
     await $`libdragon init -v --branch=unstable`;
     await $`libdragon destroy -v`;
+
+    console.log('initializing again');
+
     await $`libdragon init -v`;
+
     const { stdout: newContainerId } = await $`libdragon start`;
+    console.log('newContainerId', newContainerId.trim());
+
     const { stdout: branch } =
       await $`git -C ./libdragon rev-parse --abbrev-ref HEAD`;
 
-    expect(
-      (
-        await $`docker container inspect ${newContainerId.trim()} --format "{{.Config.Image}}"`
-      ).stdout.trim()
-    ).toBe('ghcr.io/dragonminded/libdragon:unstable');
+    const { stdout: containerImage } =
+      await $`docker container inspect ${newContainerId.trim()} --format "{{.Config.Image}}"`;
+
+    console.log('containerImage', containerImage.trim());
+    console.log('branch', branch.trim());
+
+    expect(containerImage.trim()).toBe(
+      'ghcr.io/dragonminded/libdragon:unstable'
+    );
 
     expect(branch.trim()).toEqual('unstable');
   }, 200000);
