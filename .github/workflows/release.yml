@@ -15,12 +15,12 @@ jobs:
     needs: run-tests
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
       - name: Prepare
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           # Do not include registy url here, it creates a .npmrc which prevents
           # semantic-release from authenticating with npm
