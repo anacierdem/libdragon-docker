@@ -267,7 +267,11 @@ async function initGitAndCacheContainerId(libdragonInfo) {
  */
 async function ensureGit(info) {
   const gitRoot = (
-    await runGitMaybeHost(info, ['rev-parse', '--show-toplevel']).catch(() => {
+    await runGitMaybeHost(info, ['rev-parse', '--show-toplevel'], {
+      inheritStdin: false,
+      inheritStdout: false,
+      inheritStderr: false,
+    }).catch(() => {
       // Probably host does not have git, can ignore
       return '';
     })
