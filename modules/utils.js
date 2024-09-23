@@ -145,12 +145,7 @@ async function runGitMaybeHost(libdragonInfo, params, options = {}) {
       // Enable progress otherwise.
       isWin
         ? { inheritStdin: false, ...options }
-        : {
-            inheritStdin: false,
-            inheritStdout: true,
-            inheritStderr: true,
-            ...options,
-          }
+        : { inheritStdout: true, inheritStderr: true, ...options }
     );
   } catch (e) {
     if (e instanceof CommandError) {
@@ -272,7 +267,11 @@ async function initGitAndCacheContainerId(libdragonInfo) {
  */
 async function ensureGit(info) {
   const gitRoot = (
-    await runGitMaybeHost(info, ['rev-parse', '--show-toplevel']).catch(() => {
+    await runGitMaybeHost(info, ['rev-parse', '--show-toplevel'], {
+      inheritStdin: false,
+      inheritStdout: false,
+      inheritStderr: false,
+    }).catch(() => {
       // Probably host does not have git, can ignore
       return '';
     })

@@ -271,13 +271,21 @@ async function init(info) {
 
     if ((await autoDetect(info)) === 'submodule') {
       try {
-        const existingBranchName = await runGitMaybeHost(info, [
-          '-C',
-          path.relative(info.root, info.vendorDirectory),
-          'rev-parse',
-          '--abbrev-ref',
-          'HEAD',
-        ]);
+        const existingBranchName = await runGitMaybeHost(
+          info,
+          [
+            '-C',
+            path.relative(info.root, info.vendorDirectory),
+            'rev-parse',
+            '--abbrev-ref',
+            'HEAD',
+          ],
+          {
+            inheritStdin: false,
+            inheritStdout: false,
+            inheritStderr: false,
+          }
+        );
         activeBranchName = existingBranchName.trim();
         shouldOverrideBranch = !!activeBranchName;
 
