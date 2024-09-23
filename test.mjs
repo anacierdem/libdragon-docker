@@ -33,6 +33,8 @@ let repositoryDir;
 beforeAll(async () => {
   repositoryDir = process.cwd();
 
+  console.log('linking libdragon');
+
   // Make sure the cli is linked
   await $`npm link`;
   // Inside the project, the local cli is also inserted into the path
