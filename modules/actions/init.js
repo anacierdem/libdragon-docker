@@ -43,11 +43,15 @@ const autoDetect = async (info) => {
     return false;
   });
 
-  const tmp = await runGitMaybeHost(info, [
-    'submodule',
-    'status',
-    info.vendorDirectory,
-  ]).catch((e) => {
+  const tmp = await runGitMaybeHost(
+    info,
+    ['submodule', 'status', info.vendorDirectory],
+    {
+      inheritStdin: false,
+      inheritStdout: false,
+      inheritStderr: false,
+    }
+  ).catch((e) => {
     if (!(e instanceof CommandError)) {
       throw e;
     }
