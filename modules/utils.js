@@ -145,7 +145,12 @@ async function runGitMaybeHost(libdragonInfo, params, options = {}) {
       // Enable progress otherwise.
       isWin
         ? { inheritStdin: false, ...options }
-        : { inheritStdout: true, inheritStderr: true, ...options }
+        : {
+            inheritStdin: false,
+            inheritStdout: true,
+            inheritStderr: true,
+            ...options,
+          }
     );
   } catch (e) {
     if (e instanceof CommandError) {
