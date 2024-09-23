@@ -258,6 +258,10 @@ async function init(info) {
     let activeBranchName = info.options.BRANCH ?? info.activeBranchName;
     let shouldOverrideBranch = !!info.options.BRANCH;
 
+    console.log({
+      autoDetect: await autoDetect(info),
+    });
+
     if ((await autoDetect(info)) === 'submodule') {
       try {
         const existingBranchName = await runGitMaybeHost(info, [
