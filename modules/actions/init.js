@@ -53,6 +53,7 @@ const autoDetect = async (info) => {
       if (!(e instanceof CommandError)) {
         throw e;
       }
+      console.error('submodule check', e);
     }))
   ) {
     log(`${info.vendorDirectory} is a submodule.`);
