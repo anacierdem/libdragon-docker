@@ -4,7 +4,7 @@
   "description": "This is a docker wrapper for libdragon",
   "main": "index.js",
   "engines": {
-    "node": ">=20.11.0",
+    "node": ">=22",
     "npm": ">=10"
   },
   "bin": {

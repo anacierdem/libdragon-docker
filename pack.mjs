@@ -28,7 +28,7 @@ await esbuild.build({
   bundle: true,
   format: 'esm',
   platform: 'node',
-  target: 'node20',
+  target: 'node22',
   outfile: path.join('build', 'main.js'),
   minify: true,
   loader: {

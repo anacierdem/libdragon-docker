@@ -25,7 +25,7 @@ jobs:
         with:
           # Do not include registy url here, it creates a .npmrc which prevents
           # semantic-release from authenticating with npm
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install

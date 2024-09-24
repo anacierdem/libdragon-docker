@@ -391,8 +391,10 @@ function print(text) {
  */
 function log(text, verboseOnly = false) {
   if (!verboseOnly) {
+    // New default color for console.err is red
+    // Also see https://github.com/nodejs/node/issues/53661
     // eslint-disable-next-line no-console
-    console.error(text);
+    console.error(chalk.white(text));
     return;
   }
   if (globals.verbose) {

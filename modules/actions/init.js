@@ -3,6 +3,7 @@
 const fs = require('fs/promises');
 const _fs = require('fs');
 const path = require('path');
+const sea = require('node:sea');
 
 const chalk = require('chalk').stderr;
 
@@ -31,12 +32,14 @@ const {
   getImageName,
 } = require('../helpers');
 
-const main_c = globalThis.PACKAGED
+// TODO: use https://nodejs.org/api/single-executable-applications.html#seagetassetkey-encoding &&
+// https://nodejs.org/api/single-executable-applications.html#assets instead
+const main_c = sea.isSea()
   ? // @ts-ignore-next-line
     /** @type {string} */ (require('../../skeleton/src/main.c'))
   : _fs.readFileSync(path.join(__dirname, '../../skeleton/src/main.c'), 'utf8');
 
-const makefile = globalThis.PACKAGED
+const makefile = sea.isSea()
   ? // @ts-ignore-next-line
     /** @type {string} */ require('../../skeleton/Makefile.mk')
   : _fs.readFileSync(
