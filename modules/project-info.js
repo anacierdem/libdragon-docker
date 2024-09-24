@@ -12,11 +12,11 @@ const { findNPMRoot } = require('./npm-utils');
 const {
   LIBDRAGON_PROJECT_MANIFEST,
   CONFIG_FILE,
-  DOCKER_HUB_IMAGE,
   DEFAULT_STRATEGY,
   LIBDRAGON_SUBMODULE,
   CACHED_CONTAINER_FILE,
   CONTAINER_TARGET_PATH,
+  LIBDRAGON_BRANCH,
 } = require('./constants');
 
 const {
@@ -27,6 +27,7 @@ const {
   assert,
   ParameterError,
   isProjectAction,
+  getImageName,
 } = require('./helpers');
 
 /**
@@ -49,13 +50,18 @@ const {
  *
  * @typedef { {
  *  options: ActionsWithProjectOptions
+ * } } ProjectInfo
+ *
+ * @typedef { {
+ *  options: ActionsWithProjectOptions
  *  root: string;
  *  userInfo: os.UserInfo<string>;
  *  haveProjectConfig: boolean;
  *  imageName: string;
  *  vendorDirectory: string;
  *  vendorStrategy: import('./parameters').VendorStrategy;
- *  containerId?: string
+ *  containerId?: string;
+ *  activeBranchName: string;
  * } } LibdragonInfo
  */
 
@@ -189,6 +195,13 @@ const readProjectInfo = async function (optionInfo) {
 
     vendorDirectory: toPosixPath(path.join('.', LIBDRAGON_SUBMODULE)),
     vendorStrategy: DEFAULT_STRATEGY,
+
+    activeBranchName: LIBDRAGON_BRANCH,
+
+    // This is invalid at this point, but is overridden below from config file
+    // or container if it doesn't exist in the file. If a flag is provided, it
+    // will be overridden later.
+    imageName: '',
   };
 
   log(`Project root: ${info.root}`, true);
@@ -231,15 +244,16 @@ const readProjectInfo = async function (optionInfo) {
 
   // For imageName, flag has the highest priority followed by the one read from
   // the file and then if there is any matching container, name is read from it.
-  // As last option fallback to default value.
+  // Next if `--branch` flag and as last option fallback to default value.
   // This represents the current value, so the flag should be processed later.
   // If we were to update it here, it would be impossible to know the change
   // with how we structure the code right now.
-  info.imageName = info.imageName ?? DOCKER_HUB_IMAGE;
+  info.imageName = info.imageName || getImageName(info.activeBranchName);
 
   log(`Active image name: ${info.imageName}`, true);
   log(`Active vendor directory: ${info.vendorDirectory}`, true);
   log(`Active vendor strategy: ${info.vendorStrategy}`, true);
+  log(`Active branch: ${info.activeBranchName}`, true);
 
   return info;
 };

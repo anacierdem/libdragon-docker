@@ -19,6 +19,7 @@ const { globals } = require('./globals');
  *  VENDOR_DIR?: string;
  *  VENDOR_STRAT?: VendorStrategy;
  *  FILE?: string;
+ *  BRANCH?: string;
  * }} CommandlineOptions
  */
 
@@ -81,6 +82,14 @@ const parseParameters = async (argv) => {
       continue;
     }
 
+    if (['--branch', '-b'].includes(val)) {
+      options.BRANCH = argv[++i];
+      continue;
+    } else if (val.indexOf('--branch=') === 0) {
+      options.BRANCH = val.split('=')[1];
+      continue;
+    }
+
     if (val.indexOf('-') == 0) {
       log(chalk.red(`Invalid flag \`${val}\``));
       process.exit(STATUS_BAD_PARAM);
@@ -126,7 +135,7 @@ const parseParameters = async (argv) => {
     ) &&
     options.DOCKER_IMAGE
   ) {
-    log(chalk.red('Invalid flag: image'));
+    log(chalk.red('Invalid flag: --image'));
     process.exit(STATUS_BAD_PARAM);
   }
 
@@ -138,7 +147,19 @@ const parseParameters = async (argv) => {
     ) &&
     options.FILE
   ) {
-    log(chalk.red('Invalid flag: file'));
+    log(chalk.red('Invalid flag: --file'));
+    process.exit(STATUS_BAD_PARAM);
+  }
+
+  if (
+    !(
+      /** @type {typeof actions[keyof actions][]} */ ([actions.init]).includes(
+        options.CURRENT_ACTION
+      )
+    ) &&
+    options.BRANCH
+  ) {
+    log(chalk.red('Invalid flag: --branch'));
     process.exit(STATUS_BAD_PARAM);
   }
 

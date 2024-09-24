@@ -1,5 +1,5 @@
 const { log, assert } = require('../helpers');
-const { LIBDRAGON_GIT, LIBDRAGON_BRANCH } = require('../constants');
+const { LIBDRAGON_GIT } = require('../constants');
 const {
   runGitMaybeHost,
   installDependencies,
@@ -69,7 +69,7 @@ const update = async (info) => {
       '--prefix',
       info.vendorDirectory,
       LIBDRAGON_GIT,
-      LIBDRAGON_BRANCH,
+      info.activeBranchName,
       '--squash',
     ]);
   }

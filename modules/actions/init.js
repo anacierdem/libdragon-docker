@@ -19,7 +19,6 @@ const {
 const {
   LIBDRAGON_PROJECT_MANIFEST,
   LIBDRAGON_SUBMODULE,
-  LIBDRAGON_BRANCH,
   LIBDRAGON_GIT,
 } = require('../constants');
 const {
@@ -29,6 +28,7 @@ const {
   ValidationError,
   toPosixPath,
   toNativePath,
+  getImageName,
 } = require('../helpers');
 
 const main_c = globalThis.PACKAGED
@@ -60,11 +60,15 @@ const autoDetect = async (info) => {
 
   if (
     vendorTargetExists &&
-    (await runGitMaybeHost(info, [
-      'submodule',
-      'status',
-      info.vendorDirectory,
-    ]).catch((e) => {
+    (await runGitMaybeHost(
+      info,
+      ['submodule', 'status', info.vendorDirectory],
+      {
+        inheritStdin: false,
+        inheritStdout: false,
+        inheritStderr: false,
+      }
+    ).catch((e) => {
       if (!(e instanceof CommandError)) {
         throw e;
       }
@@ -163,7 +167,7 @@ const autoVendor = async (info) => {
         '--name',
         LIBDRAGON_SUBMODULE,
         '--branch',
-        LIBDRAGON_BRANCH,
+        info.activeBranchName,
         LIBDRAGON_GIT,
         info.vendorDirectory,
       ]);
@@ -171,6 +175,9 @@ const autoVendor = async (info) => {
       if (!(e instanceof CommandError)) throw e;
       // We speculate this is caused by the user, so replace it with a more useful error message.
       e.message = `Unable to create submodule. If you have copied the executable in your project folder or you have a file named ${info.vendorDirectory}, removing it might solve this issue. Original error:\n${e.message}`;
+      if (e.out) {
+        e.message += `\n${e.out}`;
+      }
       throw e;
     }
 
@@ -204,7 +211,7 @@ const autoVendor = async (info) => {
       '--prefix',
       path.relative(info.root, info.vendorDirectory),
       LIBDRAGON_GIT,
-      LIBDRAGON_BRANCH,
+      info.activeBranchName,
       '--squash',
     ]);
     return info;
@@ -308,11 +315,44 @@ async function init(info) {
   }
 
   if (!process.env.DOCKER_CONTAINER) {
-    // We don't have a config yet, this is a fresh project, override with the
-    // image flag if provided. Also see https://github.com/anacierdem/libdragon-docker/issues/66
+    let activeBranchName = info.options.BRANCH ?? info.activeBranchName;
+    let shouldOverrideBranch = !!info.options.BRANCH;
+
+    if ((await autoDetect(info)) === 'submodule') {
+      try {
+        const existingBranchName = await runGitMaybeHost(
+          info,
+          [
+            '-C',
+            path.relative(info.root, info.vendorDirectory),
+            'rev-parse',
+            '--abbrev-ref',
+            'HEAD',
+          ],
+          {
+            inheritStdin: false,
+            inheritStdout: false,
+            inheritStderr: false,
+          }
+        );
+        activeBranchName = existingBranchName.trim();
+        shouldOverrideBranch = !!activeBranchName;
+      } catch {
+        // If we can't get the branch name, we will use the default
+      }
+    }
+
     info = {
       ...info,
-      imageName: info.options.DOCKER_IMAGE ?? info.imageName,
+      activeBranchName,
+      // We don't have a config yet, this is a fresh project, override with the
+      // image flag if provided.  Also see https://github.com/anacierdem/libdragon-docker/issues/66
+      // Next, if `--branch` flag is provided use that or the one recovered from
+      // the submodule.
+      imageName:
+        (info.options.DOCKER_IMAGE ??
+          (shouldOverrideBranch && getImageName(activeBranchName))) ||
+        info.imageName,
     };
     // Download image and start it
     await updateImage(info, info.imageName);
@@ -350,6 +390,16 @@ module.exports = /** @type {const} */ ({
     If this is the first time you are creating a libdragon project at that location, this action will also create skeleton project files to kickstart things with the given image, if provided. For subsequent runs without any parameter, it will act like \`start\` thus can be used to revive an existing project without modifying it.
 
     If you have an existing project with an already vendored submodule or subtree libdragon copy, \`init\` will automatically detect it at the provided \`--directory\`.`,
-    group: ['docker', 'vendoring'],
+    group: ['docker', 'vendoring', '_none'],
+
+    optionList: [
+      {
+        name: 'branch',
+        description:
+          'Provide a different branch to initialize libdragon. It will also change the toolchain docker image to be based on the given branch but `--image` will have precedence. Defaults to `trunk` & `latest` image.',
+        alias: 'b',
+        typeLabel: '<branch>',
+      },
+    ],
   },
 });

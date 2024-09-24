@@ -5,12 +5,8 @@ import path from 'path';
 import os from 'os';
 import 'zx/globals';
 
-import ref from 'ref-napi';
-import ffi from 'ffi-napi';
-
 /* eslint-disable no-undef */
 
-let kernel32;
 if (process.platform === 'win32') {
   // ADDITONAL Windows weirdness: docker is not found in the PATH when running
   // tests. I fixed this by moving the docker bin path to one up in the list.
@@ -31,32 +27,6 @@ if (process.platform === 'win32') {
   $.shell = true;
   // Defaults to "set -euo pipefail;" o/w
   $.prefix = '';
-
-  // Prepare the ffi bindings for GetLongPathNameA
-  const DWORD = ref.types.ulong;
-  const LPCVOID = ref.refType(ref.types.void);
-  // TODO: verify this is const
-  const LPCSTR = ref.types.CString;
-  const LPSTR = ref.types.CString;
-  kernel32 = ffi.Library('kernel32', {
-    // DWORD GetLongPathNameA(
-    //   [in]  LPCSTR lpszShortPath,
-    //   [out] LPSTR  lpszLongPath,
-    //   [in]  DWORD  cchBuffer
-    // );
-    GetLongPathNameA: [DWORD, [LPCSTR, LPSTR, DWORD]],
-    GetLastError: [DWORD, []],
-    // DWORD FormatMessageA(
-    //   [in]           DWORD   dwFlags,
-    //   [in, optional] LPCVOID lpSource,
-    //   [in]           DWORD   dwMessageId,
-    //   [in]           DWORD   dwLanguageId,
-    //   [out]          LPSTR   lpBuffer,
-    //   [in]           DWORD   nSize,
-    //   [in, optional] va_list *Arguments
-    // );
-    FormatMessageA: [DWORD, [DWORD, LPCVOID, DWORD, DWORD, LPSTR, DWORD]],
-  });
 }
 
 let repositoryDir;
@@ -85,7 +55,7 @@ afterEach(async () => {
   }
   try {
     await $`libdragon --verbose destroy`;
-  } catch (e) {
+  } catch {
     // ignore
   }
   try {
@@ -94,7 +64,7 @@ afterEach(async () => {
       maxRetries: 3,
       retryDelay: 1000,
     });
-  } catch (e) {
+  } catch {
     // ignore
   }
   lastCommand = undefined;
@@ -103,55 +73,12 @@ afterEach(async () => {
 beforeEach(async () => {
   stopped = false;
 
-  projectDir = await fsp.mkdtemp(
-    path.join(os.tmpdir(), 'libdragon-test-project-')
-  );
-
-  // tmpdir creates a short path on Windows, convert it to long form to be
-  // compatible with the other paths that we use for relative comparison
-  if (kernel32) {
-    const bufferSize = 260; // MAX_PATH as defined by windows incl. null terminator
-    const longPath = ref.allocCString(new Array(bufferSize - 1).join(' '));
-    const written = kernel32.GetLongPathNameA(projectDir, longPath, bufferSize);
-
-    if (written === 0) {
-      const errorCode = kernel32.GetLastError();
-      const messageSize = 1024;
-      const errorMessage = ref.allocCString(new Array(messageSize).join(' '));
-
-      const FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000;
-      const FORMAT_MESSAGE_IGNORE_INSERTS = 0x00000200;
-
-      // Read the system message from the error code
-      const result = kernel32.FormatMessageA(
-        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        null,
-        errorCode,
-        0,
-        errorMessage,
-        messageSize
-      );
-
-      if (result === 0) {
-        throw new Error(`Error reading message, code: ${errorCode}`);
-      }
-
-      if (errorCode === 2) {
-        throw new Error(
-          `Pathname maybe ASCII incompatible. Original error: ${errorMessage.readCString()}`
-        );
-      }
-      throw new Error(`System error: ${errorMessage.readCString()}`);
-    }
-
-    // written bytes should be less than bufferSize as there will also be an
-    // additional terminating null character
-    if (written >= bufferSize) {
-      throw new Error('Path too long.');
-    }
-
-    projectDir = ref.readCString(longPath);
-  }
+  // Windows' tmpdir returns a short path which is not compatible when doing one
+  // of the internal comparisons in the libdragon cli. So we use the parent
+  // directory instead.
+  const tmpDir =
+    process.platform === 'win32' ? path.join(repositoryDir, '..') : os.tmpdir();
+  projectDir = await fsp.mkdtemp(path.join(tmpDir, 'libdragon-test-project-'));
 
   await cd(projectDir);
 });
@@ -161,7 +88,7 @@ const runCommands = async (commands, beforeCommand) => {
     await beforeCommand?.();
     // Do not invoke it as a tagged template literal. This will cause a parameter
     // replacement, which we don't want here.
-    lastCommand = $([`libdragon  ${command}`]);
+    lastCommand = $([`libdragon -v ${command}`]);
     await lastCommand;
     if (stopped) break;
   }
@@ -184,19 +111,6 @@ describe('Smoke tests', () => {
 
   test('Can run a standard set of commands without failure', async () => {
     await runCommands(['init', 'init', ...commands, 'init -s submodule']);
-  }, 240000);
-
-  test('Can run a standard set of commands even if the container id is lost', async () => {
-    await runCommands(
-      ['init', 'init', ...commands, 'init -s submodule'],
-      async () => {
-        try {
-          await fsp.rm('.git/libdragon-docker-container');
-        } catch {
-          // ignore
-        }
-      }
-    );
   }, 240000);
 
   test('Can run a standard set of commands with subtree strategy', async () => {
@@ -223,35 +137,85 @@ describe('Smoke tests', () => {
     ]);
   }, 240000);
 
+  test('Can still run make even if stopped', async () => {
+    await $`libdragon init`;
+    await $`libdragon stop`;
+    await $`libdragon make`;
+  }, 120000);
+});
+
+describe('Additional verification', () => {
+  // TODO: find a better way to test such stuff. Integration is good but makes
+  // these really difficult to test. Or maybe we can have a flag to skip the build
+  // step
+
+  // TODO: this is the critical path, the performance can also be tested
+  test('Can still start same container even if the container id is lost', async () => {
+    await $`libdragon init`;
+    const { stdout: containerId } = await $`libdragon start`;
+    await fsp.rm('.git/libdragon-docker-container');
+    const { stdout: newContainerId } = await $`libdragon start`;
+    expect(newContainerId.trim()).toEqual(containerId.trim());
+  }, 240000);
+
   test('should not start a new docker container on a second init', async () => {
     await $`libdragon init`;
     const { stdout: containerId } = await $`libdragon start`;
     // Ideally this second init should not re-install libdragon file if they exist
     await $`libdragon init`;
-    // TODO: Actually this should hold even when the actual image is different
     expect((await $`libdragon start`).stdout.trim()).toEqual(
       containerId.trim()
     );
   }, 200000);
 
-  // TODO: find a better way to test such stuff. Integration is good but makes
-  // these really difficult to test. Or maybe we can have a flag to skip the build
-  // step
-  test('should update image when --image flag is presetn', async () => {
+  test('should update only the image when --image flag is present', async () => {
     await $`libdragon init`;
     const { stdout: containerId } = await $`libdragon start`;
     const { stdout: image } =
       await $`docker container inspect ${containerId.trim()} --format "{{.Config.Image}}"`;
+    const { stdout: branch } =
+      await $`git -C ./libdragon rev-parse --abbrev-ref HEAD`;
 
+    expect(branch.trim()).toEqual('trunk');
     expect(image.trim()).toEqual('ghcr.io/dragonminded/libdragon:latest');
 
     await $`libdragon init --image="ghcr.io/dragonminded/libdragon:unstable"`;
     const { stdout: newContainerId } = await $`libdragon start`;
+    const { stdout: newBranch } =
+      await $`git -C ./libdragon rev-parse --abbrev-ref HEAD`;
+
+    expect(newBranch.trim()).toEqual('trunk');
+
     expect(newContainerId.trim()).not.toEqual(containerId);
     expect(
       (
         await $`docker container inspect ${newContainerId.trim()} --format "{{.Config.Image}}"`
       ).stdout.trim()
     ).toBe('ghcr.io/dragonminded/libdragon:unstable');
+  }, 200000);
+
+  test('should use the provided branch', async () => {
+    await $`libdragon init --branch=unstable`;
+    const { stdout: branch } =
+      await $`git -C ./libdragon rev-parse --abbrev-ref HEAD`;
+
+    expect(branch.trim()).toEqual('unstable');
+  }, 120000);
+
+  test('should recover the submodule branch after a destroy', async () => {
+    await $`libdragon init --branch=unstable`;
+    await $`libdragon destroy`;
+    await $`libdragon init`;
+    const { stdout: newContainerId } = await $`libdragon start`;
+    const { stdout: branch } =
+      await $`git -C ./libdragon rev-parse --abbrev-ref HEAD`;
+
+    expect(
+      (
+        await $`docker container inspect ${newContainerId.trim()} --format "{{.Config.Image}}"`
+      ).stdout.trim()
+    ).toBe('ghcr.io/dragonminded/libdragon:unstable');
+
+    expect(branch.trim()).toEqual('unstable');
   }, 200000);
 });

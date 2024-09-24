@@ -1,5 +1,5 @@
 module.exports = /** @type {const} */ ({
-  DOCKER_HUB_IMAGE: 'ghcr.io/dragonminded/libdragon:latest',
+  DOCKER_HUB_IMAGE: 'ghcr.io/dragonminded/libdragon',
   LIBDRAGON_GIT: 'https://github.com/DragonMinded/libdragon',
   LIBDRAGON_BRANCH: 'trunk',
   LIBDRAGON_SUBMODULE: 'libdragon',
