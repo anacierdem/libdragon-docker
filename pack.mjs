@@ -1,8 +1,11 @@
 #!/usr/bin/env zx
+// TODO: enable type checking for this file.
 import path from 'node:path';
 import { copyFileSync } from 'node:fs';
 import * as esbuild from 'esbuild';
 import 'zx/globals';
+
+/* eslint-disable no-undef */
 
 if (process.platform === 'win32') {
   // See notes on test.mjs
