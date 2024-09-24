@@ -17,7 +17,6 @@
     "start": "node index.js start",
     "stop": "node index.js stop",
     "pack": "node pack.mjs",
-    "sea": "node --experimental-vm-modules ./pack.mjs",
     "format": "prettier **/*.js **/*.mjs **/*.cjs --write",
     "format-check": "prettier **/*.js **/*.mjs **/*.cjs --check",
     "lint": "eslint --fix modules/**/*.js *.js *.mjs *.cjs",
