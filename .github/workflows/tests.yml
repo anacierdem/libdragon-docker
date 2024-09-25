@@ -44,9 +44,9 @@ jobs:
         run: npm ci
 
       - name: Install Docker
-      if: matrix.os == 'macos-latest'
-      run: |
-        brew install colima
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install colima
 
       - name: Tests
         run: |
