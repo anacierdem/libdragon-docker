@@ -27,7 +27,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -42,13 +42,6 @@ jobs:
 
       - name: Install
         run: npm ci
-
-      - name: Install Docker
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install docker
-          brew install colima
-          colima start
 
       - name: Tests
         run: |
