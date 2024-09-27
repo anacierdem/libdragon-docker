@@ -1,6 +1,5 @@
 const path = require('path');
 const fs = require('fs/promises');
-const fsClassic = require('fs');
 const chalk = require('chalk').stderr;
 const { spawn } = require('child_process');
 
@@ -121,7 +120,7 @@ async function dirExists(path) {
  *  inheritStdout?: boolean,
  *  inheritStderr?: boolean,
  *  spawnOptions?: import('child_process').SpawnOptions,
- *  stdin?: fsClassic.ReadStream,
+ *  stdin?: import('fs').ReadStream,
  * }} SpawnOptions
  */
 
@@ -352,60 +351,6 @@ const dockerExec = /** @type {DockerExec} */ (
 );
 
 /**
- * Recursively copies directories and files
- * @param {string} src
- * @param {string} dst
- */
-async function copyDirContents(src, dst) {
-  log(`Copying from ${src} to ${dst}`, true);
-
-  const dstStat = await fs.stat(dst).catch((e) => {
-    if (e.code !== 'ENOENT') throw e;
-    return null;
-  });
-
-  if (dstStat && !dstStat.isDirectory()) {
-    log(`${dst} is not a directory, skipping.`);
-    return;
-  }
-
-  if (!dstStat) {
-    log(`Creating a directory at ${dst}.`, true);
-    await fs.mkdir(dst);
-  }
-
-  const files = await fs.readdir(src);
-  return Promise.all(
-    files.map(async (name) => {
-      const source = path.join(src, name);
-      const dest = path.join(dst, name);
-      // promise version does not work on snapshot filesystem
-      // Also see https://github.com/vercel/pkg/issues/1561
-      const stats = await new Promise((res, rej) =>
-        fsClassic.stat(source, (err, stats) => {
-          if (err) return rej(err);
-          res(stats);
-        })
-      );
-      if (stats.isDirectory()) {
-        await copyDirContents(source, dest);
-      } else if (stats.isFile()) {
-        const content = await fs.readFile(source);
-        try {
-          log(`Writing to ${dest}`, true);
-          await fs.writeFile(dest, content, {
-            flag: 'wx',
-          });
-        } catch {
-          log(`${dest} already exists, skipping.`);
-          return;
-        }
-      }
-    })
-  );
-}
-
-/**
  * @param {string} p
  */
 function toPosixPath(p) {
@@ -446,8 +391,10 @@ function print(text) {
  */
 function log(text, verboseOnly = false) {
   if (!verboseOnly) {
+    // New default color for console.err is red
+    // Also see https://github.com/nodejs/node/issues/53661
     // eslint-disable-next-line no-console
-    console.error(text);
+    console.error(chalk.white(text));
     return;
   }
   if (globals.verbose) {
@@ -491,7 +438,6 @@ module.exports = {
   assert,
   fileExists,
   dirExists,
-  copyDirContents,
   CommandError,
   ParameterError,
   ValidationError,

@@ -1,6 +1,8 @@
 const path = require('path');
 const fsClassic = require('fs');
+const fs = require('fs/promises');
 
+// TODO: stop using lodash just for a simple uniq function
 const _ = require('lodash');
 
 const { dockerHostUserParams } = require('./docker-utils');
@@ -36,7 +38,9 @@ const installNPMDependencies = async (libdragonInfo) => {
   if (npmRoot) {
     const packageJsonPath = path.join(npmRoot, 'package.json');
 
-    const { dependencies, devDependencies } = require(packageJsonPath);
+    const { dependencies, devDependencies } = JSON.parse(
+      await fs.readFile(packageJsonPath, { encoding: 'utf8' })
+    );
 
     const deps = await Promise.all(
       Object.keys({

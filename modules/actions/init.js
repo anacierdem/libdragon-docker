@@ -1,5 +1,9 @@
+/// <reference path="../../globals.d.ts" />
+
 const fs = require('fs/promises');
+const _fs = require('fs');
 const path = require('path');
+const sea = require('node:sea');
 
 const chalk = require('chalk').stderr;
 
@@ -20,7 +24,6 @@ const {
 } = require('../constants');
 const {
   log,
-  copyDirContents,
   CommandError,
   ParameterError,
   ValidationError,
@@ -28,6 +31,21 @@ const {
   toNativePath,
   getImageName,
 } = require('../helpers');
+
+// TODO: use https://nodejs.org/api/single-executable-applications.html#seagetassetkey-encoding &&
+// https://nodejs.org/api/single-executable-applications.html#assets instead
+const main_c = sea.isSea()
+  ? // @ts-ignore-next-line
+    /** @type {string} */ (require('../../skeleton/src/main.c'))
+  : _fs.readFileSync(path.join(__dirname, '../../skeleton/src/main.c'), 'utf8');
+
+const makefile = sea.isSea()
+  ? // @ts-ignore-next-line
+    /** @type {string} */ require('../../skeleton/Makefile.mk')
+  : _fs.readFileSync(
+      path.join(__dirname, '../../skeleton/Makefile.mk'),
+      'utf8'
+    );
 
 /**
  * @param {import('../project-info').LibdragonInfo} info
@@ -206,6 +224,47 @@ const autoVendor = async (info) => {
 };
 
 /**
+ * @param {import('../project-info').LibdragonInfo} info
+ */
+async function copyFiles(info) {
+  // TODO: make use of VFS, this is far from ideal
+  const srcPath = path.join(info.root, 'src');
+
+  const srcStat = await fs.stat(srcPath).catch((e) => {
+    if (e.code !== 'ENOENT') throw e;
+    return null;
+  });
+
+  if (srcStat && !srcStat.isDirectory()) {
+    log(`${srcPath} is not a directory, skipping.`);
+    return;
+  }
+
+  if (!srcStat) {
+    log(`Creating a directory at ${srcPath}.`, true);
+    await fs.mkdir(srcPath);
+  }
+
+  const makefilePath = path.join(info.root, 'Makefile');
+  await fs
+    .writeFile(makefilePath, makefile, {
+      flag: 'wx',
+    })
+    .catch(() => {
+      log(`${makefilePath} already exists, skipping.`);
+    });
+
+  const mainPath = path.join(info.root, 'src', 'main.c');
+  await fs
+    .writeFile(mainPath, main_c, {
+      flag: 'wx',
+    })
+    .catch(() => {
+      log(`${mainPath} already exists, skipping.`);
+    });
+}
+
+/**
  * Initialize a new libdragon project in current working directory
  * Also downloads the image
  * @param {import('../project-info').LibdragonInfo} info
@@ -313,13 +372,8 @@ async function init(info) {
   info = await autoVendor(info);
 
   log(`Preparing project files...`);
-  const skeletonFolder = path.join(__dirname, '../../skeleton');
 
-  await Promise.all([
-    installDependencies(info),
-    // node copy functions does not work with pkg
-    copyDirContents(skeletonFolder, info.root),
-  ]);
+  await Promise.all([installDependencies(info), copyFiles(info)]);
 
   log(chalk.green(`libdragon ready at \`${info.root}\`.`));
   return info;
