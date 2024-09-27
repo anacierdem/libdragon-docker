@@ -1,3 +1,10 @@
+# [11.4.0](https://github.com/anacierdem/libdragon-docker/compare/v11.3.0...v11.4.0) (2024-09-27)
+
+
+### Features
+
+* start packaging with node SEA ([9709082](https://github.com/anacierdem/libdragon-docker/commit/97090824d939b314ae19e0f3a0ae15241492b7cd))
+
 # [11.3.0](https://github.com/anacierdem/libdragon-docker/compare/v11.2.0...v11.3.0) (2024-09-27)
 
 
