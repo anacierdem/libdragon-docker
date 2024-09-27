@@ -8,9 +8,10 @@ import 'zx/globals';
 /* eslint-disable no-undef */
 
 if (process.platform === 'win32') {
-  // See notes on test.mjs
-  $.shell = true;
-  $.prefix = '';
+  usePowerShell();
+  // for PowerShell compatibility
+  $.prefix = '$ErrorActionPreference = "Stop";';
+  $.postfix = '; exit $LastExitCode';
 }
 
 // TODO: Enable useSnapshot for a faster startup in the future

@@ -34,6 +34,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
+          path: ./build
           pattern: executable-*
           merge-multiple: true
 
