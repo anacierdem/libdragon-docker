@@ -1,3 +1,16 @@
+# [11.3.0](https://github.com/anacierdem/libdragon-docker/compare/v11.2.0...v11.3.0) (2024-09-27)
+
+
+### Bug Fixes
+
+* **init.js:** ensure local development is working ([97cb111](https://github.com/anacierdem/libdragon-docker/commit/97cb111ebe8f1c674c8fd8065548d6dcdc826960))
+* **init.js:** fix issues with SEA init ([261cd0b](https://github.com/anacierdem/libdragon-docker/commit/261cd0bd78ed89b7b211a99f3aa42c913655a79f))
+
+
+### Features
+
+* start packaging with node SEA ([fbe7055](https://github.com/anacierdem/libdragon-docker/commit/fbe70559d0d3ed541658e64be241ee9e71807ad0)), closes [#71](https://github.com/anacierdem/libdragon-docker/issues/71)
+
 # [11.2.0](https://github.com/anacierdem/libdragon-docker/compare/v11.1.3...v11.2.0) (2024-09-23)
 
 
