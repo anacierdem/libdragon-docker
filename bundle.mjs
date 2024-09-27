@@ -26,6 +26,6 @@ await fs.rm('./tmp/libdragon');
 
 await fs.rename('./build/libdragon.exe', './tmp/libdragon.exe');
 await $`Compress-Archive -Path ./tmp/libdragon.exe -DestinationPath libdragon-win-x86_64.zip`;
-await fs.rm('./tmp/libdragon.exe');
+// Do not remove the win executable, it will be used for building the installer
 
 await $`iscc setup.iss /dMyAppVersion=${process.argv[2]}`;
