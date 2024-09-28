@@ -1,5 +1,10 @@
 on:
   workflow_call:
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+      NPM_TOKEN:
+        required: true
 
 jobs:
   staticAnalysis:
@@ -71,6 +76,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release --dry-run --no-ci
+          shell: bash
 
       - name: Build
         run: npm run pack ${{ steps.next_release.outputs.version }}
