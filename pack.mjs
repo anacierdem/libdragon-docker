@@ -7,6 +7,10 @@ import 'zx/globals';
 
 /* eslint-disable no-undef */
 
+if (!process.argv[2]) {
+  throw new Error('Please provide a version number.');
+}
+
 if (process.platform === 'win32') {
   usePowerShell();
   // for PowerShell compatibility
