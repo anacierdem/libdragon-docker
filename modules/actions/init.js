@@ -1,5 +1,3 @@
-/// <reference path="../../globals.d.ts" />
-
 const fs = require('fs/promises');
 const _fs = require('fs');
 const path = require('path');

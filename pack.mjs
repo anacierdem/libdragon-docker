@@ -39,6 +39,11 @@ await esbuild.build({
     '.c': 'text',
     '.mk': 'text',
   },
+  define: {
+    ...(process.argv[2] && {
+      'globalThis.VERSION': JSON.stringify(process.argv[2]),
+    }),
+  },
 });
 
 await $`node --experimental-sea-config sea-config.json`;
