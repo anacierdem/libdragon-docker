@@ -75,7 +75,7 @@
       [
         "@semantic-release/exec",
         {
-          "verifyReleaseCmd": "echo \"version=${nextRelease.version}\" >> $GITHUB_OUTPUT",
+          "verifyReleaseCmd": "echo \"${nextRelease.version}\" >> version.txt",
           "prepareCmd": "npm run bundle ${nextRelease.version}"
         }
       ],

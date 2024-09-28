@@ -64,13 +64,16 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Get next version
-        id: next_release
+      - name: Write next version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        shell: bash
         run: npx semantic-release --dry-run --no-ci
+
+      - name: Get next version
+        id: next_release
+        shell: bash
+        run: echo "version=$(cat version.txt)" >> $GITHUB_OUTPUT
 
       - name: Build
         run: npm run pack ${{ steps.next_release.outputs.version }}
