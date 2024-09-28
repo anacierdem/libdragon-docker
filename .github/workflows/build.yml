@@ -67,6 +67,9 @@ jobs:
 
       - name: Get next version
         id: next_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release --dry-run --no-ci
 
       - name: Build
