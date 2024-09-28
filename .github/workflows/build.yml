@@ -65,8 +65,12 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Get next version
+        id: next_release
+        run: npx semantic-release --dry-run --no-ci
+
       - name: Build
-        run: npm run pack
+        run: npm run pack ${{ steps.next_release.outputs.version }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
