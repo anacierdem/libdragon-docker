@@ -27,7 +27,8 @@
     },
 
     {
-      "type": "node",
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppvsdbg",
       "request": "launch",
       "name": "Tests",
       "program": "${env:UNF_LOADER}",
@@ -38,12 +39,11 @@
         "${workspaceFolder}/libdragon/tests/testrom.z64"
       ],
       "preLaunchTask": "buildTests",
-      "outputCapture": "std",
       "console": "integratedTerminal"
     },
 
     {
-      "cwd": "${workspaceFolder}/src/",
+      "cwd": "${workspaceFolder}/libdragon/tests",
       "type": "cppvsdbg",
       "request": "launch",
       "name": "Tests (emu)",
@@ -54,7 +54,7 @@
     },
 
     {
-      "cwd": "${workspaceFolder}/src/",
+      "cwd": "${fileDirname}",
       "type": "cppvsdbg",
       "request": "launch",
       "name": "Run selected example",
