@@ -222,10 +222,10 @@ npm run libdragon -- update
 
 The root `bench` recipe is for building the code in root `src` folder. This is a quick way of testing your libdragon changes or a sample code built around libdragon, and is called the test bench. This recipe together with `examples` and `tests` recipes will build and install libdragon automatically as necessary. Thus, they will always produce a rom image using the libdragon code in the repository via their make dependencies, which is ideal for experimenting with libdragon itself. 
 
-There are also vscode launch configurations to quickly build the examples, tests and the bench. If you have the `N64_EMU` environment variable set pointing at your favourite emulator ([ares](https://ares-emu.net/) is highly recommended), the launch configurations ending in `(emu)` will kick your emulator with the selected example/code. You can also just hit F5 to launch the selected configuration.
+There are also vscode launch configurations to quickly build the examples, tests and the bench. If you have the `N64_EMU` environment variable set pointing at your favourite emulator ([ares](https://ares-emu.net/) is highly recommended), the launch configurations ending in `(emu)` will kick your emulator with the selected example/code. You can also just hit F5 to launch the selected configuration. For the examples configuration, you can navigate to the relevant `.c` file and `Run selected example` will start it most of the time. In some cases, the output ROM name may not match the `.c` file and in those cases, you can select the ROM file and it should work.
 
 > [!NOTE]
-> This repository also uses [ed64](https://github.com/anacierdem/ed64), so you can use the launch configurations without `(emu)` to run the code if you have an everdrive plugged in and your active configuration will just boot up.
+> This repository also uses [UNFLoader](https://github.com/buu342/N64-UNFLoader), so you can use the launch configurations without `(emu)` to run the code if you have a supported flashcart plugged in and have `UNF_LOADER` environment variable pointing at the executable.
 
 You can clean everything with the `clean` recipe/task (open the command palette and choose `Run Task -> clean`).
 
