@@ -1,3 +1,10 @@
+## [11.4.2](https://github.com/anacierdem/libdragon-docker/compare/v11.4.1...v11.4.2) (2024-09-28)
+
+
+### Bug Fixes
+
+* bundle the cli with the correct version ([2a74c7a](https://github.com/anacierdem/libdragon-docker/commit/2a74c7a71109c1d920c82e74db0fadd967cb5ed1))
+
 ## [11.4.1](https://github.com/anacierdem/libdragon-docker/compare/v11.4.0...v11.4.1) (2024-09-28)
 
 
