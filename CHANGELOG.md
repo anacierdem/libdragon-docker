@@ -1,3 +1,10 @@
+## [11.4.1](https://github.com/anacierdem/libdragon-docker/compare/v11.4.0...v11.4.1) (2024-09-28)
+
+
+### Bug Fixes
+
+* get rid of the experimental warning ([b0894e9](https://github.com/anacierdem/libdragon-docker/commit/b0894e96fab304f17415355261bfd36ec0908491))
+
 # [11.4.0](https://github.com/anacierdem/libdragon-docker/compare/v11.3.0...v11.4.0) (2024-09-27)
 
 
