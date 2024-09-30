@@ -9,9 +9,6 @@
       "type": "cppvsdbg",
       "request": "launch",
       "name": "Test Bench",
-      "windows": {
-        "program": "UNFLoader.exe"
-      },
       "program": "UNFLoader",
       "args": ["-b", "-d", "-r", "${workspaceFolder}/src/test_bench.z64"],
       "preLaunchTask": "build",
@@ -34,9 +31,6 @@
       "type": "cppvsdbg",
       "request": "launch",
       "name": "Tests",
-      "windows": {
-        "program": "UNFLoader.exe"
-      },
       "program": "UNFLoader",
       "args": [
         "-b",
@@ -64,9 +58,6 @@
       "type": "cppvsdbg",
       "request": "launch",
       "name": "Run selected example",
-      "windows": {
-        "program": "UNFLoader.exe"
-      },
       "program": "UNFLoader",
       "args": [
         "-b",
