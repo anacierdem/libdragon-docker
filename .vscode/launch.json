@@ -20,10 +20,39 @@
       "type": "cppvsdbg",
       "request": "launch",
       "name": "Test Bench (emu)",
-      "program": "${env:N64_EMU}",
-      "args": ["${workspaceFolder}/src/test_bench.z64"],
+      "program": "ares",
+      "args": [
+        "${workspaceFolder}/src/test_bench.z64",
+        "--setting=DebugServer/Enabled=true",
+        "--setting=DebugServer/UseIPv4=true",
+        "--setting=DebugServer/Port=9123",
+        "--setting Input/Defocus=Block"
+      ],
       "preLaunchTask": "build",
       "console": "integratedTerminal"
+    },
+
+    {
+      "cwd": "${workspaceFolder}/src/",
+      "type": "cppdbg",
+      "request": "launch",
+      "name": "Attach to Test Bench (emu)",
+      "program": "${workspaceFolder}/src/build/test_bench.elf",
+      "preLaunchTask": "build",
+      "stopAtEntry": true,
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb-multiarch",
+      "miDebuggerServerAddress": "127.0.0.1:9123",
+      "setupCommands": [
+        {
+          "description": "Set architecture",
+          "text": "set arch mips:4300"
+        }
+      ],
+      "sourceFileMap": {
+        "libdragon": "${workspaceFolder}"
+      }
     },
 
     {
@@ -47,8 +76,14 @@
       "type": "cppvsdbg",
       "request": "launch",
       "name": "Tests (emu)",
-      "program": "${env:N64_EMU}",
-      "args": ["${workspaceFolder}/libdragon/tests/testrom_emu.z64"],
+      "program": "ares",
+      "args": [
+        "${workspaceFolder}/libdragon/tests/testrom_emu.z64",
+        "--setting=DebugServer/Enabled=true",
+        "--setting=DebugServer/UseIPv4=true",
+        "--setting=DebugServer/Port=9123",
+        "--setting Input/Defocus=Block"
+      ],
       "preLaunchTask": "buildTests",
       "console": "integratedTerminal"
     },
@@ -74,10 +109,24 @@
       "type": "cppvsdbg",
       "request": "launch",
       "name": "Run selected example (emu)",
-      "program": "${env:N64_EMU}",
-      "args": ["${fileDirname}/${fileBasenameNoExtension}.z64"],
+      "program": "ares",
+      "args": [
+        "${fileDirname}/${fileBasenameNoExtension}.z64",
+        "--setting=DebugServer/Enabled=true",
+        "--setting=DebugServer/UseIPv4=true",
+        "--setting=DebugServer/Port=9123",
+        "--setting Input/Defocus=Block"
+      ],
       "preLaunchTask": "buildTests",
       "console": "integratedTerminal"
+    }
+  ],
+
+  "compounds": [
+    {
+      "name": "Debug Test Bench (emu)",
+      "configurations": ["Test Bench (emu)", "Attach to Test Bench (emu)"],
+      "stopAll": true
     }
   ]
 }
