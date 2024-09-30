@@ -8,7 +8,10 @@ import 'zx/globals';
 /* eslint-disable no-undef */
 
 if (!process.argv[2]) {
-  throw new Error('Please provide a version number.');
+  // eslint-disable-next-line no-console
+  console.error(
+    'No version is provided, building cli with the existing version.'
+  );
 }
 
 if (process.platform === 'win32') {

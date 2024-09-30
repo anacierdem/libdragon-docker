@@ -18,6 +18,16 @@ if (process.platform === 'win32') {
   $.postfix = '; exit $LastExitCode';
 }
 
+const { stdout: versionString } = await $`./build/libdragon.exe version`;
+
+if (versionString.trim() !== `libdragon-cli v${process.argv[2]} (sea)`) {
+  throw new Error(
+    `Version mismatch! Expected: libdragon-cli v${
+      process.argv[2]
+    } (sea), got: ${versionString.trim()}`
+  );
+}
+
 await fs.mkdir('./tmp').catch(() => {});
 
 await fs.rename('./build/libdragon-linux', './tmp/libdragon');
