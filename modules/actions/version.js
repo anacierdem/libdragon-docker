@@ -1,6 +1,6 @@
 const sea = require('node:sea');
 
-const { log } = require('../helpers');
+const { print } = require('../helpers');
 
 const printVersion = async () => {
   // Version is set during build time. If it is not set, it is set to the
@@ -10,7 +10,7 @@ const printVersion = async () => {
     const { version } = require('../../package.json');
     globalThis.VERSION = version;
   }
-  log(`libdragon-cli v${globalThis.VERSION} ${sea.isSea() ? '(sea)' : ''}`);
+  print(`libdragon-cli v${globalThis.VERSION} ${sea.isSea() ? '(sea)' : ''}`);
 };
 
 module.exports = /** @type {const} */ ({
