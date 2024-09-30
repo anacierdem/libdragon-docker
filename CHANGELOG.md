@@ -1,3 +1,10 @@
+## [11.4.3](https://github.com/anacierdem/libdragon-docker/compare/v11.4.2...v11.4.3) (2024-09-30)
+
+
+### Bug Fixes
+
+* print version string to stdout for version action ([8245649](https://github.com/anacierdem/libdragon-docker/commit/8245649fb215bceca8cebc3622a419bbe1c7a433))
+
 ## [11.4.2](https://github.com/anacierdem/libdragon-docker/compare/v11.4.1...v11.4.2) (2024-09-28)
 
 
