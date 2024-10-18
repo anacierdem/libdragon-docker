@@ -307,7 +307,10 @@ const dockerExec = /** @type {DockerExec} */ (
         workDirIndex >= 0 ? finalDockerParams[workDirIndex + 1] : undefined;
       return spawnProcess(finalCmdWithParams[0], finalCmdWithParams.slice(1), {
         ...options,
-        spawnOptions: { cwd: workDir, ...options?.spawnOptions },
+        spawnOptions: {
+          cwd: workDir,
+          ...options?.spawnOptions,
+        },
       });
     }
 
@@ -345,7 +348,17 @@ const dockerExec = /** @type {DockerExec} */ (
         libdragonInfo.containerId,
         ...finalCmdWithParams,
       ],
-      options
+      {
+        ...options,
+        spawnOptions: {
+          env: {
+            // Prevent the annoyin docker "What's next?" message. It messes up everything.
+            DOCKER_CLI_HINTS: 'false',
+            ...options?.spawnOptions?.env,
+          },
+          ...options?.spawnOptions,
+        },
+      }
     );
   }
 );
