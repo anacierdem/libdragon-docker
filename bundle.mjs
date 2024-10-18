@@ -35,7 +35,7 @@ await $`tar -C ./tmp -cvzf libdragon-linux-x86_64.tar.gz libdragon`;
 await fs.rm('./tmp/libdragon');
 
 await fs.rename('./build/libdragon-macos', './tmp/libdragon');
-await $`tar -C ./tmp -cvzf libdragon-macos-x86_64.tar.gz libdragon`;
+await $`tar -C ./tmp -cvzf libdragon-macos-arm64.tar.gz libdragon`;
 await fs.rm('./tmp/libdragon');
 
 await fs.rename('./build/libdragon.exe', './tmp/libdragon.exe');

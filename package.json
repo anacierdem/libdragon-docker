@@ -88,7 +88,7 @@
               "label": "Linux executable"
             },
             {
-              "path": "libdragon-macos-x86_64.tar.gz",
+              "path": "libdragon-macos-arm64.tar.gz",
               "label": "MacOS executable"
             },
             {
