@@ -1,3 +1,11 @@
+## [11.4.4](https://github.com/anacierdem/libdragon-docker/compare/v11.4.3...v11.4.4) (2024-10-18)
+
+
+### Bug Fixes
+
+* disable docker's What's new message ([22740c0](https://github.com/anacierdem/libdragon-docker/commit/22740c071d0fab62a2d906373eac9619214bcc97))
+* fix the name for macos tar file ([674afce](https://github.com/anacierdem/libdragon-docker/commit/674afcebf64011f7d4f424bbe7dd070b5e1ab9c3))
+
 ## [11.4.3](https://github.com/anacierdem/libdragon-docker/compare/v11.4.2...v11.4.3) (2024-09-30)
 
 
