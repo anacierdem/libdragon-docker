@@ -183,6 +183,10 @@ function spawnProcess(
         enableOutTTY ? 'inherit' : 'pipe',
         enableErrorTTY ? 'inherit' : 'pipe',
       ],
+      env: {
+        // Prevent the annoying docker "What's next?" message. It messes up everything.
+        DOCKER_CLI_HINTS: 'false',
+      },
       ...spawnOptions,
     });
 
@@ -348,17 +352,7 @@ const dockerExec = /** @type {DockerExec} */ (
         libdragonInfo.containerId,
         ...finalCmdWithParams,
       ],
-      {
-        ...options,
-        spawnOptions: {
-          env: {
-            // Prevent the annoyin docker "What's next?" message. It messes up everything.
-            DOCKER_CLI_HINTS: 'false',
-            ...options?.spawnOptions?.env,
-          },
-          ...options?.spawnOptions,
-        },
-      }
+      options
     );
   }
 );
