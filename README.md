@@ -289,6 +289,17 @@ To create your own dev container backed project, you can use the contents of the
   - It will prepare the container and open it in the editor.
 </details>
 
+## As an NPM dependency
+
+You can install libdragon as an NPM dependency by `npm install libdragon --save` in order to use docker in your N64 projects. A `libdragon` command similar to global installation is provided that can be used in your NPM scripts as follows;
+```json
+"scripts": {
+    "prepare": "libdragon init"
+    "build": "libdragon make",
+    "clean": "libdragon make clean"
+}
+```
+
 ## Funding
 
 If this tool helped you, consider supporting its development by sponsoring it!
