@@ -33,7 +33,7 @@ const { readProjectInfo, writeProjectInfo } = require('./modules/project-info');
 // This is overridden when building for SEA. When running from local or NPM,
 // the package.json version is used by the version action. esbuild will give
 // a warning for this assignment, but it works as expected.
-globalThis.VERSION = "";
+globalThis.VERSION = '';
 
 parseParameters(process.argv)
   .then(readProjectInfo)

@@ -65,7 +65,7 @@ Download the [pre-built executable](https://github.com/anacierdem/libdragon-dock
 
 ### via NPM
 
-Install [node.js](https://nodejs.org/en/download/) (`>= 18`) and install `libdragon` as a global NPM package;
+Install [node.js](https://nodejs.org/en/download/) (`>= 22`) and install `libdragon` as a global NPM package;
 
 ```bash
 npm install -g libdragon
