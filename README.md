@@ -6,9 +6,7 @@ This is a wrapper for a docker container to make managing the libdragon toolchai
 
 ## Prerequisites
 
-You should have [docker](https://www.docker.com/products/docker-desktop) (`>= 27.2.0`) installed on your system.
-
-`git` is not strictly required to use the tool. Still, it is highly recommended to have git on your host machine as it will be used instead of the one in the container.
+You should have [docker](https://www.docker.com/products/docker-desktop) (`>= 27.2.0`) && [git](https://git-scm.com/downloads) installed on your system.
 
 ## Installation
 

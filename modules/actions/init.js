@@ -10,7 +10,7 @@ const {
   installDependencies,
   initGitAndCacheContainerId,
   updateImage,
-  runGitMaybeHost,
+  runGit,
   destroyContainer,
   ensureGit,
 } = require('../utils');
@@ -61,15 +61,11 @@ const autoDetect = async (info) => {
 
   if (
     vendorTargetExists &&
-    (await runGitMaybeHost(
-      info,
-      ['submodule', 'status', info.vendorDirectory],
-      {
-        inheritStdin: false,
-        inheritStdout: false,
-        inheritStderr: false,
-      }
-    ).catch((e) => {
+    (await runGit(info, ['submodule', 'status', info.vendorDirectory], {
+      inheritStdin: false,
+      inheritStdout: false,
+      inheritStderr: false,
+    }).catch((e) => {
       if (!(e instanceof CommandError)) {
         throw e;
       }
@@ -80,7 +76,7 @@ const autoDetect = async (info) => {
   }
 
   if (vendorTargetExists) {
-    const gitLogs = await runGitMaybeHost(info, ['log'], {
+    const gitLogs = await runGit(info, ['log'], {
       inheritStdin: false,
       inheritStdout: false,
       inheritStderr: false,
@@ -161,7 +157,7 @@ const autoVendor = async (info) => {
 
   if (info.vendorStrategy === 'submodule') {
     try {
-      await runGitMaybeHost(info, [
+      await runGit(info, [
         'submodule',
         'add',
         '--force',
@@ -188,7 +184,7 @@ const autoVendor = async (info) => {
   if (info.vendorStrategy === 'subtree') {
     // Create a commit if it does not exist. This is required for subtree.
     try {
-      await runGitMaybeHost(info, ['rev-parse', 'HEAD']);
+      await runGit(info, ['rev-parse', 'HEAD']);
     } catch (e) {
       if (!(e instanceof CommandError)) throw e;
 
@@ -197,16 +193,16 @@ const autoVendor = async (info) => {
       // git on the host machine.
       // TODO: this is probably creating an unnecessary commit for someone who
       // just created a git repo and knows what they are doing.
-      await runGitMaybeHost(info, [
+      await runGit(info, [
         'commit',
         '--allow-empty',
         '-n',
         '-m',
-        'Initial commit.',
+        '"Initial commit."',
       ]);
     }
 
-    await runGitMaybeHost(info, [
+    await runGit(info, [
       'subtree',
       'add',
       '--prefix',
@@ -321,7 +317,7 @@ async function init(info) {
 
     if ((await autoDetect(info)) === 'submodule') {
       try {
-        const existingBranchName = await runGitMaybeHost(
+        const existingBranchName = await runGit(
           info,
           [
             '-C',

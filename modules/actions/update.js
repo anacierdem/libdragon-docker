@@ -1,7 +1,7 @@
 const { log, assert } = require('../helpers');
 const { LIBDRAGON_GIT } = require('../constants');
 const {
-  runGitMaybeHost,
+  runGit,
   installDependencies,
   updateImage,
   destroyContainer,
@@ -55,7 +55,7 @@ const update = async (info) => {
   }
 
   if (info.vendorStrategy === 'submodule') {
-    await runGitMaybeHost(info, [
+    await runGit(info, [
       'submodule',
       'update',
       '--remote',
@@ -63,7 +63,7 @@ const update = async (info) => {
       info.vendorDirectory,
     ]);
   } else if (info.vendorStrategy === 'subtree') {
-    await runGitMaybeHost(info, [
+    await runGit(info, [
       'subtree',
       'pull',
       '--prefix',

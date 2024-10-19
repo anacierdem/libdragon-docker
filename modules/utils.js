@@ -10,13 +10,11 @@ const {
   dockerExec,
   dirExists,
   assert,
-  CommandError,
   ValidationError,
   toNativePath,
 } = require('./helpers');
 
 const { dockerHostUserParams } = require('./docker-utils');
-const { installNPMDependencies } = require('./npm-utils');
 
 /**
  * @param {import('./project-info').LibdragonInfo} libdragonInfo
@@ -44,8 +42,6 @@ const installDependencies = async (libdragonInfo) => {
     ],
     ['/bin/bash', './build.sh']
   );
-
-  await installNPMDependencies(libdragonInfo);
 };
 
 /**
@@ -119,8 +115,7 @@ const destroyContainer = async (libdragonInfo) => {
 };
 
 /**
- * Invokes host git with provided params. If host does not have git, falls back
- * to the docker git, with the nix user set to the user running libdragon.
+ * Invokes host git with provided params.
  */
 
 /**
@@ -129,43 +124,23 @@ const destroyContainer = async (libdragonInfo) => {
  * @param {string[]} params
  * @param {import('./helpers').SpawnOptions} options
  */
-async function runGitMaybeHost(libdragonInfo, params, options = {}) {
+async function runGit(libdragonInfo, params, options = {}) {
   assert(
     libdragonInfo.vendorStrategy !== 'manual',
     new Error('Should never run git if vendoring strategy is manual.')
   );
-  try {
-    const isWin = /^win/.test(process.platform);
+  const isWin = /^win/.test(process.platform);
 
-    return await spawnProcess(
-      'git',
-      ['-C', libdragonInfo.root, ...params],
-      // Windows git is breaking the TTY somehow - disable TTY for now
-      // We are not able to display progress for the initial clone b/c of this
-      // Enable progress otherwise.
-      isWin
-        ? { inheritStdin: false, ...options }
-        : { inheritStdout: true, inheritStderr: true, ...options }
-    );
-  } catch (e) {
-    if (e instanceof CommandError) {
-      throw e;
-    }
-
-    assert(
-      !process.env.DOCKER_CONTAINER,
-      new Error('[runGitMaybeHost] Native git should exist in a container.')
-    );
-
-    return await dockerExec(
-      libdragonInfo,
-      // Use the host user when initializing git as we will need access
-      [...dockerHostUserParams(libdragonInfo)],
-      ['git', ...params],
-      // Let's enable tty here to show the progress
-      { inheritStdout: true, inheritStderr: true, ...options }
-    );
-  }
+  return await spawnProcess(
+    'git',
+    ['-C', libdragonInfo.root, ...params],
+    // Windows git is breaking the TTY somehow - disable TTY for now
+    // We are not able to display progress for the initial clone b/c of this
+    // Enable progress otherwise.
+    isWin
+      ? { inheritStdin: false, ...options }
+      : { inheritStdout: true, inheritStderr: true, ...options }
+  );
 }
 
 /**
@@ -267,7 +242,7 @@ async function initGitAndCacheContainerId(libdragonInfo) {
  */
 async function ensureGit(info) {
   const gitRoot = (
-    await runGitMaybeHost(info, ['rev-parse', '--show-toplevel'], {
+    await runGit(info, ['rev-parse', '--show-toplevel'], {
       inheritStdin: false,
       inheritStdout: false,
       inheritStderr: false,
@@ -283,7 +258,7 @@ async function ensureGit(info) {
   // where there is a git working tree higher in the host filesystem, which
   // the container does not have access to.
   if (!gitRoot) {
-    await runGitMaybeHost(info, ['init']);
+    await runGit(info, ['init']);
   }
 }
 
@@ -294,6 +269,6 @@ module.exports = {
   checkContainerRunning,
   checkContainerAndClean,
   initGitAndCacheContainerId,
-  runGitMaybeHost,
+  runGit,
   ensureGit,
 };
