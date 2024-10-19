@@ -1,3 +1,23 @@
+# [12.0.0](https://github.com/anacierdem/libdragon-docker/compare/v11.4.4...v12.0.0) (2024-10-19)
+
+
+### Bug Fixes
+
+* disable docker hints for all operations ([37a9397](https://github.com/anacierdem/libdragon-docker/commit/37a9397d89324bd9d2dc8057704588444757d05c))
+* fix ENOENT issues on macOS ([f6c1296](https://github.com/anacierdem/libdragon-docker/commit/f6c129629deb14f1943a1950abdc6573b8049dcd))
+
+
+### Code Refactoring
+
+* drop support for NPM dependency management ([84f02b3](https://github.com/anacierdem/libdragon-docker/commit/84f02b34a2f3a3eb68addff86628fb9e377b80d7)), closes [#77](https://github.com/anacierdem/libdragon-docker/issues/77) [#60](https://github.com/anacierdem/libdragon-docker/issues/60)
+* stop using container git ([ce4ae92](https://github.com/anacierdem/libdragon-docker/commit/ce4ae92eac51c9db0ec1b3939b61cdc261a05c19))
+
+
+### BREAKING CHANGES
+
+* NPM dependency system will not work anymore
+* Host system must have git installed after this update.
+
 ## [11.4.4](https://github.com/anacierdem/libdragon-docker/compare/v11.4.3...v11.4.4) (2024-10-18)
 
 
