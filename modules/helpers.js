@@ -124,11 +124,12 @@ async function dirExists(path) {
  * }} SpawnOptions
  */
 
-// A simple Promise wrapper for child_process.spawn. Return the err/out streams
-// from the process by default. Specify inheritStdout / inheritStderr to disable
-// this and inherit the parent process's stream, passing through the TTY if any.
 /**
- *
+ * A simple Promise wrapper for child_process.spawn. Return the err/out streams
+ * from the process by default. Specify inheritStdout / inheritStderr to disable
+ * this and inherit the parent process's stream, passing through the TTY if any.
+ * Runs everything in a shell, so be careful with user input. By default, we get
+ * the input from user but this is the whole idea of most of the logic here.
  * @param {string} cmd
  * @param {string[]} params
  * @param {SpawnOptions} options
@@ -187,6 +188,7 @@ function spawnProcess(
         // Prevent the annoying docker "What's next?" message. It messes up everything.
         DOCKER_CLI_HINTS: 'false',
       },
+      shell: true,
       ...spawnOptions,
     });
 

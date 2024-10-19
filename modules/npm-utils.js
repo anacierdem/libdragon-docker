@@ -125,16 +125,7 @@ const installNPMDependencies = async (libdragonInfo) => {
 function runNPM(params) {
   return spawnProcess(
     /^win/.test(process.platform) ? 'npm.cmd' : 'npm',
-    params,
-    {
-      userCommand: false,
-      inheritStdin: true,
-      inheritStdout: false,
-      inheritStderr: false,
-      spawnOptions: {
-        shell: true,
-      },
-    }
+    params
   );
 }
 module.exports = {
