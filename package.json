@@ -41,7 +41,6 @@
   "dependencies": {
     "chalk": "^4.1.0",
     "command-line-usage": "^6.1.1",
-    "lodash": "^4.17.20",
     "zx": "^8.1.8"
   },
   "devDependencies": {
@@ -49,7 +48,6 @@
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "@types/command-line-usage": "^5.0.2",
-    "@types/lodash": "^4.14.182",
     "commitizen": "^4.2.4",
     "cz-conventional-changelog": "^3.3.0",
     "esbuild": "^0.20.0",

@@ -289,50 +289,6 @@ To create your own dev container backed project, you can use the contents of the
   - It will prepare the container and open it in the editor.
 </details>
 
-## Dependency management
-
-> [!WARNING]
-> This is an experimental feature.
-
-### As an NPM dependency
-
-You can install libdragon as an NPM dependency by `npm install libdragon --save` in order to use docker in your N64 projects. A `libdragon` command similar to global intallation is provided that can be used in your NPM scripts as follows;
-
-```json
-"scripts": {
-    "prepare": "libdragon init"
-    "build": "libdragon make",
-    "clean": "libdragon make clean"
-}
-```
-
-See [here](https://github.com/anacierdem/ed64-example) for a full example.
-
-### Developing a dependency
-
-You can make an NPM package that a `libdragon` project can depend on. Just include a `Makefile` on the repository root with a default recipe and an `install` recipe. On the depending project, after installing libdragon and the dependency with `npm install <dep name> --save`, one can install libdragon dependencies on the current docker container using `package.json` scripts.
-
-For example this `package.json` in the dependent project;
-
-```json
-{
-    "name": "libdragonDependentProject",
-    "version": "1.0.0",
-    "description": "...",
-    "scripts": {
-        "build": "libdragon make",
-        "clean": "libdragon make clean",
-        "prepare": "libdragon init"
-    },
-    "dependencies": {
-        "libdragon": <version>,
-        "ed64": <version>
-    }
-}
-```
-
-will init the container for this project and run `make && make install` for `ed64` upon running `npm install`. To develop a dependency [this](https://github.com/anacierdem/libdragon-dependency) is a good starting point.
-
 ## Funding
 
 If this tool helped you, consider supporting its development by sponsoring it!

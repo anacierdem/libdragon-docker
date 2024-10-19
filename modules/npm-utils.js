@@ -1,20 +1,6 @@
 const path = require('path');
-const fsClassic = require('fs');
-const fs = require('fs/promises');
 
-// TODO: stop using lodash just for a simple uniq function
-const _ = require('lodash');
-
-const { dockerHostUserParams } = require('./docker-utils');
-
-const { CONTAINER_TARGET_PATH } = require('./constants');
-const {
-  fileExists,
-  toPosixPath,
-  spawnProcess,
-  dockerExec,
-  ValidationError,
-} = require('./helpers');
+const { fileExists, spawnProcess } = require('./helpers');
 
 async function findNPMRoot() {
   try {
@@ -30,96 +16,6 @@ async function findNPMRoot() {
 }
 
 /**
- * Install other NPM dependencies if this is an NPM project
- * @param {import('./project-info').LibdragonInfo} libdragonInfo
- */
-const installNPMDependencies = async (libdragonInfo) => {
-  const npmRoot = await findNPMRoot();
-  if (npmRoot) {
-    const packageJsonPath = path.join(npmRoot, 'package.json');
-
-    const { dependencies, devDependencies } = JSON.parse(
-      await fs.readFile(packageJsonPath, { encoding: 'utf8' })
-    );
-
-    const deps = await Promise.all(
-      Object.keys({
-        ...dependencies,
-        ...devDependencies,
-      })
-        .filter((dep) => dep !== 'libdragon')
-        .map(async (dep) => {
-          const npmPath = await runNPM(['ls', dep, '--parseable=true']);
-          return {
-            name: dep,
-            paths: _.uniq(npmPath.split('\n').filter((f) => f)),
-          };
-        })
-    );
-
-    await Promise.all(
-      deps.map(({ name, paths }) => {
-        return /** @type Promise<void> */ (
-          new Promise((resolve, reject) => {
-            fsClassic.access(
-              path.join(paths[0], 'Makefile'),
-              fsClassic.constants.F_OK,
-              async (e) => {
-                if (e) {
-                  // File does not exist - skip
-                  resolve();
-                  return;
-                }
-
-                if (paths.length > 1) {
-                  reject(
-                    new ValidationError(
-                      `Using same dependency with different versions is not supported! ${name}`
-                    )
-                  );
-                  return;
-                }
-
-                try {
-                  const relativePath = toPosixPath(
-                    path.relative(libdragonInfo.root, paths[0])
-                  );
-                  const containerPath = path.posix.join(
-                    CONTAINER_TARGET_PATH,
-                    relativePath
-                  );
-                  const makePath = path.posix.join(containerPath, 'Makefile');
-
-                  await dockerExec(
-                    libdragonInfo,
-                    [...dockerHostUserParams(libdragonInfo)],
-                    [
-                      '/bin/bash',
-                      '-c',
-                      '[ -f ' +
-                        makePath +
-                        ' ] && make -C ' +
-                        containerPath +
-                        ' && make -C ' +
-                        containerPath +
-                        ' install',
-                    ]
-                  );
-
-                  resolve();
-                } catch (e) {
-                  reject(e);
-                }
-              }
-            );
-          })
-        );
-      })
-    );
-  }
-};
-
-/**
  * @param {string[]} params
  */
 function runNPM(params) {
@@ -129,6 +25,5 @@ function runNPM(params) {
   );
 }
 module.exports = {
-  installNPMDependencies,
   findNPMRoot,
 };
