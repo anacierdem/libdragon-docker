@@ -91,7 +91,7 @@ async function findContainerId(libdragonInfo) {
       '--format',
       '{{.}}{{.ID}}',
       '-f',
-      'volume=' + CONTAINER_TARGET_PATH,
+      '"volume=' + CONTAINER_TARGET_PATH + '"',
     ])
   )
     .split('\n')

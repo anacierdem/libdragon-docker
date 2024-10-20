@@ -40,16 +40,7 @@ const installDependencies = async (libdragonInfo) => {
       CONTAINER_TARGET_PATH + '/' + libdragonInfo.vendorDirectory,
       ...dockerHostUserParams(libdragonInfo),
     ],
-    ['/bin/bash', './build.sh'],
-    {
-      userCommand: false,
-      inheritStdin: true,
-      inheritStdout: false,
-      inheritStderr: false,
-      spawnOptions: {
-        shell: true,
-      },
-    }
+    ['/bin/bash', './build.sh']
   );
 };
 
@@ -142,7 +133,7 @@ async function runGit(libdragonInfo, params, options = {}) {
 
   return await spawnProcess(
     'git',
-    ['-C', libdragonInfo.root, ...params],
+    ['-C', '"' + libdragonInfo.root + '"', ...params],
     // Windows git is breaking the TTY somehow - disable TTY for now
     // We are not able to display progress for the initial clone b/c of this
     // Enable progress otherwise.
