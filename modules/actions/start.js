@@ -58,7 +58,16 @@ const initContainer = async (libdragonInfo) => {
         '-R',
         `${uid >= 0 ? uid : ''}:${gid >= 0 ? gid : ''}`,
         '/n64_toolchain',
-      ]
+      ],
+      {
+        userCommand: false,
+        inheritStdin: true,
+        inheritStdout: false,
+        inheritStderr: false,
+        spawnOptions: {
+          shell: true,
+        },
+      }
     );
   } catch (e) {
     // Dispose the invalid container, clean and exit
