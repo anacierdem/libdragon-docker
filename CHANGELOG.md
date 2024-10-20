@@ -1,3 +1,10 @@
+## [12.0.1](https://github.com/anacierdem/libdragon-docker/compare/v12.0.0...v12.0.1) (2024-10-20)
+
+
+### Bug Fixes
+
+* only invoke a shell for docker commands known to cause problems on macos ([bc88f2e](https://github.com/anacierdem/libdragon-docker/commit/bc88f2e3a49a2a9365bc39e94e7daf9736b93a94))
+
 # [12.0.0](https://github.com/anacierdem/libdragon-docker/compare/v11.4.4...v12.0.0) (2024-10-19)
 
 
