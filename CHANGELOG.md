@@ -1,3 +1,10 @@
+## [12.0.2](https://github.com/anacierdem/libdragon-docker/compare/v12.0.1...v12.0.2) (2024-10-20)
+
+
+### Bug Fixes
+
+* run all commands in a shell and quote all user provided parameters ([9383222](https://github.com/anacierdem/libdragon-docker/commit/9383222c855b7aa54184578c8af60e0d35b70af4))
+
 ## [12.0.1](https://github.com/anacierdem/libdragon-docker/compare/v12.0.0...v12.0.1) (2024-10-20)
 
 
