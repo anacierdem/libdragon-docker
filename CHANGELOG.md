@@ -1,3 +1,19 @@
+## [12.0.4](https://github.com/anacierdem/libdragon-docker/compare/v12.0.3...v12.0.4) (2024-10-20)
+
+
+### Bug Fixes
+
+* properly passthrough environment variables ([2477f1c](https://github.com/anacierdem/libdragon-docker/commit/2477f1c6a04f7cc69a2e3d09938fe7f7adc5252c))
+
+
+### Reverts
+
+* Revert "fix: do not use shell for user initiated docker exec" ([b4b400c](https://github.com/anacierdem/libdragon-docker/commit/b4b400c12b134c9af37e3cc090cddc4827e72132))
+* Revert "fix: fix ENOENT issues on macOS" ([42d27c5](https://github.com/anacierdem/libdragon-docker/commit/42d27c5008591ddcb6a74d72fe7db248397de1c4))
+* Revert "fix: only invoke a shell for docker commands known to cause problems on macos" ([8635ac0](https://github.com/anacierdem/libdragon-docker/commit/8635ac093fa37585d1dac994bd86bd94b8ba953a))
+* Revert "fix: run all commands in a shell and quote all user provided parameters" ([887893f](https://github.com/anacierdem/libdragon-docker/commit/887893fab23af3a9d47bba94ba9ad5ab90957ccf))
+* Revert "Remove potentially unnecessary shell" ([48b9b8f](https://github.com/anacierdem/libdragon-docker/commit/48b9b8f14568f3d0d84aa7a630c8624bb574cd22))
+
 ## [12.0.3](https://github.com/anacierdem/libdragon-docker/compare/v12.0.2...v12.0.3) (2024-10-20)
 
 
