@@ -34,11 +34,10 @@ const initContainer = async (libdragonInfo) => {
         'run',
         '-d', // Detached
         '--mount',
-        '"type=bind,source=' +
+        'type=bind,source=' +
           libdragonInfo.root +
           ',target=' +
-          CONTAINER_TARGET_PATH +
-          '"', // Mount files
+          CONTAINER_TARGET_PATH, // Mount files
         '-w=' + CONTAINER_TARGET_PATH, // Set working directory
         libdragonInfo.imageName,
         'tail',
