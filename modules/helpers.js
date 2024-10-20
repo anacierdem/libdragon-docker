@@ -320,6 +320,7 @@ const dockerExec = /** @type {DockerExec} */ (
         ...options,
         spawnOptions: {
           cwd: workDir,
+          shell: false,
           ...options?.spawnOptions,
         },
       });

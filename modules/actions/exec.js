@@ -66,24 +66,22 @@ const exec = async (info) => {
   const stdin = new PassThrough();
 
   /** @type {string[]} */
-  const paramsWithConvertedPaths = (
-    await Promise.all(
-      parameters.map(async (item) => {
-        if (item.startsWith('-')) {
-          return item;
-        }
-        if (
-          item.includes(path.sep) &&
-          ((await fileExists(item)) || (await dirExists(item)))
-        ) {
-          return toPosixPath(
-            path.isAbsolute(item) ? path.relative(process.cwd(), item) : item
-          );
-        }
+  const paramsWithConvertedPaths = await Promise.all(
+    parameters.map(async (item) => {
+      if (item.startsWith('-')) {
         return item;
-      })
-    )
-  ).map((param) => `"${param}"`);
+      }
+      if (
+        item.includes(path.sep) &&
+        ((await fileExists(item)) || (await dirExists(item)))
+      ) {
+        return toPosixPath(
+          path.isAbsolute(item) ? path.relative(process.cwd(), item) : item
+        );
+      }
+      return item;
+    })
+  );
 
   /**
    *

@@ -40,7 +40,12 @@ const installDependencies = async (libdragonInfo) => {
       CONTAINER_TARGET_PATH + '/' + libdragonInfo.vendorDirectory,
       ...dockerHostUserParams(libdragonInfo),
     ],
-    ['/bin/bash', './build.sh']
+    ['/bin/bash', './build.sh'],
+    {
+      spawnOptions: {
+        shell: true,
+      },
+    }
   );
 };
 
