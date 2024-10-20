@@ -112,10 +112,6 @@ const exec = async (info) => {
           // spawnProcess defaults does not apply to dockerExec so we need to
           // provide these explicitly here.
           inheritStderr: true,
-          spawnOptions: {
-            ...opts.spawnOptions,
-            shell: true,
-          },
           ...opts,
         }
       )
