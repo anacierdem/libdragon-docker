@@ -34,13 +34,12 @@ const initContainer = async (libdragonInfo) => {
         'run',
         '-d', // Detached
         '--mount',
-        '"type=bind,source=' +
+        'type=bind,source=' +
           libdragonInfo.root +
           ',target=' +
-          CONTAINER_TARGET_PATH +
-          '"', // Mount files
-        '"-w=' + CONTAINER_TARGET_PATH + '"', // Set working directory
-        '"' + libdragonInfo.imageName + '"',
+          CONTAINER_TARGET_PATH, // Mount files
+        '-w=' + CONTAINER_TARGET_PATH, // Set working directory
+        libdragonInfo.imageName,
         'tail',
         '-f',
         '/dev/null',
@@ -59,7 +58,16 @@ const initContainer = async (libdragonInfo) => {
         '-R',
         `${uid >= 0 ? uid : ''}:${gid >= 0 ? gid : ''}`,
         '/n64_toolchain',
-      ]
+      ],
+      {
+        userCommand: false,
+        inheritStdin: true,
+        inheritStdout: false,
+        inheritStderr: false,
+        spawnOptions: {
+          shell: true,
+        },
+      }
     );
   } catch (e) {
     // Dispose the invalid container, clean and exit

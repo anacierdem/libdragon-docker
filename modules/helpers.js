@@ -188,12 +188,6 @@ function spawnProcess(
         // Prevent the annoying docker "What's next?" message. It messes up everything.
         DOCKER_CLI_HINTS: 'false',
       },
-      // On macos, we need to run the command in a shell for some docker commands
-      // to work properly. The ones with paths in them probably not working on
-      // macOS. No need to do this on Windows, as it'd now require additional
-      // escaping for the paths.
-      // shell: process.platform === 'darwin',
-      shell: true,
       ...spawnOptions,
     });
 
