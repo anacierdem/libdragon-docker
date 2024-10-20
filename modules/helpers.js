@@ -188,6 +188,7 @@ function spawnProcess(
         // Prevent the annoying docker "What's next?" message. It messes up everything.
         DOCKER_CLI_HINTS: 'false',
       },
+      shell: true,
       ...spawnOptions,
     });
 
