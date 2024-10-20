@@ -1,3 +1,10 @@
+## [12.0.3](https://github.com/anacierdem/libdragon-docker/compare/v12.0.2...v12.0.3) (2024-10-20)
+
+
+### Bug Fixes
+
+* do not use shell for user initiated docker exec ([4eb5910](https://github.com/anacierdem/libdragon-docker/commit/4eb5910ba11351b77b57a5c27ba46ad59fe74e54))
+
 ## [12.0.2](https://github.com/anacierdem/libdragon-docker/compare/v12.0.1...v12.0.2) (2024-10-20)
 
 
