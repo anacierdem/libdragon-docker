@@ -113,7 +113,7 @@ describe('Smoke tests', () => {
     await runCommands(['init', 'init', ...commands, 'init -s submodule']);
   }, 240000);
 
-  test.skip('Can run a standard set of commands with subtree strategy', async () => {
+  test('Can run a standard set of commands with subtree strategy', async () => {
     await runCommands([
       'init -s subtree -d ./libdragon',
       'init -s subtree -d ./libdragon',
