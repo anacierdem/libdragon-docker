@@ -184,6 +184,7 @@ function spawnProcess(
         enableErrorTTY ? 'inherit' : 'pipe',
       ],
       env: {
+        ...process.env,
         // Prevent the annoying docker "What's next?" message. It messes up everything.
         DOCKER_CLI_HINTS: 'false',
       },
