@@ -4,7 +4,7 @@
 
 This is a wrapper for a docker container to make managing the libdragon toolchain easier. It has the additional advantage that libdragon toolchain and library can be installed on a per-project basis instead of managing system-wide installations.
 
-> [!INFO]
+> [!NOTE]
 > I've started this project a few years before [devcontainers](https://containers.dev/) were a thing. The cli still works and provides minor additional functionality, but if you already have a containerized environment, I suggest using a devcontainer instead. It is doing essentially the same thing. You can find more info in [`libdragon` devcontainer](#libdragon-configuration) section. I'll continue to improve that configuration to make it a compelling alternative.
 
 ## Prerequisites
@@ -166,7 +166,7 @@ To be able to share your project with the library change, you just commit your c
 
 ## Working on this repository
 
-> [!HINT]
+> [!TIP]
 > You can simply use [`development` devcontainer](#development-configuration) support to get up an running quickly if your development environment supports it.
 
 After cloning this repository on a system with node.js (`>= 18`) & docker (`>= 27.2.0`), in this repository's root do;
