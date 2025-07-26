@@ -60,9 +60,6 @@
     "typescript": "^4.9.5",
     "zx": "^8.7.1"
   },
-  "overrides": {
-    "minimist": "1.2.6"
-  },
   "release": {
     "plugins": [
       "@semantic-release/commit-analyzer",
