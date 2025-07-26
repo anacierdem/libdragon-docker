@@ -1,0 +1,39 @@
+name: libdragon-docker
+
+services:
+
+  dind:
+    image: docker:27.2.1-dind
+    environment:
+      DOCKER_TLS_CERTDIR: /certs
+    volumes:
+      - certs-ca:/certs/ca
+      - certs-client:/certs/client
+      - ../..:/workspace:cached
+    networks:
+      docker-network:
+        aliases:
+          - docker
+    privileged: true
+    restart: always
+
+  devcontainer:
+    build:
+      context: ./
+    environment:
+      DOCKER_CERT_PATH: /certs/client
+      DOCKER_HOST: tcp://docker:2376
+      DOCKER_TLS_VERIFY: 1
+    volumes:
+      - certs-client:/certs/client:ro
+      - ../..:/workspace:cached
+    networks:
+      docker-network:
+    command: sleep infinity
+    restart: always
+
+volumes:
+  certs-ca:
+  certs-client:
+networks:
+  docker-network:

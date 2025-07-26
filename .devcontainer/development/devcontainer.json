@@ -1,0 +1,6 @@
+{
+    "dockerComposeFile": "./docker-compose.yml",
+    "service": "devcontainer",
+    "workspaceFolder": "/workspace",
+    "runServices": ["dind"]
+}

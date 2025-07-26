@@ -1,9 +1,0 @@
-{
-    // Use image instead of build, if you don't need the cli installed
-    // "image": ghcr.io/dragonminded/libdragon:latest
-    "build": { "dockerfile": "./Dockerfile", "context": "../" },
-    "workspaceMount":  "source=${localWorkspaceFolder},target=/libdragon,type=bind",
-    "workspaceFolder": "/libdragon",
-    // You can execute ./build.sh instead, if you don't need the cli in the container
-    "postCreateCommand": "npm install && npm link && libdragon install"
-}

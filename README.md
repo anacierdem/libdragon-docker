@@ -4,6 +4,9 @@
 
 This is a wrapper for a docker container to make managing the libdragon toolchain easier. It has the additional advantage that libdragon toolchain and library can be installed on a per-project basis instead of managing system-wide installations.
 
+> [!INFO]
+> I've started this project a few years before [devcontainers](https://containers.dev/) were a thing. The cli still works and provides minor additional functionality, but if you already have a containerized environment, I suggest using a devcontainer instead. It is doing essentially the same thing. You can find more info in [`libdragon` devcontainer](#libdragon-configuration) section. I'll continue to improve that configuration to make it a compelling alternative.
+
 ## Prerequisites
 
 You should have [docker](https://www.docker.com/products/docker-desktop) (`>= 27.2.0`) and [git](https://git-scm.com/downloads) installed on your system.
@@ -163,6 +166,9 @@ To be able to share your project with the library change, you just commit your c
 
 ## Working on this repository
 
+> [!HINT]
+> You can simply use [`development` devcontainer](#development-configuration) support to get up an running quickly if your development environment supports it.
+
 After cloning this repository on a system with node.js (`>= 18`) & docker (`>= 27.2.0`), in this repository's root do;
 
 ```bash
@@ -237,7 +243,7 @@ For a quick development loop it really helps linking the code in this repository
 npm link
 ```
 
-in the root of the repository. Once you do this, running `libdragon` will use the code here rather than the actual npm installation. Then you can test your changes in the libdragon project here or elsewhere on your computer. This setup is automatically done if you use the [devcontainer](#experimental-devcontainer-support).
+in the root of the repository. Once you do this, running `libdragon` will use the code here rather than the actual npm installation. Then you can test your changes in the libdragon project here or elsewhere on your computer.
 
 When you are happy with your changes, you can verify you conform to the coding standards via:
 
@@ -266,28 +272,40 @@ npx cz
 
 It will create a `semantic-release` compatible commit from your current staged changes.
 
-### Experimental devcontainer support
+### Devcontainer support
 
-The repository provides a configuration (in `.devcontainer`) so that IDEs that support it can create and run the Docker container for you. Then, you can start working on it as if you are working on a machine with libdragon installed.
-
-With the provided setup, you can continue using the cli in the container and it will work for non-container specific actions like `install`, `disasm` etc. You don't have to use the cli in the container, but you can. In general it will be easier and faster to just run `make` in the container but this setup is included to ease developing the cli as well.
-
-To create your own dev container backed project, you can use the contents of the `.devcontainer` folder as reference. You don't need to include nodejs or the cli and you can just run `build.sh` as `postCreateCommand`. See the `devcontainer.json` for more details. As long as your container have the `DOCKER_CONTAINER` environment variable, the tool can work inside a container.
-
-#### Caveats
-
-- In the devcontainer, uploading via USB will not work.
-- Error matching is not yet tested.
-- Ideally the necessary extensions should be automatically installed. This is not configured yet.
+The repository provides two devcontainer configurations (`development` and `libdragon`) for supported IDEs. If you have docker and a compatible IDE, you can quickly start working on this project.
+To create your own dev container backed project, you can use the contents of the `.devcontainer` folder as reference.
 
 <details>
   <summary>vscode instructions</summary>
 
   - Make sure you have the [Dev container extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed and you fulfill its [requirements](https://code.visualstudio.com/docs/devcontainers/containers).
-  - Clone this repository with `--recurse-submodules` or run `git submodule update --init`.
   - Open command palette and run `Dev Containers: Reopen in container`.
+  - Pick `development` or `libdragon` configuration.
   - It will prepare the container and open it in the editor.
 </details>
+
+#### `development` configuration
+
+This has everything required to develop the tool itself. Just follow "Working on this repository" section inside the devcontainer.
+
+#### `libdragon` configuration
+
+This is an example devcontainer setup for using the libdragon toolchain to build n64 ROMs. To start building with libdragon:
+
+- Clone this repository with `--recurse-submodules` or run `git submodule update --init` in the devcontainer.
+- Run `cd libdragon && ./build.sh && cd ..` to build and install the library.
+- Run `make bench` to build the [test bench](#local-test-bench). You'll see the rom in `src` folder.
+
+If you setup a similar devcontainer for your project, you can immediately start building n64 ROMs using libdragon.
+
+#### Future direction
+
+- The cli is not enabled on `libdragon` devcontainer, so you cannot currently use actions like `install` or `disasm`. This is supported by the cli (via `DOCKER_CONTAINER`) but not yet enabled on the devcontainer.
+- In the devcontainer, uploading via USB is not yet implemented.
+- Error matching is not yet tested.
+- Ideally the necessary extensions should be automatically installed. This is not configured yet.
 
 ## As an NPM dependency
 
