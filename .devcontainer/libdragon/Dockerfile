@@ -1,5 +1,6 @@
 FROM ghcr.io/dragonminded/libdragon:latest
 
+# This is for libdragon-cli
 ENV DOCKER_CONTAINER=true
 
 ARG USERNAME=dev
