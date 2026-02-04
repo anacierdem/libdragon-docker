@@ -36,7 +36,7 @@ Download the [pre-built executable](https://github.com/anacierdem/libdragon-dock
 <details>
   <summary>Windows instructions</summary>
 
-  - Download the Windows executable and copy it to `C:\bin`
+  - Download Windows executable and copy it to `C:\bin`
   - Press `Windows + R` key combination and then enter `rundll32 sysdm.cpl,EditEnvironmentVariables`
   - In the `Environment Variables` window find the `Path` variable under `User variables for <your user name>`
   - Double click it and add a new entry as `C:\bin`
@@ -49,7 +49,7 @@ Download the [pre-built executable](https://github.com/anacierdem/libdragon-dock
 <details>
   <summary>MacOS instructions</summary>
 
-  - Download the MacOS executable and copy it to `/usr/local/bin`
+  - Download MacOS executable and copy it to `/usr/local/bin`
   - Right click it and choose `Open`.
   - It will show a warning, approve it by clicking `Open` again. You can close the newly opened terminal window.
   - You should now be able to use the `libdragon` command.
@@ -60,7 +60,10 @@ Download the [pre-built executable](https://github.com/anacierdem/libdragon-dock
 <details>
   <summary>Linux instructions</summary>
 
-  - You should already know this :)
+  - Download Linux executable and copy it to `~/.local/bin`, or somewhere convenient on your `PATH`.
+  - Run `chmod u+x ~/.local/bin/libdragon`
+  - You should now be able to use the `libdragon` command on new shell sessions.
+  - To update it with a new version, replace the file and repeat the other steps.
 
 </details>
 
