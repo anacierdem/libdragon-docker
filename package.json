@@ -22,7 +22,8 @@
     "format-check": "prettier **/*.js **/*.mjs **/*.cjs --check",
     "lint": "eslint --fix modules/**/*.js *.js *.mjs *.cjs",
     "lint-check": "eslint modules/**/*.js *.js *.mjs *.cjs",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "cz": "cz"
   },
   "repository": {
     "type": "git",

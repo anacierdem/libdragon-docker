@@ -270,7 +270,7 @@ npm run test
 This repository uses [`semantic-release`](https://github.com/semantic-release/semantic-release) and manages releases from specially formatted commit messages. To simplify creating them you can use:
 
 ```bash
-npx cz
+npm run cz
 ```
 
 It will create a `semantic-release` compatible commit from your current staged changes.
