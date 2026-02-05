@@ -5,6 +5,10 @@ on:
       - 'beta'
       - 'master'
 
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
 jobs:
   verify:
     name: Verify and build
@@ -41,6 +45,5 @@ jobs:
 
       - name: Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}''
         run: npx semantic-release
