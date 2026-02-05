@@ -5,9 +5,6 @@ on:
       - 'beta'
       - 'master'
 
-permissions:
-  id-token: write  # Required for OIDC
-
 jobs:
   verify:
     name: Verify and build
