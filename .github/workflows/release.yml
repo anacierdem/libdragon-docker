@@ -22,7 +22,7 @@ jobs:
           persist-credentials: false
 
       - name: Prepare
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           # Do not include registy url here, it creates a .npmrc which prevents
           # semantic-release from authenticating with npm
