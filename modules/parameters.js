@@ -20,6 +20,7 @@ const { globals } = require('./globals');
  *  VENDOR_STRAT?: VendorStrategy;
  *  FILE?: string;
  *  BRANCH?: string;
+ *  CWD?: string;
  * }} CommandlineOptions
  */
 
@@ -87,6 +88,11 @@ const parseParameters = async (argv) => {
       continue;
     } else if (val.indexOf('--branch=') === 0) {
       options.BRANCH = val.split('=')[1];
+      continue;
+    }
+
+    if (['-C'].includes(val)) {
+      options.CWD = argv[++i];
       continue;
     }
 

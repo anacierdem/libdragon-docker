@@ -165,6 +165,8 @@ const readProjectInfo = async function (optionInfo) {
     return /** @type {NoProjectInfo} */ (optionInfo);
   }
 
+  optionInfo.options.CWD && process.chdir(optionInfo.options.CWD);
+
   const projectRoot = await findLibdragonRoot();
 
   if (
