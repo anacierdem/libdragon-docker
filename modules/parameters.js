@@ -34,6 +34,9 @@ const parseParameters = async (argv) => {
     CURRENT_ACTION: undefined,
   };
 
+  /** @type string[] */
+  let potentialExtraFlags = [];
+
   for (let i = 2; i < argv.length; i++) {
     const val = argv[i];
 
@@ -96,9 +99,10 @@ const parseParameters = async (argv) => {
       continue;
     }
 
+    // Collect unknown flags
     if (val.indexOf('-') == 0) {
-      log(chalk.red(`Invalid flag \`${val}\``));
-      process.exit(STATUS_BAD_PARAM);
+      potentialExtraFlags.push(val);
+      continue;
     }
 
     if (options.CURRENT_ACTION) {
@@ -130,6 +134,20 @@ const parseParameters = async (argv) => {
   ) {
     log(chalk.red('You should provide a command to exec'));
     process.exit(STATUS_BAD_PARAM);
+  }
+
+  // Because of https://github.com/microsoft/vscode-cpptools/issues/14169
+  // move any unkown flags before the action to the end of the container command
+  if (
+    options.CURRENT_ACTION !== actions.exec &&
+    potentialExtraFlags.length > 0
+  ) {
+    log(chalk.red(`Invalid flag \`${potentialExtraFlags[0]}\``));
+    process.exit(STATUS_BAD_PARAM);
+  }
+
+  if (options.CURRENT_ACTION === actions.exec) {
+    options.EXTRA_PARAMS = [...options.EXTRA_PARAMS, ...potentialExtraFlags];
   }
 
   if (
