@@ -39,6 +39,7 @@ const initContainer = async (libdragonInfo) => {
           ',target=' +
           CONTAINER_TARGET_PATH, // Mount files
         '-w=' + CONTAINER_TARGET_PATH, // Set working directory
+        "--add-host=host.docker.internal:host-gateway",
         libdragonInfo.imageName,
         'tail',
         '-f',
