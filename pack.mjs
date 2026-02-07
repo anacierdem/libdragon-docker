@@ -7,11 +7,19 @@ import 'zx/globals';
 
 /* eslint-disable no-undef */
 
+let version;
+let install = false;
 if (!process.argv[2]) {
   // eslint-disable-next-line no-console
   console.error(
     'No version is provided, building cli with the existing version.'
   );
+} else if (process.argv[2].startsWith("--")) {
+  if (process.argv[2] === "--install") {
+    install = true;
+  }
+} else {
+  version = process.argv[2];
 }
 
 if (process.platform === 'win32') {
@@ -47,8 +55,8 @@ await esbuild.build({
     '.mk': 'text',
   },
   define: {
-    ...(process.argv[2] && {
-      'globalThis.VERSION': JSON.stringify(process.argv[2]),
+    ...(version && {
+      'globalThis.VERSION': JSON.stringify(version),
     }),
   },
 });
@@ -69,3 +77,16 @@ await $([
     'sea-prep.blob'
   )} --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 --macho-segment-name NODE_SEA`,
 ]);
+
+if (install) {
+  if (process.env.DEVCONTAINER !== "true") {
+    console.error(
+      'Install is only intended for devcontainer workflow'
+    );
+  } else {
+    console.error(
+      'Installing to host...'
+    );
+    await $`cp ${executablePath} /host_home/.local/bin/libdragon`
+  }
+}

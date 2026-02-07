@@ -293,6 +293,9 @@ To create your own dev container backed project, you can use the contents of the
 
 This has everything required to develop the tool itself. Just follow "Working on this repository" section inside the devcontainer.
 
+> [!NOTE]
+> When working in this devcontainer on a Linux host, you can build and install the latest executable in `${HOME}/.local/bin` by running `npm run install-host` (in the container) to test it on your host.
+
 #### `libdragon` configuration
 
 This is an example devcontainer setup for using the libdragon toolchain to build n64 ROMs. To start building with libdragon:

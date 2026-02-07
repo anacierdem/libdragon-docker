@@ -17,6 +17,7 @@
     "start": "node index.js start",
     "stop": "node index.js stop",
     "pack": "node pack.mjs",
+    "install-host": "node pack.mjs --install",
     "bundle": "node bundle.mjs",
     "format": "prettier **/*.js **/*.mjs **/*.cjs --write",
     "format-check": "prettier **/*.js **/*.mjs **/*.cjs --check",

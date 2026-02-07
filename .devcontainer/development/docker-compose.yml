@@ -24,9 +24,11 @@ services:
       DOCKER_CERT_PATH: /certs/client
       DOCKER_HOST: tcp://docker:2376
       DOCKER_TLS_VERIFY: 1
+      DEVCONTAINER: true
     volumes:
       - certs-client:/certs/client:ro
       - ../..:/workspace:cached
+      - ${HOME}:/host_home
     networks:
       docker-network:
     command: sleep infinity
