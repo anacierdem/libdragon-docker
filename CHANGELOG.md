@@ -1,3 +1,10 @@
+# [12.1.0](https://github.com/anacierdem/libdragon-docker/compare/v12.0.4...v12.1.0) (2026-02-07)
+
+
+### Features
+
+* **start:** enable host access via host.docker.internal ([d0d28db](https://github.com/anacierdem/libdragon-docker/commit/d0d28dbe6f0270a134daf6636afc8b2d25d9850f))
+
 ## [12.0.4](https://github.com/anacierdem/libdragon-docker/compare/v12.0.3...v12.0.4) (2024-10-20)
 
 
