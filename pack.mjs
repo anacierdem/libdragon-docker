@@ -47,7 +47,7 @@ await esbuild.build({
   bundle: true,
   format: 'esm',
   platform: 'node',
-  target: 'node22',
+  target: 'node24',
   outfile: path.join('build', 'main.js'),
   minify: true,
   loader: {
@@ -83,6 +83,7 @@ if (install) {
     console.error('Install is only intended for devcontainer workflow');
   } else {
     console.error('Installing to host...');
+    await $`mkdir -p /host_home/.local/bin`;
     await $`cp ${executablePath} /host_home/.local/bin/libdragon`;
   }
 }

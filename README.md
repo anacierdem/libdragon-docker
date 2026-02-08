@@ -69,7 +69,7 @@ Download the [pre-built executable](https://github.com/anacierdem/libdragon-dock
 
 ### via NPM
 
-Install [node.js](https://nodejs.org/en/download/) (`>= 22`) and install `libdragon` as a global NPM package;
+Install [node.js](https://nodejs.org/en/download/) (`>= 24`) and install `libdragon` as a global NPM package;
 
 ```bash
 npm install -g libdragon
@@ -172,7 +172,7 @@ To be able to share your project with the library change, you just commit your c
 > [!TIP]
 > You can simply use [`development` devcontainer](#development-configuration) support to get up an running quickly if your development environment supports it.
 
-After cloning this repository on a system with node.js (`>= 18`) & docker (`>= 27.2.0`), in this repository's root do;
+After cloning this repository on a system with node.js (`>= 24`) & docker (`>= 27.2.0`), in this repository's root do;
 
 ```bash
 npm install
