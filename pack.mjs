@@ -14,8 +14,8 @@ if (!process.argv[2]) {
   console.error(
     'No version is provided, building cli with the existing version.'
   );
-} else if (process.argv[2].startsWith("--")) {
-  if (process.argv[2] === "--install") {
+} else if (process.argv[2].startsWith('--')) {
+  if (process.argv[2] === '--install') {
     install = true;
   }
 } else {
@@ -79,14 +79,10 @@ await $([
 ]);
 
 if (install) {
-  if (process.env.DEVCONTAINER !== "true") {
-    console.error(
-      'Install is only intended for devcontainer workflow'
-    );
+  if (process.env.DEVCONTAINER !== 'true') {
+    console.error('Install is only intended for devcontainer workflow');
   } else {
-    console.error(
-      'Installing to host...'
-    );
-    await $`cp ${executablePath} /host_home/.local/bin/libdragon`
+    console.error('Installing to host...');
+    await $`cp ${executablePath} /host_home/.local/bin/libdragon`;
   }
 }
