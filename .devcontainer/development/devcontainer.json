@@ -2,5 +2,10 @@
     "dockerComposeFile": "./docker-compose.yml",
     "service": "devcontainer",
     "workspaceFolder": "/workspace",
-    "runServices": ["dind"]
+    "runServices": ["dind"],
+    "customizations": {
+        "vscode": {
+            "extensions": ["dbaeumer.vscode-eslint", "esbenp.prettier-vscode"]
+        }
+    }
 }

@@ -80,10 +80,11 @@ await $([
 
 if (install) {
   if (process.env.DEVCONTAINER !== 'true') {
+    // eslint-disable-next-line no-console
     console.error('Install is only intended for devcontainer workflow');
   } else {
+    // eslint-disable-next-line no-console
     console.error('Installing to host...');
-    await $`mkdir -p /host_home/.local/bin`;
     await $`cp ${executablePath} /host_home/.local/bin/libdragon`;
   }
 }
