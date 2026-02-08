@@ -1,3 +1,11 @@
+# [12.2.0](https://github.com/anacierdem/libdragon-docker/compare/v12.1.0...v12.2.0) (2026-02-08)
+
+
+### Features
+
+* **parameters.js:** accept flags before exec command ([bd9831e](https://github.com/anacierdem/libdragon-docker/commit/bd9831e7a8bdbea25eba2d42a2bc867e7674bcc8))
+* **parameters.js:** add support for providing a work dir via -C ([7a5fe22](https://github.com/anacierdem/libdragon-docker/commit/7a5fe2230cddd26fc6b9c7ee66f908984af278c0)), closes [#52](https://github.com/anacierdem/libdragon-docker/issues/52)
+
 # [12.1.0](https://github.com/anacierdem/libdragon-docker/compare/v12.0.4...v12.1.0) (2026-02-07)
 
 
