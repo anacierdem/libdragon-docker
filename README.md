@@ -5,7 +5,7 @@
 This is a wrapper for a docker container to make managing the libdragon toolchain easier. It has the additional advantage that libdragon toolchain and library can be installed on a per-project basis instead of managing system-wide installations.
 
 > [!NOTE]
-> I've started this project a few years before [devcontainers](https://containers.dev/) were a thing. The cli still works and provides minor additional functionality, but if you already have a containerized environment, I suggest using a devcontainer instead. It is doing essentially the same thing. You can find more info in [`libdragon` devcontainer](#libdragon-configuration) section. I'll continue to improve that configuration to make it a compelling alternative.
+> I've started this project a few years before [devcontainers](https://containers.dev/) were a thing. The cli still works and provides minor additional functionality, but if you already have a containerized environment, I suggest giving devcontainers a try instead. It is doing essentially the same thing. See the [template](https://github.com/anacierdem/libdragon-template) to get up and running.
 
 ## Prerequisites
 
@@ -146,17 +146,6 @@ libdragon install
 
 This will update all the artifacts in your container and your new code will start linking against the new version when you re-build it via `libdragon make`. The build system should pick up the change in the library and re-compile the dependent files.
 
-Instead of depending on the above command, you can automatically re-build the library by making it a make dependency in your project:
-
-```makefile
-libdragon-install:
-	$(MAKE) -C ./libdragon install
-```
-
-If your build now depends on `libdragon-install`, it will force an install (which should be pretty quick if you don't have changes) and force the build system to rebuild your project when necessary.
-
-If you clone this repository, this setup is pretty much ready for you. Make sure you have a working libdragon setup and you get the submodules (e.g `git submodule update --init`). Then you can run `libdragon make bench` to execute the code in `./src` with your library changes. Also see [test bench](#local-test-bench).
-
 When managing your changes to the library, you have a few options:
 
 #### **Using `submodule` vendor strategy.**
@@ -170,9 +159,9 @@ To be able to share your project with the library change, you just commit your c
 ## Working on this repository
 
 > [!TIP]
-> You can simply use [`development` devcontainer](#development-configuration) support to get up an running quickly if your development environment supports it.
+> You can simply use [devcontainer](#development-configuration) support to get up an running quickly if your development environment supports it.
 
-After cloning this repository on a system with node.js (`>= 24`) & docker (`>= 27.2.0`), in this repository's root do;
+After cloning this repository on a system with node.js (or devcontainer) & docker, in this repository's root do;
 
 ```bash
 npm install
@@ -197,9 +186,6 @@ Now you will be able to work on the files simultaneously with the docker contain
 There is a root `Makefile` making deeper makefiles easier with these recipes;
 
     bench: build the test bench (see below)
-    examples: build libdragon examples
-    tests: build the test ROM
-    libdragon-install: build and install libdragon
     clean-bench: clean the test bench (see below)
     clean: clean everything and start from scratch
 
@@ -229,18 +215,11 @@ npm run libdragon -- update
 
 The root `bench` recipe is for building the code in root `src` folder. This is a quick way of testing your libdragon changes or a sample code built around libdragon, and is called the test bench. This recipe together with `examples` and `tests` recipes will build and install libdragon automatically as necessary. Thus, they will always produce a rom image using the libdragon code in the repository via their make dependencies, which is ideal for experimenting with libdragon itself. 
 
-There are also vscode launch configurations to quickly build and run the examples, tests and the bench. If you have [ares](https://ares-emu.net/) on your `PATH`, the launch configurations ending in `(emu)` will start it automatically. For the examples configuration, you can navigate to the relevant `.c` file and `Run selected example` will start it most of the time. In some cases, the output ROM name may not match the `.c` file and in those cases, you can select the ROM file instead and it should work.
-
-> [!NOTE]
-> This repository also uses [UNFLoader](https://github.com/buu342/N64-UNFLoader), so you can use the launch configurations without `(emu)` to run the code if you have a supported flashcart plugged in and have `UNFLoader` executable on your `PATH`.
->
-> The special `Debug Test Bench (emu)` configuration will start ares with remote debugging for the test bench if you have `gdb-multiarch` executable on your `PATH`. It should automatically break in your `main` function.
-
 You can clean everything with the `clean` recipe/task (open the command palette and choose `Run Task -> clean`).
 
 ### Developing the tool itself
 
-For a quick development loop it really helps linking the code in this repository as the global libdragon installation. To do this run;
+For a quick development loop it really helps linking the code in this repository as the global libdragon installation. To do this, run;
 
 ```bash
 npm link
@@ -277,34 +256,19 @@ It will create a `semantic-release` compatible commit from your current staged c
 
 ### Devcontainer support
 
-The repository provides two devcontainer configurations (`development` and `libdragon`) for supported IDEs. If you have docker and a compatible IDE, you can quickly start working on this project.
-To create your own dev container backed project, you can use the contents of the `.devcontainer` folder as reference.
+The repository provides a devcontainer configuration for supported IDEs. If you have docker and a compatible IDE, you can quickly start working on this project.
+This has everything required to develop the tool itself. Just follow "Working on this repository" section inside the devcontainer.
 
 <details>
   <summary>vscode instructions</summary>
 
   - Make sure you have the [Dev container extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) installed and you fulfill its [requirements](https://code.visualstudio.com/docs/devcontainers/containers).
   - Open command palette and run `Dev Containers: Reopen in container`.
-  - Pick `development` or `libdragon` configuration.
   - It will prepare the container and open it in the editor.
 </details>
 
-#### `development` configuration
-
-This has everything required to develop the tool itself. Just follow "Working on this repository" section inside the devcontainer.
-
 > [!NOTE]
 > When working in this devcontainer on a Linux host, you can build and install the latest executable in `${HOME}/.local/bin` by running `npm run install-host` (in the container) to test it on your host.
-
-#### `libdragon` configuration
-
-This is an example devcontainer setup for using the libdragon toolchain to build n64 ROMs. To start building with libdragon:
-
-- Clone this repository with `--recurse-submodules` or run `git submodule update --init` in the devcontainer.
-- Run `cd libdragon && ./build.sh && cd ..` to build and install the library.
-- Run `make bench` to build the [test bench](#local-test-bench). You'll see the rom in `src` folder.
-
-If you setup a similar devcontainer for your project, you can immediately start building n64 ROMs using libdragon.
 
 #### Future direction
 

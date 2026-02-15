@@ -1,7 +1,6 @@
 name: libdragon-docker
 
 services:
-
   dind:
     image: docker:27.2.1-dind
     environment:
@@ -9,7 +8,7 @@ services:
     volumes:
       - certs-ca:/certs/ca
       - certs-client:/certs/client
-      - ../..:/workspace:cached
+      - ..:/workspace:cached
     networks:
       docker-network:
         aliases:
@@ -27,7 +26,7 @@ services:
       DEVCONTAINER: true
     volumes:
       - certs-client:/certs/client:ro
-      - ../..:/workspace:cached
+      - ..:/workspace:cached
       - ${HOME}:/host_home
     networks:
       docker-network:
