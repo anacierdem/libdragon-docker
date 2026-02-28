@@ -5,7 +5,7 @@
 This is a wrapper for a docker container to make managing the libdragon toolchain easier. It has the additional advantage that libdragon toolchain and library can be installed on a per-project basis instead of managing system-wide installations.
 
 > [!NOTE]
-> I've started this project a few years before [devcontainers](https://containers.dev/) were a thing. The cli still works and provides minor additional functionality, but if you already have a containerized environment, I suggest giving devcontainers a try instead. It is doing essentially the same thing. See the [template](https://github.com/anacierdem/libdragon-template) to get up and running.
+> I've started this project a few years before [devcontainers](https://containers.dev/) were a thing. The cli still works and provides minor additional functionality, but if you already have a containerized environment, I suggest giving devcontainers a try instead. It is doing a very similar thing. See the [template](https://github.com/anacierdem/libdragon-template) to get up and running.
 
 ## Prerequisites
 
@@ -114,10 +114,10 @@ Run `libdragon help [action]` for more details on individual actions.
 Use the `--branch` flag to set up a custom libdragon branch when initializing your project:
 
 ```bash
-libdragon init --branch unstable
+libdragon init --branch preview
 ```
 
-This will use the `unstable` toolchain and code.
+This will use the `preview` toolchain and code.
 
 ### Switching to a different branch of libdragon
 
@@ -179,31 +179,12 @@ Then run;
 npm run libdragon -- init
 ```
 
-to download the pre-built toolchain image, start and initialize it. This will also install [test bench](#local-test-bench) dependencies into the container if any.
+to download the pre-built toolchain image, start and initialize it.
 
 Now you will be able to work on the files simultaneously with the docker container and any built binaries will be available in your workspace as it is mounted on the container.
 
-There is a root `Makefile` making deeper makefiles easier with these recipes;
-
-    bench: build the test bench (see below)
-    clean-bench: clean the test bench (see below)
-    clean: clean everything and start from scratch
-
-For example, to re-build the original libdragon examples do;
-
-```bash
-npm run libdragon -- make examples
-```
-
-Similarly to run the `clean` recipe, run;
-
-```bash
-npm run libdragon -- make clean
-```
-
 > [!IMPORTANT]
 > Keep in mind that `--` is necessary for actual arguments when using npm scripts.
-
 
 To update the submodule and re-build everything;
 
@@ -213,9 +194,12 @@ npm run libdragon -- update
 
 ### Local test bench
 
-The root `bench` recipe is for building the code in root `src` folder. This is a quick way of testing your libdragon changes or a sample code built around libdragon, and is called the test bench. This recipe together with `examples` and `tests` recipes will build and install libdragon automatically as necessary. Thus, they will always produce a rom image using the libdragon code in the repository via their make dependencies, which is ideal for experimenting with libdragon itself. 
+There is a very barebones libdragon example in root `src` folder, called the test bench. You can build and clean it respectively with:
 
-You can clean everything with the `clean` recipe/task (open the command palette and choose `Run Task -> clean`).
+```bash
+npm run libdragon make -C ./src
+npm run libdragon make -C ./src clean
+```
 
 ### Developing the tool itself
 
@@ -269,13 +253,6 @@ This has everything required to develop the tool itself. Just follow "Working on
 
 > [!NOTE]
 > When working in this devcontainer on a Linux host, you can build and install the latest executable in `${HOME}/.local/bin` by running `npm run install-host` (in the container) to test it on your host.
-
-#### Future direction
-
-- The cli is not enabled on `libdragon` devcontainer, so you cannot currently use actions like `install` or `disasm`. This is supported by the cli (via `DOCKER_CONTAINER`) but not yet enabled on the devcontainer.
-- In the devcontainer, uploading via USB is not yet implemented.
-- Error matching is not yet tested.
-- Ideally the necessary extensions should be automatically installed. This is not configured yet.
 
 ## As an NPM dependency
 
