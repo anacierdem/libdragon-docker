@@ -16,6 +16,12 @@ const printUsage = async (info) => {
       alias: 'v',
       typeLabel: ' ',
     },
+    {
+      description:
+        'Execute the tool as if it is running in provided path on the host. Equivalent to `chdir`ing into that path.',
+      alias: 'C',
+      typeLabel: '<path>',
+    },
   ];
 
   const optionDefinitions = [
