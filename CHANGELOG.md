@@ -1,3 +1,10 @@
+## [12.2.1](https://github.com/anacierdem/libdragon-docker/compare/v12.2.0...v12.2.1) (2026-03-06)
+
+
+### Bug Fixes
+
+* add help info for -C flag ([1c1a402](https://github.com/anacierdem/libdragon-docker/commit/1c1a40256ca6c43c90002546125cd40fae0816f2))
+
 # [12.2.0](https://github.com/anacierdem/libdragon-docker/compare/v12.1.0...v12.2.0) (2026-02-08)
 
 
